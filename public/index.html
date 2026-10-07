@@ -64,8 +64,8 @@
     <section id="view-participant" class="view-panel active">
       <div class="participant-container">
         
-        <!-- ÉCRAN 1.1 : Accueil, QR Code & Saisie Nom/Prénom -->
-        <div id="screen-register" class="mobile-card step-screen active">
+        <!-- ÉCRAN 1.1 : Accueil & QR Code Uniquement (Affichage Grand Écran / Invitation) -->
+        <div id="screen-qr" class="mobile-card step-screen active">
           <div class="card-hero">
             <img src="assets/images/archetypes.jpg" alt="Les 5 Schtroumpfs" class="hero-image">
             <div class="hero-badge">Workshop Innovation IoT</div>
@@ -73,7 +73,7 @@
           <div class="card-body">
             <h2 class="card-title">Le Village IoT des Schtroumpfs</h2>
             <p class="card-desc">
-              Participez au workshop d'innovation ! Scannez le QR Code ci-dessous avec votre smartphone pour ouvrir le questionnaire d'analyse de personnalité (15 questions) ou remplissez directement ce formulaire.
+              Bienvenue au workshop d'innovation ! Scannez le QR Code ci-dessous avec l'appareil photo de votre smartphone pour démarrer l'aventure et passer le test de positionnement comportemental.
             </p>
 
             <!-- CARTE DU QR CODE POUR ACCÈS MOBILE RAPIDE -->
@@ -82,22 +82,47 @@
                 <span class="qr-join-icon">📱</span>
                 <div>
                   <h3 class="qr-join-title">Scannez pour Passer le Test sur Mobile</h3>
-                  <p class="qr-join-subtitle">Ouvrez l'appareil photo de votre smartphone et pointez ce QR code :</p>
+                  <p class="qr-join-subtitle">Pointez l'appareil photo de votre smartphone vers ce QR Code :</p>
                 </div>
               </div>
               <div class="qr-canvas-preview-wrap">
-                <canvas id="registrationQrCanvas" width="180" height="180"></canvas>
+                <img id="registrationQrImg" src="" alt="QR Code Workshop" style="display:none; width: 190px; height: 190px; border-radius: 8px; margin: 0 auto;">
+                <canvas id="registrationQrCanvas" width="190" height="190"></canvas>
               </div>
               <div class="qr-join-url-row">
-                <input type="text" id="registrationDirectUrl" class="form-input text-center" readonly value="http://localhost:3000">
+                <input type="text" id="registrationDirectUrl" class="form-input text-center" readonly value="http://localhost:3000/?join=1">
                 <button type="button" class="btn btn-outline btn-xs" onclick="copyRegistrationUrl()">Copier le lien</button>
               </div>
+            </div>
+
+            <!-- BOUTON D'ACCÈS POUR PARTICIPER SUR CE NAVIGATEUR (SANS SMARTPHONE) -->
+            <div class="direct-start-wrap">
+              <button type="button" class="btn btn-primary btn-block btn-lg pulse-glow" onclick="goToIdentifyScreen()" id="btnStartDirect">
+                <span>📱 Participer depuis ce navigateur (Saisir Nom & Prénom)</span>
+                <span class="btn-arrow">➔</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ÉCRAN 1.2 : Identification du Participant (Affiché après Scan du QR Code ou Clic) -->
+        <div id="screen-identify" class="mobile-card step-screen">
+          <div class="card-hero card-hero-mini">
+            <img src="assets/images/archetypes.jpg" alt="Les 5 Schtroumpfs" class="hero-image">
+            <div class="hero-badge">Étape 1 : Identification</div>
+          </div>
+          <div class="card-body">
+            <div class="identify-header-box text-center">
+              <h2 class="card-title">Bienvenue dans l'Atelier IoT !</h2>
+              <p class="card-desc">
+                Veuillez renseigner votre prénom et nom pour démarrer votre évaluation de personnalité.
+              </p>
             </div>
 
             <!-- FORMULAIRE NOM & PRÉNOM -->
             <form id="formRegistration" class="auth-form" onsubmit="event.preventDefault(); startPersonalityTest();">
               <div class="form-section-divider">
-                <span>Identification du Participant</span>
+                <span>IDENTIFICATION DU PARTICIPANT</span>
               </div>
               <div class="form-group">
                 <label for="inputFirstName">Prénom *</label>
@@ -120,6 +145,12 @@
                 <span>Commencer le Questionnaire (15 Questions)</span>
                 <span class="btn-arrow">➔</span>
               </button>
+
+              <div class="text-center mt-3">
+                <button type="button" class="btn btn-ghost btn-sm" onclick="goToQrScreen()">
+                  ← Revenir à l'écran du QR Code
+                </button>
+              </div>
             </form>
           </div>
         </div>

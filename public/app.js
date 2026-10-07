@@ -133,14 +133,33 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // Génération du QR Code sur l'écran d'accueil d'inscription
-function renderRegistrationQrCode() {
+async function renderRegistrationQrCode() {
   const canvas = document.getElementById('registrationQrCanvas');
+  const img = document.getElementById('registrationQrImg');
   const urlInput = document.getElementById('registrationDirectUrl');
   if (!canvas || !urlInput) return;
 
-  const currentUrl = window.location.origin;
-  urlInput.value = currentUrl;
-  drawStyledQrCode(canvas, currentUrl);
+  let targetUrl = `${window.location.origin}/?join=1`;
+
+  try {
+    const res = await fetch('/api/qrcode');
+    if (res.ok) {
+      const data = await res.json();
+      if (data.url) targetUrl = data.url;
+      if (data.dataUrl && img) {
+        img.src = data.dataUrl;
+        img.style.display = 'block';
+        canvas.style.display = 'none';
+      }
+    }
+  } catch (err) {
+    console.warn('API qrcode non disponible, fallback canvas client:', err);
+  }
+
+  urlInput.value = targetUrl;
+  if (!img || img.style.display !== 'block') {
+    drawStyledQrCode(canvas, targetUrl);
+  }
 }
 
 function copyRegistrationUrl() {
@@ -247,15 +266,55 @@ function openDbStatusModal() {
 
 function loadSavedUserFromStorage() {
   try {
+    const urlParams = new URLSearchParams(window.location.search);
+    const isDirectJoin = urlParams.has('join') || urlParams.has('scan') || urlParams.has('participant') || urlParams.has('register');
+
     const saved = localStorage.getItem('smurf_iot_user');
-    if (saved) {
+    if (saved && !isDirectJoin) {
       state.currentUser = JSON.parse(saved);
       // Afficher directement l'écran de résultat si déjà inscrit
       showResultScreen(state.currentUser);
+      return;
+    }
+
+    if (isDirectJoin) {
+      goToIdentifyScreen();
     }
   } catch (e) {
     console.error('Erreur chargement utilisateur local:', e);
   }
+}
+
+// Basculer vers l'écran d'identification (Nom & Prénom)
+function goToIdentifyScreen() {
+  const scrQr = document.getElementById('screen-qr');
+  const scrId = document.getElementById('screen-identify');
+  const scrQuiz = document.getElementById('screen-quiz');
+  const scrRes = document.getElementById('screen-result');
+
+  if (scrQr) scrQr.classList.remove('active');
+  if (scrQuiz) scrQuiz.classList.remove('active');
+  if (scrRes) scrRes.classList.remove('active');
+  if (scrId) {
+    scrId.classList.add('active');
+    setTimeout(() => {
+      const input = document.getElementById('inputFirstName');
+      if (input) input.focus();
+    }, 80);
+  }
+}
+
+// Revenir à l'écran du QR Code d'accueil
+function goToQrScreen() {
+  const scrQr = document.getElementById('screen-qr');
+  const scrId = document.getElementById('screen-identify');
+  const scrQuiz = document.getElementById('screen-quiz');
+  const scrRes = document.getElementById('screen-result');
+
+  if (scrId) scrId.classList.remove('active');
+  if (scrQuiz) scrQuiz.classList.remove('active');
+  if (scrRes) scrRes.classList.remove('active');
+  if (scrQr) scrQr.classList.add('active');
 }
 
 function startPersonalityTest() {
@@ -273,8 +332,13 @@ function startPersonalityTest() {
   state.quiz.ratings = new Array(OFFICIAL_15_QUESTIONS.length).fill(null);
 
   // Basculer sur l'écran du quiz
-  document.getElementById('screen-register').classList.remove('active');
-  document.getElementById('screen-quiz').classList.add('active');
+  const scrQr = document.getElementById('screen-qr');
+  const scrId = document.getElementById('screen-identify');
+  const scrQuiz = document.getElementById('screen-quiz');
+
+  if (scrQr) scrQr.classList.remove('active');
+  if (scrId) scrId.classList.remove('active');
+  if (scrQuiz) scrQuiz.classList.add('active');
 
   renderQuizQuestion();
 }
@@ -318,7 +382,13 @@ function renderQuizQuestion() {
   const btnPrev = document.getElementById('btnQuizPrev');
   const btnNext = document.getElementById('btnQuizNext');
 
-  btnPrev.style.visibility = state.quiz.currentIndex > 0 ? 'visible' : 'hidden';
+  btnPrev.style.visibility = 'visible';
+  if (state.quiz.currentIndex === 0) {
+    btnPrev.textContent = '← Nom & Prénom';
+  } else {
+    btnPrev.textContent = '← Précédent';
+  }
+
   btnNext.disabled = currentRating === null;
 
   if (currentNum === total) {
@@ -337,6 +407,8 @@ function prevQuizQuestion() {
   if (state.quiz.currentIndex > 0) {
     state.quiz.currentIndex--;
     renderQuizQuestion();
+  } else {
+    goToIdentifyScreen();
   }
 }
 
@@ -387,9 +459,15 @@ async function submitQuizResults() {
 }
 
 function showResultScreen(participant) {
-  document.getElementById('screen-register').classList.remove('active');
-  document.getElementById('screen-quiz').classList.remove('active');
-  document.getElementById('screen-result').classList.add('active');
+  const scrQr = document.getElementById('screen-qr');
+  const scrId = document.getElementById('screen-identify');
+  const scrQuiz = document.getElementById('screen-quiz');
+  const scrRes = document.getElementById('screen-result');
+
+  if (scrQr) scrQr.classList.remove('active');
+  if (scrId) scrId.classList.remove('active');
+  if (scrQuiz) scrQuiz.classList.remove('active');
+  if (scrRes) scrRes.classList.add('active');
 
   const meta = ARCHETYPES[participant.archetype] || ARCHETYPES.Professeur;
 
@@ -1085,25 +1163,29 @@ async function confirmResetWorkshop() {
     showToast('Workshop réinitialisé.', 'success');
     refreshWorkshopData();
     switchView('view-participant');
-    document.getElementById('screen-register').classList.add('active');
-    document.getElementById('screen-quiz').classList.remove('active');
-    document.getElementById('screen-result').classList.remove('active');
+    goToQrScreen();
   } catch (err) {
     showToast(err.message, 'error');
   }
 }
 
 // Modale QR Code
-function openQrModal() {
+async function openQrModal() {
   const modal = document.getElementById('modalQrCode');
   const canvas = document.getElementById('qrCodeCanvas');
   const urlInput = document.getElementById('qrDirectUrl');
 
-  const currentUrl = window.location.origin;
-  urlInput.value = currentUrl;
+  let targetUrl = `${window.location.origin}/?join=1`;
+  try {
+    const res = await fetch('/api/qrcode');
+    if (res.ok) {
+      const data = await res.json();
+      if (data.url) targetUrl = data.url;
+    }
+  } catch (e) {}
 
-  // Dessin d'un QR code stylisé en Canvas
-  drawStyledQrCode(canvas, currentUrl);
+  if (urlInput) urlInput.value = targetUrl;
+  if (canvas) drawStyledQrCode(canvas, targetUrl);
 
   modal.classList.add('active');
 }

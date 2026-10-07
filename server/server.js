@@ -1,11 +1,31 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const os = require('os');
 const db = require('./db');
 require('dotenv').config();
 
+let QRCode = null;
+try {
+  QRCode = require('qrcode');
+} catch (e) {
+  QRCode = null;
+}
+
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+function getLocalIp() {
+  const nets = os.networkInterfaces();
+  for (const name of Object.keys(nets)) {
+    for (const net of nets[name]) {
+      if (net.family === 'IPv4' && !net.internal) {
+        return net.address;
+      }
+    }
+  }
+  return 'localhost';
+}
 
 app.use(cors());
 app.use(express.json());
@@ -57,15 +77,44 @@ const ARCHETYPES_META = {
 
 // ================= API ENDPOINTS =================
 
-// 1. Statut & Santé (MySQL & Workshop)
+// 1. Statut & Santé (MySQL, Réseau & Workshop)
 app.get('/api/health', (req, res) => {
   const status = db.getStatus();
+  const localIp = getLocalIp();
   res.json({
     status: 'online',
     timestamp: new Date().toISOString(),
     database: status,
-    archetypes: Object.keys(ARCHETYPES_META)
+    archetypes: Object.keys(ARCHETYPES_META),
+    network: {
+      localIp: localIp,
+      port: PORT,
+      joinUrl: `http://${localIp}:${PORT}/?join=1`
+    }
   });
+});
+
+// 1b. Générateur de QR Code scannable officiel
+app.get('/api/qrcode', async (req, res) => {
+  try {
+    const localIp = getLocalIp();
+    const targetUrl = req.query.url || `http://${localIp}:${PORT}/?join=1`;
+    if (QRCode) {
+      const dataUrl = await QRCode.toDataURL(targetUrl, {
+        margin: 1,
+        width: 250,
+        color: {
+          dark: '#070d19',
+          light: '#ffffff'
+        }
+      });
+      return res.json({ success: true, dataUrl, url: targetUrl, localIp });
+    }
+    // Si QRCode non chargé, renvoyer url pour générateur client
+    res.json({ success: false, url: targetUrl, localIp });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 // 2. Récupérer les métadonnées des archétypes
