@@ -62,59 +62,77 @@ const LIKERT_SCALE = [
   { val: 5, label: "5 — Tout à fait d'accord" }
 ];
 
-// Métadonnées statiques des 5 archétypes Schtroumpfs
+// Métadonnées statiques des 5 archétypes Schtroumpfs (Ordre officiel du Workshop)
 const ARCHETYPES = {
-  Sportif: {
-    name: 'Schtroumpf Sportif (Action Man)',
-    tagline: 'Le prototypage rapide et l\'énergie de concrétisation',
-    avatar: 'assets/images/sportif.jpg',
-    color: '#f59e0b',
-    badge: 'Sportif Action Man',
-    associatedQuestions: 'Q1 + Q6 + Q11',
-    desc: 'Moins de paroles, plus d\'action ! Vous aimez tester des maquettes physiques, brancher des cartes et faire fonctionner le premier prototype au plus vite sur le terrain.',
-    powers: ['Prototypage express (Maker spirit)', 'Résolution rapide des blocages concrets', 'Dynamisme d\'équipe et passage à l\'action']
-  },
   Artiste: {
     name: 'Schtroumpf Artiste',
+    displayName: 'Artiste',
     tagline: 'L\'imagination sans limites et le sens du design',
     avatar: 'assets/images/artiste.jpg',
     color: '#ec4899',
-    badge: 'Artiste Créatif',
+    badge: 'Artiste',
     associatedQuestions: 'Q2 + Q7 + Q12',
     desc: 'Vous abordez les projets par l\'esthétique, l\'émotion visuelle et la pensée divergente. Vous imaginez des objets connectés élégants qui font rêver l\'utilisateur.',
-    powers: ['Design d\'interface & ergonomie sensorielle', 'Storytelling et projection visuelle', 'Création de scénarios d\'usage immersifs']
+    powers: ['Design d\'interface & ergonomie visuelle', 'Storytelling et projection visuelle', 'Création de scénarios d\'usage immersifs']
   },
   Professeur: {
     name: 'Schtroumpf Professeur (Théoricien)',
+    displayName: 'Professeur (Théoricien)',
     tagline: 'L\'architecture rigoureuse et la logique technique',
     avatar: 'assets/images/professeur.jpg',
     color: '#0284c7',
-    badge: 'Professeur Théoricien',
+    badge: 'Professeur (Théoricien)',
     associatedQuestions: 'Q3 + Q8 + Q13',
     desc: 'Vous décomposez chaque système en blocs fonctionnels clairs. Pour vous, un projet IoT doit être robuste, documenté et techniquement infaillible.',
     powers: ['Modélisation de la chaîne technique', 'Sélection optimale des capteurs et protocoles', 'Structuration méthodique des étapes']
   },
   Critique: {
     name: 'Schtroumpf Critique',
+    displayName: 'Critique',
     tagline: 'L\'exigence de faisabilité et le regard acéré',
     avatar: 'assets/images/critique.jpg',
     color: '#8b5cf6',
-    badge: 'Critique Rigoureux',
+    badge: 'Critique',
     associatedQuestions: 'Q4 + Q9 + Q14',
     desc: 'Vous êtes le garant de la qualité et du pragmatisme. Vous repérez immédiatement les failles techniques, les coûts cachés et les risques d\'échec.',
     powers: ['Stress-test des hypothèses', 'Optimisation des coûts et de la sécurité', 'Vérification de la cohérence de marché']
   },
   Empathique: {
     name: 'Schtroumpf Empathique (Sentimental)',
+    displayName: 'Empathique (Sentimental)',
     tagline: 'Le facteur humain et l\'utilité sociétale',
     avatar: 'assets/images/empathique.jpg',
     color: '#10b981',
-    badge: 'Empathique Sentimental',
+    badge: 'Empathique (Sentimental)',
     associatedQuestions: 'Q5 + Q10 + Q15',
     desc: 'Vous vous mettez à la place de l\'humain qui utilisera la technologie. Pour vous, un objet connecté doit apporter du réconfort, du lien social ou un vrai soulagement au quotidien.',
     powers: ['Compréhension profonde du besoin réel', 'Éthique et respect de la vie privée', 'Expérience utilisateur bienveillante']
+  },
+  Sportif: {
+    name: 'Schtroumpf Sportif (Action Man)',
+    displayName: 'Sportif (Action Man)',
+    tagline: 'Le dynamisme athlétique et l\'énergie de concrétisation',
+    avatar: 'assets/images/sportif.jpg',
+    color: '#f59e0b',
+    badge: 'Sportif (Action Man)',
+    associatedQuestions: 'Q1 + Q6 + Q11',
+    desc: 'Moins de paroles, plus d\'action ! Vous aimez tester des maquettes physiques, brancher des cartes et faire fonctionner le premier prototype au plus vite sur le terrain avec une énergie débordante.',
+    powers: ['Prototypage express (Maker & Action spirit)', 'Résolution rapide des blocages concrets', 'Dynamisme d\'équipe et passage à l\'action']
   }
 };
+
+function getArchetypeDisplayName(archKey) {
+  const meta = ARCHETYPES[archKey];
+  if (meta && meta.displayName) return meta.displayName;
+  const map = {
+    Artiste: 'Artiste',
+    Professeur: 'Professeur (Théoricien)',
+    Critique: 'Critique',
+    Empathique: 'Empathique (Sentimental)',
+    Sportif: 'Sportif (Action Man)'
+  };
+  return map[archKey] || archKey;
+}
 
 // ====================================================================
 // INITIALISATION DE L'APPLICATION
@@ -490,7 +508,7 @@ function showResultScreen(participant) {
   const scores75 = participant.archetype_scores || {};
   const totalSum = participant.total_sum || Object.values(scores75).reduce((a, b) => a + b, 0);
 
-  const archetypesOrder = ['Sportif', 'Artiste', 'Professeur', 'Critique', 'Empathique'];
+  const archetypesOrder = ['Artiste', 'Professeur', 'Critique', 'Empathique', 'Sportif'];
 
   archetypesOrder.forEach(arch => {
     const item = breakdown[arch] || {};
@@ -505,13 +523,13 @@ function showResultScreen(participant) {
     else if (scoreVal >= 45) levelClass = 'fort';
     else if (scoreVal >= 30) levelClass = 'modere';
 
-    const archMeta = ARCHETYPES[arch] || { color: '#0284c7', associatedQuestions: '3 Qs' };
+    const archMeta = ARCHETYPES[arch] || { color: '#0284c7', associatedQuestions: '3 Qs', displayName: arch };
 
     const row = document.createElement('div');
     row.className = `scoring-row ${isDominant ? 'dominant' : ''}`;
     row.innerHTML = `
       <div class="scoring-archetype-name" style="color: ${archMeta.color};">
-        ${arch}
+        ${archMeta.displayName || arch}
       </div>
       <div class="scoring-formula">
         <span>${archMeta.associatedQuestions} = (${rawSum}) × 5</span>
@@ -535,12 +553,12 @@ function showResultScreen(participant) {
     const item = breakdown[arch] || {};
     const scoreVal = item.score !== undefined ? item.score : (scores75[arch] || 0);
     const pct = item.percent !== undefined ? item.percent : (totalSum > 0 ? Math.round((scoreVal / totalSum) * 100) : 20);
-    const traitMeta = ARCHETYPES[arch] || { color: '#0284c7' };
+    const traitMeta = ARCHETYPES[arch] || { color: '#0284c7', displayName: arch };
 
     const row = document.createElement('div');
     row.className = 'score-bar-row';
     row.innerHTML = `
-      <span>${arch}</span>
+      <span>${traitMeta.displayName || arch}</span>
       <div class="score-bar-track">
         <div class="score-bar-fill" style="width: ${pct}%; background-color: ${traitMeta.color};"></div>
       </div>
@@ -599,7 +617,7 @@ function populateTeamSelector() {
   state.teams.forEach(team => {
     const opt = document.createElement('option');
     opt.value = team.id;
-    opt.textContent = `${team.name} (${team.archetype}) - Maison ${team.current_house}/6`;
+    opt.textContent = `${team.name} (${getArchetypeDisplayName(team.archetype)}) - Maison ${team.current_house}/6`;
     selector.appendChild(opt);
   });
 
@@ -635,7 +653,7 @@ function onTeamSelectionChanged() {
   // Mise à jour de la carte équipe
   document.getElementById('teamCardAvatar').src = `assets/images/${team.avatar}`;
   document.getElementById('teamCardName').textContent = team.name;
-  document.getElementById('teamCardTrait').textContent = `Archétype dominant : ${team.archetype}`;
+  document.getElementById('teamCardTrait').textContent = `Archétype dominant : ${getArchetypeDisplayName(team.archetype)}`;
 
   // Scribe / Porteur de stylo
   const scribe = team.scribe;
@@ -962,7 +980,7 @@ function renderVillageMap() {
     if (dock) {
       const token = document.createElement('div');
       token.className = 'team-avatar-token';
-      token.title = `${team.name} (${team.archetype}) - Progression : ${team.progress_percent}%`;
+      token.title = `${team.name} (${getArchetypeDisplayName(team.archetype)}) - Progression : ${team.progress_percent}%`;
       token.style.borderColor = team.color;
       token.onclick = (e) => {
         e.stopPropagation();
@@ -1002,7 +1020,7 @@ function renderDashboardTeamsGrid() {
         <img src="assets/images/${team.avatar}" alt="${team.name}" class="dash-team-avatar" style="border: 2px solid ${team.color};">
         <div>
           <div class="dash-team-title">${team.name}</div>
-          <div class="dash-team-sub">${team.archetype} • ${(team.members || []).length} membres</div>
+          <div class="dash-team-sub">${getArchetypeDisplayName(team.archetype)} • ${(team.members || []).length} membres</div>
         </div>
       </div>
 
@@ -1088,7 +1106,7 @@ function openHouseDetailsModal(houseNum) {
             <img src="assets/images/${t.avatar}" style="width: 36px; height: 36px; border-radius: 6px; object-fit: cover;">
             <div>
               <div style="font-weight: bold; color: #fff;">${t.name}</div>
-              <div style="font-size: 0.75rem; color: #94a3b8;">${t.archetype} • Rédacteur : ${t.scribe ? t.scribe.first_name + ' ' + t.scribe.last_name : 'Défaut'}</div>
+              <div style="font-size: 0.75rem; color: #94a3b8;">${getArchetypeDisplayName(t.archetype)} • Rédacteur : ${t.scribe ? t.scribe.first_name + ' ' + t.scribe.last_name : 'Défaut'}</div>
             </div>
           </div>
           <button class="btn btn-outline btn-xs" onclick="closeModal('modalHouseDetails'); inspectTeamFromDashboard('${t.id}');">Consulter la saisie ➔</button>
@@ -1329,7 +1347,7 @@ function renderRestitutionCards(filterTeamId) {
           <div>
             <h3 class="restitution-team-name">${team.name}</h3>
             <div class="restitution-team-meta">
-              Archétype : <strong style="color: ${team.color};">${team.archetype}</strong> • 
+              Archétype : <strong style="color: ${team.color};">${getArchetypeDisplayName(team.archetype)}</strong> • 
               Rédacteur : <strong>${team.scribe ? team.scribe.first_name + ' ' + team.scribe.last_name : 'Non désigné'}</strong> • 
               Progression Village : <strong>${team.progress_percent}% (Maison ${team.current_house}/6)</strong>
             </div>
@@ -1450,7 +1468,7 @@ function exportMarkdownReport() {
     const d5 = dels.find(d => d.house_number === 5)?.content || {};
     const d6 = dels.find(d => d.house_number === 6)?.content || {};
 
-    md += `## ${idx + 1}. Équipe : ${t.name} (${t.archetype})\n\n`;
+    md += `## ${idx + 1}. Équipe : ${t.name} (${getArchetypeDisplayName(t.archetype)})\n\n`;
     md += `- **Progression :** Maison ${t.current_house}/6 (${t.progress_percent}%)\n`;
     md += `- **Rédacteur Officiel :** ${t.scribe ? t.scribe.first_name + ' ' + t.scribe.last_name : 'Non désigné'}\n`;
     md += `- **Membres :** ${(t.members || []).map(m => m.first_name + ' ' + m.last_name).join(', ') || 'Aucun'}\n\n`;

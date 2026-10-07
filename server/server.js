@@ -31,18 +31,20 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, '../public')));
 
-// Archétypes et métadonnées Schtroumpf
+// Archétypes et métadonnées Schtroumpf (Ordre officiel)
 const ARCHETYPES_META = {
   Artiste: {
-    title: 'Schtroumpf Artiste / Créatif',
+    title: 'Schtroumpf Artiste',
+    displayName: 'Artiste',
     tagline: 'L\'imagination sans limites et le sens du design',
     avatar: 'artiste.jpg',
     color: '#ec4899',
     description: 'Vous abordez les projets par l\'esthétique, l\'émotion visuelle et la pensée divergente. Vous imaginez des objets connectés élégants qui font rêver l\'utilisateur.',
-    powers: ['Design d\'interface & expérience utilisateur', 'Storytelling percutant', 'Création de scénarios d\'usage immersifs']
+    powers: ['Design d\'interface & ergonomie visuelle', 'Storytelling percutant', 'Création de scénarios d\'usage immersifs']
   },
   Professeur: {
-    title: 'Schtroumpf Professeur / Savant',
+    title: 'Schtroumpf Professeur (Théoricien)',
+    displayName: 'Professeur (Théoricien)',
     tagline: 'L\'architecture rigoureuse et la logique technique',
     avatar: 'professeur.jpg',
     color: '#0284c7',
@@ -50,7 +52,8 @@ const ARCHETYPES_META = {
     powers: ['Modélisation de la chaîne technique', 'Sélection optimale des capteurs et protocoles', 'Structuration méthodique des étapes']
   },
   Critique: {
-    title: 'Schtroumpf Critique / Rigoureux',
+    title: 'Schtroumpf Critique',
+    displayName: 'Critique',
     tagline: 'L\'exigence de faisabilité et le regard acéré',
     avatar: 'critique.jpg',
     color: '#8b5cf6',
@@ -58,7 +61,8 @@ const ARCHETYPES_META = {
     powers: ['Stress-test des hypothèses', 'Optimisation des coûts et de la sécurité', 'Vérification de la cohérence de marché']
   },
   Empathique: {
-    title: 'Schtroumpf Empathique / Solidaire',
+    title: 'Schtroumpf Empathique (Sentimental)',
+    displayName: 'Empathique (Sentimental)',
     tagline: 'Le facteur humain et l\'utilité sociétale',
     avatar: 'empathique.jpg',
     color: '#10b981',
@@ -66,12 +70,13 @@ const ARCHETYPES_META = {
     powers: ['Compréhension profonde du besoin réel', 'Éthique et respect de la vie privée', 'Expérience utilisateur bienveillante']
   },
   Sportif: {
-    title: 'Schtroumpf Sportif / Action Man',
-    tagline: 'Le prototypage rapide et l\'énergie de concrétisation',
+    title: 'Schtroumpf Sportif (Action Man)',
+    displayName: 'Sportif (Action Man)',
+    tagline: 'Le dynamisme athlétique et l\'énergie de concrétisation',
     avatar: 'sportif.jpg',
     color: '#f59e0b',
-    description: 'Moins de paroles, plus d\'action ! Vous aimez souder, tester des maquettes physiques, brancher des cartes et faire fonctionner le premier prototype au plus vite.',
-    powers: ['Prototypage express (Maker spirit)', 'Résolution rapide des blocages concrets', 'Dynamisme d\'équipe et passage à l\'action']
+    description: 'Moins de paroles, plus d\'action ! Vous aimez souder, tester des maquettes physiques, brancher des cartes et faire fonctionner le premier prototype au plus vite avec une énergie débordante.',
+    powers: ['Prototypage express (Maker & Action spirit)', 'Résolution rapide des blocages concrets', 'Dynamisme d\'équipe et passage à l\'action']
   }
 };
 
@@ -259,11 +264,11 @@ app.post('/api/teams/generate', async (req, res) => {
 
     const archetypesList = ['Artiste', 'Professeur', 'Critique', 'Empathique', 'Sportif'];
     const teamNameTemplates = {
-      Artiste: 'Les Schtroumpfs Créatifs',
-      Professeur: 'Les Schtroumpfs Savants',
-      Critique: 'Les Schtroumpfs Rigoureux',
-      Empathique: 'Les Schtroumpfs Solidaires',
-      Sportif: 'Les Schtroumpfs Bâtisseurs'
+      Artiste: 'Les Schtroumpfs Artistes',
+      Professeur: 'Les Schtroumpfs Professeurs (Théoriciens)',
+      Critique: 'Les Schtroumpfs Critiques',
+      Empathique: 'Les Schtroumpfs Empathiques (Sentimentaux)',
+      Sportif: 'Les Schtroumpfs Sportifs (Action Man)'
     };
 
     archetypesList.forEach((archetype) => {

@@ -391,11 +391,11 @@ async function seedDemoData() {
   ];
 
   const demoTeams = [
-    { id: 'team-professeurs', name: 'Les Schtroumpfs Savants', archetype: 'Professeur', color: '#0284c7', avatar: 'professeur.jpg', current_house: 4, progress_percent: 66, scribe_participant_id: 'part-1' },
-    { id: 'team-artistes', name: 'Les Schtroumpfs Créatifs', archetype: 'Artiste', color: '#ec4899', avatar: 'artiste.jpg', current_house: 5, progress_percent: 83, scribe_participant_id: 'part-4' },
-    { id: 'team-critiques', name: 'Les Schtroumpfs Rigoureux', archetype: 'Critique', color: '#8b5cf6', avatar: 'critique.jpg', current_house: 3, progress_percent: 50, scribe_participant_id: 'part-7' },
-    { id: 'team-empathiques', name: 'Les Schtroumpfs Solidaires', archetype: 'Empathique', color: '#10b981', avatar: 'empathique.jpg', current_house: 6, progress_percent: 100, scribe_participant_id: 'part-10' },
-    { id: 'team-sportifs', name: 'Les Schtroumpfs Bâtisseurs', archetype: 'Sportif', color: '#f59e0b', avatar: 'sportif.jpg', current_house: 3, progress_percent: 50, scribe_participant_id: 'part-13' },
+    { id: 'team-artistes', name: 'Les Schtroumpfs Artistes', archetype: 'Artiste', color: '#ec4899', avatar: 'artiste.jpg', current_house: 5, progress_percent: 83, scribe_participant_id: 'part-4' },
+    { id: 'team-professeurs', name: 'Les Schtroumpfs Professeurs (Théoriciens)', archetype: 'Professeur', color: '#0284c7', avatar: 'professeur.jpg', current_house: 4, progress_percent: 66, scribe_participant_id: 'part-1' },
+    { id: 'team-critiques', name: 'Les Schtroumpfs Critiques', archetype: 'Critique', color: '#8b5cf6', avatar: 'critique.jpg', current_house: 3, progress_percent: 50, scribe_participant_id: 'part-7' },
+    { id: 'team-empathiques', name: 'Les Schtroumpfs Empathiques (Sentimentaux)', archetype: 'Empathique', color: '#10b981', avatar: 'empathique.jpg', current_house: 6, progress_percent: 100, scribe_participant_id: 'part-10' },
+    { id: 'team-sportifs', name: 'Les Schtroumpfs Sportifs (Action Man)', archetype: 'Sportif', color: '#f59e0b', avatar: 'sportif.jpg', current_house: 3, progress_percent: 50, scribe_participant_id: 'part-13' },
   ];
 
   // Assigner les team_id aux participants
