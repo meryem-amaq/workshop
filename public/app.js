@@ -11,6 +11,7 @@ const state = {
   currentUser: null, // Participant connecté sur ce navigateur
   isAdmin: false, // Mode Animateur activé ou non (accès pupitre, supervision, etc.)
   sessionPhase: 'registration', // 'registration' | 'teams_formed'
+  hasAutoRedirectedToWorkspace: false, // Flag pour basculer automatiquement le participant sur mobile
   waitingTimerInterval: null,
   waitingStartTime: null,
   participants: [],
@@ -149,6 +150,7 @@ document.addEventListener('DOMContentLoaded', () => {
   applyAdminModeUI();
 
   setupNavigation();
+  initRouter();
   loadSavedUserFromStorage();
   checkDatabaseHealth();
   refreshWorkshopData();
@@ -159,6 +161,53 @@ document.addEventListener('DOMContentLoaded', () => {
     refreshWorkshopData(false);
   }, 2500);
 });
+
+// ====================================================================
+// ROUTEUR D'URL (HTML5 HISTORY API SANS RECHARGEMENT DE PAGE)
+// ====================================================================
+function initRouter() {
+  window.addEventListener('popstate', () => {
+    handleCurrentUrlRoute(false);
+  });
+  handleCurrentUrlRoute(false);
+}
+
+function navigateToUrl(path) {
+  if (window.location.pathname !== path) {
+    window.history.pushState({}, '', path);
+  }
+}
+
+function handleCurrentUrlRoute(push = false) {
+  const path = window.location.pathname.toLowerCase();
+
+  if (path === '/admin' || path === '/dashboard') {
+    if (!state.isAdmin) {
+      openAdminAuthModal();
+    }
+    switchView('view-dashboard', false);
+  } else if (path === '/team' || path === '/workspace') {
+    switchView('view-workspace', false);
+  } else if (path === '/restitution') {
+    if (!state.isAdmin) {
+      openAdminAuthModal();
+    }
+    switchView('view-restitution', false);
+  } else if (path === '/register') {
+    switchView('view-participant', false);
+    goToIdentifyScreen(false);
+  } else if (path === '/quiz') {
+    switchView('view-participant', false);
+  } else if (path === '/waiting') {
+    switchView('view-participant', false);
+    if (state.currentUser) {
+      showResultScreen(state.currentUser, false);
+    }
+  } else {
+    // Racine '/' ou autre
+    switchView('view-participant', false);
+  }
+}
 
 // Échappement HTML sécurisé pour l'affichage des noms
 function escapeHtml(str) {
@@ -297,7 +346,7 @@ function setupNavigation() {
   }
 }
 
-function switchView(viewId) {
+function switchView(viewId, updateUrl = true) {
   // Restriction stricte : seules les personnes authentifiées animateur accèdent au dashboard et restitution
   if (!state.isAdmin && (viewId === 'view-dashboard' || viewId === 'view-restitution')) {
     showToast('Accès restreint : cette vue est réservée à l\'animateur du workshop.', 'warning');
@@ -315,9 +364,31 @@ function switchView(viewId) {
   if (activePanel) activePanel.classList.add('active');
   if (activeTab) activeTab.classList.add('active');
 
+  // Mise à jour de la vraie URL dans la barre d'adresse
+  if (updateUrl) {
+    if (viewId === 'view-dashboard') navigateToUrl('/admin');
+    else if (viewId === 'view-workspace') navigateToUrl('/team');
+    else if (viewId === 'view-restitution') navigateToUrl('/restitution');
+    else if (viewId === 'view-participant') {
+      const scrRes = document.getElementById('screen-result');
+      if (scrRes && scrRes.classList.contains('active')) {
+        navigateToUrl('/waiting');
+      } else {
+        const scrId = document.getElementById('screen-identify');
+        const scrQuiz = document.getElementById('screen-quiz');
+        if ((scrId && scrId.classList.contains('active')) || (scrQuiz && scrQuiz.classList.contains('active'))) {
+          navigateToUrl('/register');
+        } else {
+          navigateToUrl('/');
+        }
+      }
+    }
+  }
+
   // Actions spécifiques lors de l'ouverture
   if (viewId === 'view-dashboard') {
     renderVillageMap();
+    renderAdminPrelaunchGrid();
   } else if (viewId === 'view-restitution') {
     renderRestitutionView();
   } else if (viewId === 'view-workspace') {
@@ -403,7 +474,7 @@ function loadSavedUserFromStorage() {
 }
 
 // Basculer vers l'écran d'identification (Nom & Prénom)
-function goToIdentifyScreen() {
+function goToIdentifyScreen(updateUrl = true) {
   const scrQr = document.getElementById('screen-qr');
   const scrId = document.getElementById('screen-identify');
   const scrQuiz = document.getElementById('screen-quiz');
@@ -419,10 +490,11 @@ function goToIdentifyScreen() {
       if (input) input.focus();
     }, 80);
   }
+  if (updateUrl) navigateToUrl('/register');
 }
 
 // Revenir à l'écran du QR Code d'accueil
-function goToQrScreen() {
+function goToQrScreen(updateUrl = true) {
   const scrQr = document.getElementById('screen-qr');
   const scrId = document.getElementById('screen-identify');
   const scrQuiz = document.getElementById('screen-quiz');
@@ -432,6 +504,7 @@ function goToQrScreen() {
   if (scrQuiz) scrQuiz.classList.remove('active');
   if (scrRes) scrRes.classList.remove('active');
   if (scrQr) scrQr.classList.add('active');
+  if (updateUrl) navigateToUrl('/');
 }
 
 function startPersonalityTest() {
@@ -575,7 +648,7 @@ async function submitQuizResults() {
   }
 }
 
-function showResultScreen(participant) {
+function showResultScreen(participant, updateUrl = true) {
   const scrQr = document.getElementById('screen-qr');
   const scrId = document.getElementById('screen-identify');
   const scrQuiz = document.getElementById('screen-quiz');
@@ -585,6 +658,8 @@ function showResultScreen(participant) {
   if (scrId) scrId.classList.remove('active');
   if (scrQuiz) scrQuiz.classList.remove('active');
   if (scrRes) scrRes.classList.add('active');
+
+  if (updateUrl) navigateToUrl('/waiting');
 
   const meta = ARCHETYPES[participant.archetype] || ARCHETYPES.Professeur;
 
@@ -812,6 +887,17 @@ function updateParticipantTeamStatus(participant) {
     }
 
     stopWaitingTimer();
+
+    // REDIRECTION AUTOMATIQUE SUR LE SMARTPHONE DU PARTICIPANT :
+    // Dès que les groupes sont constitués par l'animateur, si le participant était dans la salle d'attente,
+    // son écran bascule automatiquement vers l'Espace Équipe Rédaction des 6 Maisons !
+    if (state.currentView === 'view-participant' && !state.isAdmin && !state.hasAutoRedirectedToWorkspace) {
+      state.hasAutoRedirectedToWorkspace = true;
+      showToast(`🎉 Votre groupe « ${team.name} » est constitué ! Redirection vers votre espace...`, 'success');
+      setTimeout(() => {
+        switchToWorkspaceWithTeam();
+      }, 1500);
+    }
   } else {
     // Équipes non encore formées : rester en salle d'attente interactive
     if (idlePanel) idlePanel.style.display = 'block';
@@ -828,7 +914,7 @@ function switchToWorkspaceWithTeam() {
   }
   const tabWs = document.getElementById('tabWorkspace');
   if (tabWs) tabWs.style.display = 'inline-flex';
-  switchView('view-workspace');
+  switchView('view-workspace', true);
 }
 
 // ====================================================================
@@ -1326,7 +1412,66 @@ function updatePitchTimerDisplay() {
 // VUE 3 : LE DASHBOARD "VILLAGE DE SCHTROUMPFS" (VUE ANIMATEUR)
 // ====================================================================
 
+// Panneau Pré-Constitution : Affichage visuel de tous les participants inscrits avec profil
+function renderAdminPrelaunchGrid() {
+  const grid = document.getElementById('adminParticipantsGrid');
+  const countEl = document.getElementById('adminReadyCount');
+  const launchCountEl = document.getElementById('btnLaunchCount');
+  const launchBtn = document.getElementById('btnAdminLaunchTeams');
+  if (!grid) return;
+
+  const participants = state.participants || [];
+  if (countEl) countEl.textContent = participants.length;
+  if (launchCountEl) launchCountEl.textContent = participants.length;
+  if (launchBtn) {
+    launchBtn.disabled = participants.length === 0;
+  }
+
+  if (participants.length === 0) {
+    grid.innerHTML = `
+      <div class="admin-prelaunch-empty">
+        <h4>🍄 En attente des premières inscriptions...</h4>
+        <p>Les participants apparaîtront ici dès qu'ils auront scanné le QR Code et validé leur test de 15 questions.</p>
+        <button type="button" class="btn btn-outline btn-xs mt-3" onclick="openQrModal()">📱 Afficher le Grand QR Code d'accès</button>
+      </div>
+    `;
+    return;
+  }
+
+  grid.innerHTML = participants.map(p => {
+    const meta = ARCHETYPES[p.archetype] || ARCHETYPES.Professeur;
+    const timeStr = p.created_at ? new Date(p.created_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) : 'Prêt';
+    const hasTeam = Boolean(p.team_id);
+    const team = hasTeam ? state.teams.find(t => t.id === p.team_id) : null;
+    const isScribe = (team && team.scribe_participant_id === p.id) || p.is_scribe;
+
+    return `
+      <div class="admin-part-card" style="border-left: 3px solid ${meta.color};">
+        <div class="admin-part-left">
+          <img src="${meta.avatar}" alt="${p.archetype}" class="admin-part-avatar">
+          <div class="admin-part-meta">
+            <div class="admin-part-name">${escapeHtml(p.first_name)} ${escapeHtml(p.last_name)}</div>
+            <span class="admin-part-arch" style="background: ${meta.color}22; color: ${meta.color}; border: 1px solid ${meta.color}44;">
+              ${meta.badge || p.archetype}
+            </span>
+            ${hasTeam ? `
+              <div style="font-size:0.72rem; color:${team ? team.color : '#38bdf8'}; margin-top:3px; font-weight:600;">
+                👥 ${escapeHtml(team ? team.name : 'Affecté')} ${isScribe ? '<span style="color:#fbbf24;">(✍️ Rédacteur)</span>' : ''}
+              </div>
+            ` : '<div style="font-size:0.7rem; color:#f59e0b; margin-top:2px;">⏳ En attente de groupe</div>'}
+            <div class="admin-part-time">Test validé à ${timeStr}</div>
+          </div>
+        </div>
+        <button type="button" class="admin-part-del-btn" onclick="confirmRemoveParticipant('${p.id}', '${escapeHtml(p.first_name)} ${escapeHtml(p.last_name)}')" title="Retirer ce participant s'il a quitté le workshop">
+          Retirer ❌
+        </button>
+      </div>
+    `;
+  }).join('');
+}
+
 function renderVillageMap() {
+  renderAdminPrelaunchGrid();
   // Réinitialiser les quais des 6 maisons
   for (let i = 1; i <= 6; i++) {
     const dock = document.getElementById(`dock-house-${i}`);
@@ -1950,9 +2095,10 @@ async function refreshWorkshopData(updateUiFeedback = true) {
     if (elTeams) elTeams.textContent = state.teams.length;
     if (elDels) elDels.textContent = deliverables.length;
 
-    // Si nous sommes sur le Dashboard (animateur), rafraîchir la carte et les cartes d'équipes
+    // Si nous sommes sur le Dashboard (animateur), rafraîchir la carte et la pré-constitution
     if (state.currentView === 'view-dashboard') {
       renderVillageMap();
+      renderAdminPrelaunchGrid();
     }
 
     // Si un participant local existe, vérifier son affectation et ses droits

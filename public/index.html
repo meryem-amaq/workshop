@@ -805,6 +805,31 @@
           </div>
         </div>
 
+        <!-- ===================================================================
+             PANNEAU PRÉ-CONSTITUTION : PARTICIPANTS EN ATTENTE (VUE ANIMATEUR)
+             Affichage nominatif de tous les inscrits avec profil AVANT lancement
+             =================================================================== -->
+        <div class="admin-prelaunch-card" id="adminPrelaunchCard">
+          <div class="prelaunch-header">
+            <div class="prelaunch-meta">
+              <div class="prelaunch-badge">🍄 Salle de Contrôle • Réception des Profils</div>
+              <h3 class="prelaunch-title">👥 Participants Inscrits & Prêts (<span id="adminReadyCount">0</span>)</h3>
+              <p class="prelaunch-desc">Visualisez chaque participant ayant complété son test avec son profil Schtroumpf dominant avant de déclencher la constitution des équipes homogènes.</p>
+            </div>
+            <div class="prelaunch-action">
+              <button class="btn btn-primary btn-lg pulse-glow" id="btnAdminLaunchTeams" onclick="triggerAutoAssignTeams()" disabled>
+                <span>⚡ Former les Groupes (<span id="btnLaunchCount">0</span>)</span>
+                <span class="btn-arrow">➔</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Grille Visuelle des Participants Inscrits -->
+          <div class="admin-participants-grid" id="adminParticipantsGrid">
+            <!-- Rendu en direct par app.js -->
+          </div>
+        </div>
+
         <!-- CARTE VISUELLE DU VILLAGE DES SCHTROUMPFS -->
         <div class="village-map-card">
           <div class="village-map-header">
