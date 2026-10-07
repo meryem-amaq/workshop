@@ -1,0 +1,17 @@
+{
+  "name": "smurf-iot-village",
+  "version": "1.0.0",
+  "description": "Plateforme web interactive pour piloter le workshop IoT gamifié Le Village IoT des Schtroumpfs",
+  "main": "server/server.js",
+  "scripts": {
+    "start": "node server/server.js",
+    "dev": "node --watch server/server.js",
+    "db:init": "node server/init-db.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.1",
+    "mysql2": "^3.11.3"
+  }
+}
