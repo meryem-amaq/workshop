@@ -234,6 +234,43 @@ app.get('/api/participants', async (req, res) => {
   }
 });
 
+// 4b. État de la session globale (pour synchronisation en temps réel de tous les participants)
+app.get('/api/session', async (req, res) => {
+  try {
+    const session = await db.getSession();
+    const participants = await db.getParticipants();
+    const teams = await db.getTeams();
+    res.json({
+      session,
+      phase: session.phase || 'registration',
+      participantCount: participants.length,
+      participants: participants.map(p => ({
+        id: p.id,
+        first_name: p.first_name,
+        last_name: p.last_name,
+        archetype: p.archetype,
+        team_id: p.team_id,
+        is_scribe: p.is_scribe,
+        created_at: p.created_at
+      })),
+      teamsCount: teams.length,
+      teams: teams
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 4c. Supprimer un participant (départ / abandon)
+app.delete('/api/participants/:id', async (req, res) => {
+  try {
+    const result = await db.removeParticipant(req.params.id);
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // 5. Génération automatique des groupes homogènes
 app.post('/api/teams/generate', async (req, res) => {
   try {
@@ -303,12 +340,15 @@ app.post('/api/teams/generate', async (req, res) => {
       }
     });
 
-    // Enregistrer les équipes
+    // Enregistrer les équipes et changer la phase du workshop
     const savedTeams = await db.saveTeams(teams, participantUpdates);
+    await db.setSessionPhase('teams_formed');
+
     res.json({
       success: true,
       teams: savedTeams,
-      count: savedTeams.length
+      count: savedTeams.length,
+      phase: 'teams_formed'
     });
   } catch (err) {
     console.error('Erreur génération équipes:', err);
@@ -361,6 +401,19 @@ app.post('/api/deliverables', async (req, res) => {
       return res.status(400).json({ error: 'Données de livrable incomplètes (team_id, house_number, content requis).' });
     }
 
+    const teams = await db.getTeams();
+    const currentTeam = teams.find(t => t.id === team_id);
+    if (!currentTeam) {
+      return res.status(404).json({ error: 'Équipe introuvable.' });
+    }
+
+    // Vérification stricte des droits du rédacteur
+    if (submitted_by && currentTeam.scribe_participant_id && currentTeam.scribe_participant_id !== submitted_by) {
+      return res.status(403).json({ 
+        error: `Accès refusé : Seul le rédacteur officiel (${currentTeam.scribe ? currentTeam.scribe.first_name + ' ' + currentTeam.scribe.last_name : 'le porteur de stylo'}) possède les droits de saisie pour ce groupe.` 
+      });
+    }
+
     const deliverableId = `del_${team_id}_m${house_number}`;
     const deliverable = {
       id: deliverableId,
@@ -380,13 +433,13 @@ app.post('/api/deliverables', async (req, res) => {
     }
 
     const updatedDeliverables = await db.getDeliverables(team_id);
-    const teams = await db.getTeams();
-    const currentTeam = teams.find(t => t.id === team_id);
+    const allTeams = await db.getTeams();
+    const updatedTeam = allTeams.find(t => t.id === team_id);
 
     res.json({
       success: true,
       deliverable,
-      team: currentTeam,
+      team: updatedTeam,
       team_deliverables: updatedDeliverables
     });
   } catch (err) {

@@ -347,6 +347,68 @@ async function saveDeliverable(deliverable) {
   return deliverable;
 }
 
+// Récupérer la session courante
+async function getSession() {
+  let session = memoryStore.session;
+  if (isConnectedToMySQL && mysqlPool) {
+    try {
+      const [rows] = await mysqlPool.query('SELECT * FROM sessions WHERE id = ?', ['default']);
+      if (rows.length > 0) session = rows[0];
+    } catch (err) {
+      console.error('[DB] Erreur getSession MySQL:', err.message);
+    }
+  }
+  return session;
+}
+
+// Mettre à jour la phase de la session
+async function setSessionPhase(phase) {
+  memoryStore.session.phase = phase;
+  if (isConnectedToMySQL && mysqlPool) {
+    try {
+      await mysqlPool.query('UPDATE sessions SET phase = ? WHERE id = ?', [phase, 'default']);
+    } catch (err) {
+      console.error('[DB] Erreur setSessionPhase MySQL:', err.message);
+    }
+  }
+  persistFallbackStore();
+  return memoryStore.session;
+}
+
+// Supprimer un participant (désistement / départ pendant l'atelier)
+async function removeParticipant(participantId) {
+  const p = memoryStore.participants.find(x => x.id === participantId);
+  const teamId = p ? p.team_id : null;
+  const wasScribe = p ? (p.is_scribe || p.id === (memoryStore.teams.find(t => t.id === teamId)?.scribe_participant_id)) : false;
+
+  if (isConnectedToMySQL && mysqlPool) {
+    try {
+      await mysqlPool.query('DELETE FROM participants WHERE id = ?', [participantId]);
+    } catch (err) {
+      console.error('[DB] Erreur delete participant MySQL:', err.message);
+    }
+  }
+
+  memoryStore.participants = memoryStore.participants.filter(x => x.id !== participantId);
+
+  // Si le participant était rédacteur du groupe, élire automatiquement le prochain membre
+  if (teamId && wasScribe) {
+    const remainingMembers = memoryStore.participants.filter(x => x.team_id === teamId);
+    if (remainingMembers.length > 0) {
+      await setTeamScribe(teamId, remainingMembers[0].id);
+    } else {
+      const t = memoryStore.teams.find(x => x.id === teamId);
+      if (t) t.scribe_participant_id = null;
+      if (isConnectedToMySQL && mysqlPool) {
+        await mysqlPool.query('UPDATE teams SET scribe_participant_id = NULL WHERE id = ?', [teamId]);
+      }
+    }
+  }
+
+  persistFallbackStore();
+  return { success: true, remainingCount: memoryStore.participants.length };
+}
+
 // Réinitialiser le workshop
 async function resetAll() {
   if (isConnectedToMySQL && mysqlPool) {
@@ -355,10 +417,12 @@ async function resetAll() {
       await mysqlPool.query('UPDATE participants SET team_id = NULL, is_scribe = FALSE');
       await mysqlPool.query('DELETE FROM teams');
       await mysqlPool.query('DELETE FROM participants');
+      await mysqlPool.query('UPDATE sessions SET phase = "registration" WHERE id = "default"');
     } catch (err) {
       console.error('[DB] Erreur reset MySQL:', err.message);
     }
   }
+  memoryStore.session.phase = 'registration';
   memoryStore.participants = [];
   memoryStore.teams = [];
   memoryStore.deliverables = [];
@@ -558,8 +622,11 @@ async function seedDemoData() {
 module.exports = {
   initDatabase,
   getStatus,
+  getSession,
+  setSessionPhase,
   getParticipants,
   addParticipant,
+  removeParticipant,
   getTeams,
   saveTeams,
   setTeamScribe,

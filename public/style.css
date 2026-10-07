@@ -2177,6 +2177,468 @@ body {
 }
 
 /* ===================================================================
+   SÉPARATION STRICTE DES RÔLES & SALLE D'ATTENTE INTERACTIVE
+   =================================================================== */
+
+/* Masquage des éléments Animateur pour les participants */
+body:not(.is-admin) .admin-only {
+  display: none !important;
+}
+
+/* Boutons de bascule de rôle dans le header */
+.role-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.85rem;
+  border-radius: var(--radius-pill);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  border: 1px solid var(--border-glass);
+}
+
+.role-toggle-btn.participant-badge {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-secondary);
+}
+
+.role-toggle-btn.participant-badge:hover {
+  background: rgba(56, 189, 248, 0.15);
+  color: #fff;
+  border-color: rgba(56, 189, 248, 0.4);
+}
+
+.role-toggle-btn.admin-badge {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(239, 68, 68, 0.2));
+  color: #fef08a;
+  border-color: rgba(245, 158, 11, 0.5);
+  box-shadow: 0 0 14px rgba(245, 158, 11, 0.3);
+}
+
+.role-toggle-btn.admin-badge:hover {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.35), rgba(239, 68, 68, 0.35));
+  border-color: #f59e0b;
+}
+
+/* SALLE D'ATTENTE INTERACTIVE (#teamWaitingBox) */
+.team-waiting-box {
+  margin-top: 1.5rem;
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(14px);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
+  position: relative;
+  overflow: hidden;
+}
+
+.waiting-header-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 1.25rem;
+}
+
+.waiting-spinner {
+  position: relative;
+  width: 54px;
+  height: 54px;
+  min-width: 54px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(56, 189, 248, 0.12);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+}
+
+.radar-ping {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 2px solid var(--color-smurf-sky);
+  animation: radarPulse 2s cubic-bezier(0, 0.2, 0.8, 1) infinite;
+  pointer-events: none;
+}
+
+@keyframes radarPulse {
+  0% { transform: scale(0.8); opacity: 1; }
+  100% { transform: scale(1.6); opacity: 0; }
+}
+
+.waiting-icon {
+  font-size: 1.6rem;
+}
+
+.waiting-main-meta {
+  flex: 1;
+}
+
+.waiting-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 0.25rem;
+}
+
+.waiting-desc {
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  line-height: 1.45;
+}
+
+.waiting-meta-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.waiting-timer-pill, .waiting-count-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.85rem;
+  border-radius: var(--radius-pill);
+  font-size: 0.82rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--text-primary);
+}
+
+.waiting-timer-pill strong {
+  color: var(--color-gold-light);
+  font-family: monospace;
+  font-size: 0.95rem;
+}
+
+.waiting-count-pill strong {
+  color: var(--color-smurf-sky);
+}
+
+/* FLUX DES PARTICIPANTS EN DIRECT */
+.waiting-feed-container {
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: var(--radius-md);
+  padding: 0.85rem 1rem;
+}
+
+.feed-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.65rem;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+}
+
+.feed-dot-pulse {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-forest-green);
+  box-shadow: 0 0 8px var(--color-forest-green);
+  animation: feedBlink 1.5s infinite;
+}
+
+@keyframes feedBlink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.waiting-live-feed {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  max-height: 160px;
+  overflow-y: auto;
+}
+
+.waiting-feed-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  padding: 0.4rem 0.65rem;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: var(--radius-sm);
+  font-size: 0.82rem;
+  animation: feedItemIn 0.3s ease-out;
+}
+
+@keyframes feedItemIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.feed-item-left {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.waiting-feed-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.feed-item-name {
+  font-weight: 600;
+  color: #fff;
+}
+
+.feed-item-badge {
+  font-size: 0.72rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: var(--radius-pill);
+  font-weight: 500;
+}
+
+.feed-item-time {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+/* CARTE DE CÉLÉBRATION DE L'ÉQUIPE ASSIGNÉE */
+.assigned-celebrate-card {
+  animation: celebrateFadeIn 0.5s ease-out;
+}
+
+@keyframes celebrateFadeIn {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.assigned-head-row {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid var(--border-glass);
+}
+
+.assigned-team-avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: var(--radius-md);
+  object-fit: cover;
+  border: 2px solid var(--color-smurf-sky);
+  box-shadow: 0 0 20px rgba(56, 189, 248, 0.35);
+}
+
+.assigned-badge-top {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #34d399;
+  letter-spacing: 0.04em;
+  margin-bottom: 0.2rem;
+}
+
+.assigned-team-title {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #fff;
+  margin-bottom: 0.2rem;
+}
+
+.assigned-team-trait {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+/* CARTE DE RÔLE (RÉDACTEUR vs CONSEILLER) */
+.role-notice-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-top: 1.25rem;
+  padding: 1rem 1.25rem;
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-glass);
+  transition: all 0.3s ease;
+}
+
+.role-notice-card.is-scribe {
+  background: rgba(245, 158, 11, 0.1);
+  border-color: rgba(245, 158, 11, 0.35);
+}
+
+.role-notice-card.is-counselor {
+  background: rgba(56, 189, 248, 0.08);
+  border-color: rgba(56, 189, 248, 0.25);
+}
+
+.role-icon-col {
+  font-size: 1.75rem;
+  line-height: 1;
+}
+
+.role-text-col {
+  flex: 1;
+}
+
+.role-headline {
+  display: block;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 0.25rem;
+}
+
+.role-notice-card.is-scribe .role-headline {
+  color: #fbbf24;
+}
+
+.role-notice-card.is-counselor .role-headline {
+  color: #38bdf8;
+}
+
+.role-explanation {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  line-height: 1.45;
+}
+
+/* LISTE DES MEMBRES DU GROUPE */
+.assigned-members-box {
+  margin-top: 1.25rem;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: var(--radius-md);
+  padding: 1rem;
+}
+
+.members-box-title {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 0.75rem;
+}
+
+.team-members-list-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 0.65rem;
+}
+
+.assigned-member-pill {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.assigned-member-pill.is-me {
+  border-color: rgba(56, 189, 248, 0.4);
+  background: rgba(56, 189, 248, 0.08);
+}
+
+.assigned-member-pill.is-scribe {
+  border-color: rgba(245, 158, 11, 0.4);
+  background: rgba(245, 158, 11, 0.08);
+}
+
+.member-pill-name {
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: #fff;
+}
+
+.member-pill-badge {
+  font-size: 0.72rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: var(--radius-pill);
+  font-weight: 600;
+}
+
+.member-pill-badge.badge-scribe {
+  background: rgba(245, 158, 11, 0.2);
+  color: #fbbf24;
+  border: 1px solid rgba(245, 158, 11, 0.4);
+}
+
+.member-pill-badge.badge-counselor {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-muted);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* BANNIÈRE DE RÔLE DANS L'ESPACE DE TRAVAIL */
+.workspace-role-banner {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+  padding: 0.85rem 1.25rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-glass);
+  animation: fadeIn 0.3s ease-out;
+}
+
+.workspace-role-banner.role-scribe-mode {
+  background: rgba(245, 158, 11, 0.12);
+  border-color: rgba(245, 158, 11, 0.4);
+}
+
+.workspace-role-banner.role-counselor-mode {
+  background: rgba(56, 189, 248, 0.08);
+  border-color: rgba(56, 189, 248, 0.25);
+}
+
+.workspace-role-banner.role-admin-mode {
+  background: rgba(139, 92, 246, 0.15);
+  border-color: rgba(139, 92, 246, 0.4);
+}
+
+.workspace-role-banner .banner-icon {
+  font-size: 1.5rem;
+}
+
+.workspace-role-banner strong {
+  display: block;
+  font-size: 0.92rem;
+  color: #fff;
+  margin-bottom: 0.15rem;
+}
+
+.workspace-role-banner.role-scribe-mode strong { color: #fbbf24; }
+.workspace-role-banner.role-counselor-mode strong { color: #38bdf8; }
+.workspace-role-banner.role-admin-mode strong { color: #c084fc; }
+
+.workspace-role-banner p {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+}
+
+/* MODE CONSULTATION POUR LES CONSEILLERS */
+.workspace-readonly-active input,
+.workspace-readonly-active textarea,
+.workspace-readonly-active select {
+  opacity: 0.75;
+  cursor: not-allowed;
+  background: rgba(0, 0, 0, 0.35) !important;
+}
+
+.workspace-readonly-active button[type="submit"] {
+  opacity: 0.55;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* ===================================================================
    STYLES D'IMPRESSION (EXPORT PDF)
    =================================================================== */
 @media print {

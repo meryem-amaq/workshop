@@ -26,24 +26,30 @@
       <nav class="nav-tabs" id="mainNavTabs">
         <button class="nav-tab active" data-view="view-participant" id="tabParticipant">
           <span class="tab-icon">📱</span>
-          <span class="tab-label">1. Inscription & Test</span>
+          <span class="tab-label" id="tabLabelParticipant">1. Inscription & Test</span>
         </button>
-        <button class="nav-tab" data-view="view-workspace" id="tabWorkspace">
+        <button class="nav-tab" data-view="view-workspace" id="tabWorkspace" style="display: none;">
           <span class="tab-icon">✍️</span>
-          <span class="tab-label">2. Espace Équipe (Rédacteur)</span>
+          <span class="tab-label" id="tabLabelWorkspace">2. Mon Équipe</span>
         </button>
-        <button class="nav-tab" data-view="view-dashboard" id="tabDashboard">
+        <button class="nav-tab admin-only" data-view="view-dashboard" id="tabDashboard">
           <span class="tab-icon">🍄</span>
           <span class="tab-label">3. Dashboard Village (Animateur)</span>
         </button>
-        <button class="nav-tab" data-view="view-restitution" id="tabRestitution">
+        <button class="nav-tab admin-only" data-view="view-restitution" id="tabRestitution">
           <span class="tab-icon">📊</span>
-          <span class="tab-label">4. Compte Rendu & Restitution</span>
+          <span class="tab-label">4. Restitution</span>
         </button>
       </nav>
 
-      <!-- Badge Statut MySQL & Mode -->
+      <!-- Badge Statut MySQL & Contrôle de Rôle -->
       <div class="header-status">
+        <button type="button" class="role-toggle-btn participant-badge" id="btnAdminAccess" onclick="openAdminAuthModal()" title="Accès réservé à l'animateur du workshop">
+          <span>🔒 Espace Animateur</span>
+        </button>
+        <button type="button" class="role-toggle-btn admin-badge" id="btnAdminExit" onclick="exitAdminMode()" title="Revenir à la vue participant" style="display: none;">
+          <span>👑 Mode Animateur (Quitter)</span>
+        </button>
         <div class="status-pill" id="dbStatusPill" title="Cliquez pour inspecter la connexion base de données">
           <span class="status-dot"></span>
           <span class="status-text" id="dbStatusText">MySQL Connecté</span>
@@ -249,26 +255,88 @@
             </div>
           </div>
 
-          <!-- Boîte d'attente / Statut d'équipe -->
+          <!-- Salle d'Attente Interactive & Direct du Workshop -->
           <div class="team-waiting-box" id="teamWaitingBox">
-            <div class="waiting-spinner">
-              <div class="radar-ping"></div>
-              <span class="waiting-icon">🍄</span>
-            </div>
-            <div class="waiting-details">
-              <h4 class="waiting-title" id="waitingStatusTitle">En attente de la formation des équipes...</h4>
-              <p class="waiting-desc" id="waitingStatusDesc">
-                L'animateur va constituer les groupes homogènes depuis le pupitre du Village. Cette page s'actualisera automatiquement dès que votre équipe sera prête.
-              </p>
-              <div class="waiting-assigned-team" id="waitingAssignedTeam" style="display: none;">
-                <span class="assigned-label">Votre groupe officiel :</span>
-                <div class="assigned-name" id="assignedTeamName">Les Schtroumpfs Savants</div>
-                <div class="assigned-role" id="assignedTeamRole">✍️ Vous êtes désigné Rédacteur en chef du groupe</div>
-                <button class="btn btn-primary btn-sm mt-3" onclick="switchToWorkspaceWithTeam()">
-                  Ouvrir l'Espace de Travail de l'Équipe ➔
-                </button>
+            
+            <!-- ÉTAT 1 : En attente du lancement par l'animateur -->
+            <div id="waitingIdleState" class="waiting-state-panel">
+              <div class="waiting-header-row">
+                <div class="waiting-spinner">
+                  <div class="radar-ping"></div>
+                  <span class="waiting-icon">🍄</span>
+                </div>
+                <div class="waiting-main-meta">
+                  <h4 class="waiting-title">⏳ Salle d'Attente en Direct</h4>
+                  <p class="waiting-desc">
+                    Votre profil est enregistré ! Restez sur cet écran : dès que l'animateur lancera la répartition, votre groupe s'affichera automatiquement ici.
+                  </p>
+                  
+                  <!-- Chrono & Compteur de participants -->
+                  <div class="waiting-meta-pills mt-2">
+                    <div class="waiting-timer-pill" id="waitingTimerPill">
+                      <span>⏱️ Chrono :</span>
+                      <strong id="waitingTimerDisplay">00:00</strong>
+                    </div>
+                    <div class="waiting-count-pill" id="waitingCountPill">
+                      <span>👥 <strong id="waitingCountReady">1</strong> participant(s) prêt(s)</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Flux des participants arrivés en direct -->
+              <div class="waiting-feed-container mt-3">
+                <div class="feed-header">
+                  <span class="feed-dot-pulse"></span>
+                  <span class="feed-label">Participations reçues en direct :</span>
+                </div>
+                <div class="waiting-live-feed" id="waitingLiveFeed">
+                  <!-- Alimenté en temps réel par app.js -->
+                </div>
               </div>
             </div>
+
+            <!-- ÉTAT 2 : Équipes Formées par l'Animateur -->
+            <div id="waitingAssignedState" class="waiting-state-panel" style="display: none;">
+              <div class="assigned-celebrate-card">
+                <div class="assigned-head-row">
+                  <img src="assets/images/artiste.jpg" alt="Avatar Équipe" class="assigned-team-avatar" id="assignedTeamAvatar">
+                  <div>
+                    <span class="assigned-badge-top">🎉 Votre Équipe est Formée !</span>
+                    <h3 class="assigned-team-title" id="assignedTeamName">Les Schtroumpfs Artistes</h3>
+                    <div class="assigned-team-trait" id="assignedTeamTrait">Archétype dominant : Artiste</div>
+                  </div>
+                </div>
+
+                <!-- Bannière de rôle (Rédacteur vs Conseiller) -->
+                <div class="role-notice-card" id="assignedRoleCard">
+                  <div class="role-icon-col" id="assignedRoleIcon">✍️</div>
+                  <div class="role-text-col">
+                    <strong class="role-headline" id="assignedRoleHeadline">Vous êtes le Rédacteur Unique (Porteur de stylo)</strong>
+                    <p class="role-explanation" id="assignedRoleExplanation">
+                      Vous avez les droits exclusifs pour remplir et valider les livrables des 6 Maisons au nom de votre équipe.
+                    </p>
+                  </div>
+                </div>
+
+                <!-- Liste de tous les membres du groupe -->
+                <div class="assigned-members-box">
+                  <h4 class="members-box-title">👥 Membres de votre groupe (<span id="assignedMembersCount">0</span>) :</h4>
+                  <div class="team-members-list-grid" id="assignedMembersList">
+                    <!-- Généré dynamiquement avec badge Rédacteur / Conseiller -->
+                  </div>
+                </div>
+
+                <!-- Bouton d'accès vers l'espace de travail -->
+                <div class="assigned-actions mt-3">
+                  <button type="button" class="btn btn-primary btn-block btn-lg pulse-glow" id="btnEnterWorkspace" onclick="switchToWorkspaceWithTeam()">
+                    <span id="btnEnterWorkspaceText">✍️ Ouvrir l'Espace de Travail de mon Équipe</span>
+                    <span class="btn-arrow">➔</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
           </div>
         </div>
 
@@ -377,6 +445,15 @@
                 <span class="stepper-name">Marché</span>
                 <span class="stepper-pct">100%</span>
               </div>
+            </div>
+          </div>
+
+          <!-- Bannière Dynamique de Rôle dans l'Espace de Travail -->
+          <div class="workspace-role-banner" id="workspaceRoleBanner" style="display: none;">
+            <div class="banner-icon" id="workspaceRoleBannerIcon">✍️</div>
+            <div class="banner-content">
+              <strong id="workspaceRoleBannerTitle">Mode Rédacteur Unique (Porteur de stylo)</strong>
+              <p id="workspaceRoleBannerDesc">Vous avez les droits exclusifs pour saisir et valider les livrables de votre équipe ci-dessous.</p>
             </div>
           </div>
 
@@ -961,6 +1038,28 @@
       </div>
       <div class="modal-body" id="modalDbDetails">
         <!-- Rempli par app.js -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Modale Authentification Animateur -->
+  <div class="modal-backdrop" id="modalAdminAuth" onclick="closeModalOnBackdrop(event, 'modalAdminAuth')">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>👑 Accès Espace Animateur</h3>
+        <button class="modal-close" onclick="closeModal('modalAdminAuth')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-instruction">Entrez le code d'accès animateur pour piloter le workshop, former les groupes et gérer les rédacteurs :</p>
+        <div class="form-group">
+          <label for="adminPinInput">Code PIN Animateur :</label>
+          <input type="password" id="adminPinInput" class="form-input text-center" placeholder="Tapez le code (ex: admin)" onkeydown="if(event.key==='Enter') submitAdminPin()">
+          <div id="adminPinError" style="display:none; color: var(--color-mushroom-red); font-size: 0.85rem; margin-top: 0.5rem; text-align: center;">Code d'accès incorrect. (Code par défaut : « admin »)</div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-outline" onclick="closeModal('modalAdminAuth')">Annuler</button>
+          <button class="btn btn-primary" onclick="submitAdminPin()">Déverrouiller l'Espace Animateur</button>
+        </div>
       </div>
     </div>
   </div>

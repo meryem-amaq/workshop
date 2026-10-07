@@ -9,6 +9,10 @@
 const state = {
   currentView: 'view-participant',
   currentUser: null, // Participant connecté sur ce navigateur
+  isAdmin: false, // Mode Animateur activé ou non (accès pupitre, supervision, etc.)
+  sessionPhase: 'registration', // 'registration' | 'teams_formed'
+  waitingTimerInterval: null,
+  waitingStartTime: null,
   participants: [],
   teams: [],
   activeTeamId: null,
@@ -138,17 +142,105 @@ function getArchetypeDisplayName(archKey) {
 // INITIALISATION DE L'APPLICATION
 // ====================================================================
 document.addEventListener('DOMContentLoaded', () => {
+  // Restaurer le mode animateur si précédemment déverrouillé
+  if (localStorage.getItem('smurf_iot_admin') === 'true') {
+    state.isAdmin = true;
+  }
+  applyAdminModeUI();
+
   setupNavigation();
   loadSavedUserFromStorage();
   checkDatabaseHealth();
   refreshWorkshopData();
   renderRegistrationQrCode();
 
-  // Boucle de rafraîchissement temps réel (toutes les 4 secondes)
+  // Boucle de rafraîchissement temps réel (toutes les 2.5 secondes)
   setInterval(() => {
     refreshWorkshopData(false);
-  }, 4000);
+  }, 2500);
 });
+
+// Échappement HTML sécurisé pour l'affichage des noms
+function escapeHtml(str) {
+  if (str === null || str === undefined) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+// Gestion de l'Authentification Animateur
+function openAdminAuthModal() {
+  const modal = document.getElementById('modalAdminAuth');
+  const input = document.getElementById('adminPinInput');
+  const err = document.getElementById('adminPinError');
+  if (err) err.style.display = 'none';
+  if (input) {
+    input.value = '';
+    setTimeout(() => input.focus(), 100);
+  }
+  if (modal) modal.classList.add('active');
+}
+
+function submitAdminPin() {
+  const input = document.getElementById('adminPinInput');
+  const err = document.getElementById('adminPinError');
+  const pin = input ? input.value.trim().toLowerCase() : '';
+
+  // Code accepté : 'admin', '1234', 'animateur'
+  if (pin === 'admin' || pin === '1234' || pin === 'animateur') {
+    state.isAdmin = true;
+    localStorage.setItem('smurf_iot_admin', 'true');
+    closeModal('modalAdminAuth');
+    applyAdminModeUI();
+    showToast('👑 Espace Animateur déverrouillé avec succès !', 'success');
+  } else {
+    if (err) err.style.display = 'block';
+    if (input) {
+      input.select();
+      input.focus();
+    }
+  }
+}
+
+function exitAdminMode() {
+  state.isAdmin = false;
+  localStorage.removeItem('smurf_iot_admin');
+  applyAdminModeUI();
+  showToast('Retour au mode participant standard.', 'info');
+
+  // Si on est sur une vue réservée à l'animateur, revenir à l'espace approprié
+  if (state.currentView === 'view-dashboard' || state.currentView === 'view-restitution') {
+    if (state.currentUser && state.currentUser.team_id) {
+      switchView('view-workspace');
+    } else {
+      switchView('view-participant');
+    }
+  }
+}
+
+function applyAdminModeUI() {
+  const body = document.body;
+  const btnAccess = document.getElementById('btnAdminAccess');
+  const btnExit = document.getElementById('btnAdminExit');
+
+  if (state.isAdmin) {
+    body.classList.add('is-admin');
+    if (btnAccess) btnAccess.style.display = 'none';
+    if (btnExit) btnExit.style.display = 'inline-flex';
+  } else {
+    body.classList.remove('is-admin');
+    if (btnAccess) btnAccess.style.display = 'inline-flex';
+    if (btnExit) btnExit.style.display = 'none';
+  }
+
+  // Si on se trouve sur l'espace de travail, mettre à jour les droits d'édition
+  if (state.currentView === 'view-workspace') {
+    onTeamSelectionChanged();
+  }
+}
 
 // Génération du QR Code sur l'écran d'accueil d'inscription
 async function renderRegistrationQrCode() {
@@ -206,6 +298,13 @@ function setupNavigation() {
 }
 
 function switchView(viewId) {
+  // Restriction stricte : seules les personnes authentifiées animateur accèdent au dashboard et restitution
+  if (!state.isAdmin && (viewId === 'view-dashboard' || viewId === 'view-restitution')) {
+    showToast('Accès restreint : cette vue est réservée à l\'animateur du workshop.', 'warning');
+    openAdminAuthModal();
+    return;
+  }
+
   state.currentView = viewId;
   document.querySelectorAll('.view-panel').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
@@ -571,28 +670,155 @@ function showResultScreen(participant) {
   updateParticipantTeamStatus(participant);
 }
 
+// ====================================================================
+// SALLE D'ATTENTE INTERACTIVE & ATTRIBUTION DES ÉQUIPES
+// ====================================================================
+
+function startWaitingTimer() {
+  if (state.waitingTimerInterval) return;
+  if (!state.waitingStartTime) {
+    state.waitingStartTime = Date.now();
+  }
+  updateWaitingTimerDisplay();
+  state.waitingTimerInterval = setInterval(updateWaitingTimerDisplay, 1000);
+}
+
+function stopWaitingTimer() {
+  if (state.waitingTimerInterval) {
+    clearInterval(state.waitingTimerInterval);
+    state.waitingTimerInterval = null;
+  }
+}
+
+function updateWaitingTimerDisplay() {
+  const el = document.getElementById('waitingTimerDisplay');
+  if (!el || !state.waitingStartTime) return;
+  const elapsedSec = Math.floor((Date.now() - state.waitingStartTime) / 1000);
+  const mins = Math.floor(elapsedSec / 60);
+  const secs = elapsedSec % 60;
+  el.textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+}
+
+function renderWaitingLiveFeed(participants) {
+  const feedEl = document.getElementById('waitingLiveFeed');
+  const countEl = document.getElementById('waitingCountReady');
+  if (countEl) countEl.textContent = participants ? participants.length : 0;
+  if (!feedEl) return;
+
+  if (!participants || participants.length === 0) {
+    feedEl.innerHTML = '<div style="color: #64748b; font-size: 0.8rem; text-align: center; padding: 0.6rem;">En attente de la première participation...</div>';
+    return;
+  }
+
+  // Trier par ordre antéchronologique (les plus récents en premier)
+  const sorted = [...participants].reverse();
+  feedEl.innerHTML = sorted.map(p => {
+    const meta = ARCHETYPES[p.archetype] || ARCHETYPES.Professeur;
+    const timeStr = p.created_at ? new Date(p.created_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) : 'À l\'instant';
+    return `
+      <div class="waiting-feed-item">
+        <div class="feed-item-left">
+          <span class="waiting-feed-dot" style="background: ${meta.color};"></span>
+          <span class="feed-item-name">${escapeHtml(p.first_name)} ${escapeHtml(p.last_name)}</span>
+          <span class="feed-item-badge" style="background: ${meta.color}22; color: ${meta.color}; border: 1px solid ${meta.color}44;">
+            ${meta.badge || p.archetype}
+          </span>
+        </div>
+        <span class="feed-item-time">${timeStr}</span>
+      </div>
+    `;
+  }).join('');
+}
+
 function updateParticipantTeamStatus(participant) {
-  const waitingBox = document.getElementById('waitingAssignedTeam');
-  const waitingTitle = document.getElementById('waitingStatusTitle');
-  const waitingDesc = document.getElementById('waitingStatusDesc');
+  const idlePanel = document.getElementById('waitingIdleState');
+  const assignedPanel = document.getElementById('waitingAssignedState');
+  const tabWorkspace = document.getElementById('tabWorkspace');
 
-  if (participant.team_id && state.teams.length > 0) {
-    const team = state.teams.find(t => t.id === participant.team_id);
-    if (team) {
-      waitingTitle.textContent = '🎉 Votre équipe est officiellement formée !';
-      waitingDesc.textContent = 'Vous pouvez désormais rejoindre votre espace de travail et commencer le parcours des 6 Maisons.';
-      waitingBox.style.display = 'block';
+  // Si le participant a une équipe et que les équipes sont chargées
+  const team = participant && participant.team_id ? state.teams.find(t => t.id === participant.team_id) : null;
 
-      document.getElementById('assignedTeamName').textContent = team.name;
-      document.getElementById('assignedTeamName').style.color = team.color;
+  if (team) {
+    if (idlePanel) idlePanel.style.display = 'none';
+    if (assignedPanel) assignedPanel.style.display = 'block';
+    if (tabWorkspace) tabWorkspace.style.display = 'inline-flex';
 
-      const isScribe = participant.is_scribe || (team.scribe_participant_id === participant.id);
-      document.getElementById('assignedTeamRole').innerHTML = isScribe
-        ? '✍️ <strong>Vous êtes le Rédacteur Officiel (Porteur de stylo)</strong> : vous avez la responsabilité de saisir et valider les livrables.'
-        : '👥 <strong>Rôle : Conseiller / Membre actif</strong> : participez aux choix et laissez le rédacteur saisir les décisions.';
+    // Remplir les informations de l'équipe
+    const elName = document.getElementById('assignedTeamName');
+    const elTrait = document.getElementById('assignedTeamTrait');
+    const elAvatar = document.getElementById('assignedTeamAvatar');
+    if (elName) {
+      elName.textContent = team.name;
+      elName.style.color = team.color;
     }
+    if (elTrait) {
+      elTrait.textContent = `Archétype dominant : ${getArchetypeDisplayName(team.archetype)}`;
+    }
+    if (elAvatar) {
+      elAvatar.src = `assets/images/${team.avatar}`;
+    }
+
+    // Gestion de l'affichage du rôle : Rédacteur unique vs Conseiller
+    const isScribe = (participant.id === team.scribe_participant_id) || Boolean(participant.is_scribe);
+    const roleCard = document.getElementById('assignedRoleCard');
+    const roleIcon = document.getElementById('assignedRoleIcon');
+    const roleHeadline = document.getElementById('assignedRoleHeadline');
+    const roleExplanation = document.getElementById('assignedRoleExplanation');
+    const btnText = document.getElementById('btnEnterWorkspaceText');
+
+    const scribeMember = (team.members || []).find(m => m.id === team.scribe_participant_id || m.is_scribe);
+    const scribeName = scribeMember ? `${scribeMember.first_name} ${scribeMember.last_name}` : 'Désigné par l\'animateur';
+
+    if (isScribe) {
+      if (roleCard) roleCard.className = 'role-notice-card is-scribe';
+      if (roleIcon) roleIcon.textContent = '✍️';
+      if (roleHeadline) roleHeadline.textContent = 'Vous êtes le Rédacteur Unique (Porteur de stylo)';
+      if (roleExplanation) {
+        roleExplanation.innerHTML = 'Vous avez les <strong>droits exclusifs de saisie et de validation</strong> pour remplir les livrables des 6 Maisons au nom de votre équipe.';
+      }
+      if (btnText) btnText.textContent = '✍️ Ouvrir l\'Espace de Travail de mon Équipe';
+    } else {
+      if (roleCard) roleCard.className = 'role-notice-card is-counselor';
+      if (roleIcon) roleIcon.textContent = '👥';
+      if (roleHeadline) roleHeadline.textContent = 'Vous êtes Conseiller de l\'Équipe';
+      if (roleExplanation) {
+        roleExplanation.innerHTML = `Le rédacteur officiel de votre groupe est <strong>${scribeName}</strong>. Participez aux débats et aux orientations ; seul le rédacteur enregistre les livrables.`;
+      }
+      if (btnText) btnText.textContent = '👀 Découvrir la Maison de mon Équipe';
+    }
+
+    // Liste des membres du groupe avec badges de rôle
+    const members = team.members || [];
+    const countEl = document.getElementById('assignedMembersCount');
+    const listEl = document.getElementById('assignedMembersList');
+    if (countEl) countEl.textContent = members.length;
+    if (listEl) {
+      listEl.innerHTML = '';
+      members.forEach(m => {
+        const isMemScribe = (m.id === team.scribe_participant_id) || Boolean(m.is_scribe);
+        const isMe = m.id === participant.id;
+        const pill = document.createElement('div');
+        pill.className = `assigned-member-pill ${isMe ? 'is-me' : ''} ${isMemScribe ? 'is-scribe' : ''}`;
+        pill.innerHTML = `
+          <div class="member-pill-name">
+            ${escapeHtml(m.first_name)} ${escapeHtml(m.last_name)} ${isMe ? '<small style="color:#38bdf8; margin-left:0.3rem; font-size:0.75rem;">(Vous)</small>' : ''}
+          </div>
+          <span class="member-pill-badge ${isMemScribe ? 'badge-scribe' : 'badge-counselor'}">
+            ${isMemScribe ? '✍️ Rédacteur' : 'Conseiller'}
+          </span>
+        `;
+        listEl.appendChild(pill);
+      });
+    }
+
+    stopWaitingTimer();
   } else {
-    waitingBox.style.display = 'none';
+    // Équipes non encore formées : rester en salle d'attente interactive
+    if (idlePanel) idlePanel.style.display = 'block';
+    if (assignedPanel) assignedPanel.style.display = 'none';
+    if (tabWorkspace) tabWorkspace.style.display = 'none';
+    startWaitingTimer();
+    renderWaitingLiveFeed(state.participants);
   }
 }
 
@@ -600,6 +826,8 @@ function switchToWorkspaceWithTeam() {
   if (state.currentUser && state.currentUser.team_id) {
     state.activeTeamId = state.currentUser.team_id;
   }
+  const tabWs = document.getElementById('tabWorkspace');
+  if (tabWs) tabWs.style.display = 'inline-flex';
   switchView('view-workspace');
 }
 
@@ -644,6 +872,8 @@ function onTeamSelectionChanged() {
     document.getElementById('teamCardScribeName').textContent = 'Non désigné';
     document.getElementById('teamMemberCount').textContent = '0';
     document.getElementById('teamMembersList').innerHTML = '<li class="member-empty">Aucune équipe active</li>';
+    const banner = document.getElementById('workspaceRoleBanner');
+    if (banner) banner.style.display = 'none';
     return;
   }
 
@@ -655,9 +885,10 @@ function onTeamSelectionChanged() {
   document.getElementById('teamCardName').textContent = team.name;
   document.getElementById('teamCardTrait').textContent = `Archétype dominant : ${getArchetypeDisplayName(team.archetype)}`;
 
-  // Scribe / Porteur de stylo
-  const scribe = team.scribe;
-  document.getElementById('teamCardScribeName').textContent = scribe ? `${scribe.first_name} ${scribe.last_name}` : 'Non désigné (premier membre par défaut)';
+  // Trouver le scribe
+  const scribeMember = (team.members || []).find(m => m.id === team.scribe_participant_id || m.is_scribe) || team.scribe;
+  const scribeName = scribeMember ? `${scribeMember.first_name} ${scribeMember.last_name}` : 'Premier membre (par défaut)';
+  document.getElementById('teamCardScribeName').textContent = scribeName;
 
   // Liste des membres
   document.getElementById('teamMemberCount').textContent = (team.members || []).length;
@@ -666,20 +897,113 @@ function onTeamSelectionChanged() {
 
   (team.members || []).forEach(m => {
     const isScribe = m.id === team.scribe_participant_id || m.is_scribe;
+    const isMe = state.currentUser && m.id === state.currentUser.id;
     const li = document.createElement('li');
     li.className = 'team-member-item';
     li.innerHTML = `
-      <span>${m.first_name} ${m.last_name}</span>
+      <span>${escapeHtml(m.first_name)} ${escapeHtml(m.last_name)} ${isMe ? '<small style="color:#38bdf8; margin-left:4px;">(Vous)</small>' : ''}</span>
       ${isScribe ? '<span style="color: #fbbf24; font-size: 0.75rem; font-weight: bold;">✍️ Rédacteur</span>' : '<span style="color: #64748b; font-size: 0.75rem;">Conseiller</span>'}
     `;
     listEl.appendChild(li);
   });
+
+  // Déterminer les droits d'édition (Animateur ou Scribe unique)
+  const isUserScribe = state.currentUser && (state.currentUser.id === team.scribe_participant_id || state.currentUser.is_scribe);
+  const canEdit = state.isAdmin || isUserScribe;
+
+  // Contrôle du sélecteur d'équipe et bouton changement rédacteur
+  const btnChangeScribe = document.getElementById('btnChangeScribe');
+  if (state.isAdmin) {
+    if (selector) selector.disabled = false;
+    if (btnChangeScribe) btnChangeScribe.style.display = 'inline-block';
+  } else {
+    // Si participant : verrouiller sur son équipe attribuée
+    if (selector && state.currentUser && state.currentUser.team_id) {
+      selector.value = state.currentUser.team_id;
+      selector.disabled = true;
+    }
+    // Bouton de modification de rédacteur réservé à l'administrateur
+    if (btnChangeScribe) btnChangeScribe.style.display = 'none';
+  }
+
+  // Mise à jour de la bannière de rôle dans l'espace de travail
+  const roleBanner = document.getElementById('workspaceRoleBanner');
+  const bannerIcon = document.getElementById('workspaceRoleBannerIcon');
+  const bannerTitle = document.getElementById('workspaceRoleBannerTitle');
+  const bannerDesc = document.getElementById('workspaceRoleBannerDesc');
+
+  if (roleBanner) {
+    roleBanner.style.display = 'flex';
+    if (state.isAdmin) {
+      roleBanner.className = 'workspace-role-banner role-admin-mode';
+      if (bannerIcon) bannerIcon.textContent = '👑';
+      if (bannerTitle) bannerTitle.textContent = 'Mode Animateur (Supervision Globale)';
+      if (bannerDesc) bannerDesc.textContent = `Vous pouvez superviser et éditer toutes les équipes (${team.name}), modifier le rédacteur et forcer les jalons.`;
+    } else if (canEdit) {
+      roleBanner.className = 'workspace-role-banner role-scribe-mode';
+      if (bannerIcon) bannerIcon.textContent = '✍️';
+      if (bannerTitle) bannerTitle.textContent = 'Mode Rédacteur Unique (Porteur de stylo)';
+      if (bannerDesc) bannerDesc.textContent = `Vous êtes le rédacteur officiel de votre groupe (${team.name}). Remplissez et validez les livrables ci-dessous.`;
+    } else {
+      roleBanner.className = 'workspace-role-banner role-counselor-mode';
+      if (bannerIcon) bannerIcon.textContent = '👥';
+      if (bannerTitle) bannerTitle.textContent = 'Mode Consultation (Conseiller)';
+      if (bannerDesc) bannerDesc.textContent = `Le rédacteur désigné pour votre groupe est <strong>${scribeName}</strong>. Participez aux réflexions et aux débats ; seul le rédacteur enregistre les livrables.`;
+    }
+  }
 
   // Activer l'étape actuelle de l'équipe
   switchHouseTab(team.current_house || 1);
 
   // Charger les livrables déjà enregistrés
   loadDeliverablesIntoForms(team);
+
+  // Verrouiller ou déverrouiller les champs selon les droits
+  applyHouseFormsEditableState(canEdit, scribeName);
+}
+
+function applyHouseFormsEditableState(canEdit, scribeName) {
+  const container = document.querySelector('.house-workspace-card');
+  if (container) {
+    if (canEdit) {
+      container.classList.remove('workspace-readonly-active');
+    } else {
+      container.classList.add('workspace-readonly-active');
+    }
+  }
+
+  // Champs de formulaires
+  const formInputs = document.querySelectorAll('.house-workspace-card input, .house-workspace-card textarea, .house-workspace-card select');
+  formInputs.forEach(input => {
+    input.disabled = !canEdit;
+    input.readOnly = !canEdit;
+  });
+
+  // Bouton formule canonique
+  const btnCanon = document.querySelector('button[onclick="generateCanonicalNeedFormula()"]');
+  if (btnCanon) btnCanon.disabled = !canEdit;
+
+  // Boutons de validation des maisons
+  const submitConfigs = [
+    { id: 'btnSubmitH1', defaultText: 'Valider la Maison 1 et Passer au Concept ➔' },
+    { id: 'btnSubmitH2', defaultText: 'Valider la Maison 2 et Passer à la Faisabilité ➔' },
+    { id: 'btnSubmitH3', defaultText: 'Valider la Maison 3 et Passer au Prototype ➔' },
+    { id: 'btnSubmitH4', defaultText: 'Valider la Maison 4 et Passer au Business ➔' },
+    { id: 'btnSubmitH5', defaultText: 'Valider la Maison 5 et Passer au Marché ➔' },
+    { id: 'btnSubmitH6', defaultText: '🏆 Clôturer les 6 Maisons et Voir la Restitution' }
+  ];
+
+  submitConfigs.forEach(conf => {
+    const btn = document.getElementById(conf.id);
+    if (btn) {
+      btn.disabled = !canEdit;
+      if (canEdit) {
+        btn.textContent = conf.defaultText;
+      } else {
+        btn.textContent = `🔒 Mode Consultation (Réservé à ${scribeName})`;
+      }
+    }
+  });
 }
 
 function switchHouseTab(houseNum) {
@@ -770,6 +1094,20 @@ async function submitDeliverable(houseNum) {
   }
 
   const team = state.teams.find(t => t.id === state.activeTeamId);
+  if (!team) {
+    showToast('Équipe introuvable.', 'error');
+    return;
+  }
+
+  // Vérification de permission : seul le rédacteur ou l'animateur peut enregistrer
+  const isUserScribe = state.currentUser && (state.currentUser.id === team.scribe_participant_id || state.currentUser.is_scribe);
+  if (!state.isAdmin && !isUserScribe) {
+    const scribeMember = (team.members || []).find(m => m.id === team.scribe_participant_id || m.is_scribe);
+    const scribeName = scribeMember ? `${scribeMember.first_name} ${scribeMember.last_name}` : 'le rédacteur désigné';
+    showToast(`🔒 Accès refusé : Seul le rédacteur unique (${scribeName}) peut valider les livrables.`, 'error');
+    return;
+  }
+
   const houseTitles = {
     1: 'Maison 1 : Besoin',
     2: 'Maison 2 : Idée IoT',
@@ -868,11 +1206,13 @@ function saveDraft(houseNum) {
 }
 
 // Modal Changement de rédacteur
-function openChangeScribeModal() {
-  if (!state.activeTeamId) return;
-  const team = state.teams.find(t => t.id === state.activeTeamId);
+function openChangeScribeModal(targetTeamId = null) {
+  const teamId = targetTeamId || state.activeTeamId;
+  if (!teamId) return;
+  state.activeTeamId = teamId;
+  const team = state.teams.find(t => t.id === teamId);
   if (!team || !team.members || team.members.length === 0) {
-    showToast('Aucun membre dans cette équipe.', 'error');
+    showToast('Aucun membre dans cette équipe pour désigner un rédacteur.', 'error');
     return;
   }
 
@@ -903,7 +1243,27 @@ async function confirmChangeScribe() {
     if (!res.ok) throw new Error(data.error || 'Erreur lors du changement de rédacteur');
 
     closeModal('modalChangeScribe');
-    showToast('Nouveau rédacteur désigné !', 'success');
+    showToast('Nouveau rédacteur désigné avec succès !', 'success');
+    refreshWorkshopData();
+  } catch (err) {
+    showToast(err.message, 'error');
+  }
+}
+
+// Retirer un participant (désistement / départ pendant le workshop)
+async function confirmRemoveParticipant(participantId, participantName) {
+  if (!confirm(`Confirmez-vous le départ de ${participantName} du workshop ? Ce participant sera retiré et le rédacteur sera automatiquement réattribué si nécessaire.`)) {
+    return;
+  }
+
+  try {
+    const res = await fetch(`/api/participants/${participantId}`, {
+      method: 'DELETE'
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Erreur lors du retrait du participant');
+
+    showToast(`${participantName} a été retiré de l'atelier. Les groupes ont été synchronisés.`, 'info');
     refreshWorkshopData();
   } catch (err) {
     showToast(err.message, 'error');
@@ -1013,6 +1373,9 @@ function renderDashboardTeamsGrid() {
   }
 
   state.teams.forEach(team => {
+    const scribeMember = (team.members || []).find(m => m.id === team.scribe_participant_id || m.is_scribe) || team.scribe;
+    const scribeName = scribeMember ? `${scribeMember.first_name} ${scribeMember.last_name}` : 'Non désigné';
+
     const card = document.createElement('div');
     card.className = 'dash-team-card';
     card.innerHTML = `
@@ -1031,6 +1394,26 @@ function renderDashboardTeamsGrid() {
         <div class="dash-progress-meta">
           <span>Maison ${team.current_house}/6</span>
           <span style="font-weight: bold; color: ${team.color};">${team.progress_percent}%</span>
+        </div>
+      </div>
+
+      <!-- Contrôle Animateur : Rédacteur & Gestion des membres (départ/changement) -->
+      <div class="dash-team-admin-box" style="margin: 0.85rem 0; background: rgba(0,0,0,0.25); padding: 0.65rem 0.85rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
+          <span style="font-size: 0.78rem; color: #94a3b8;">✍️ Rédacteur : <strong style="color: #fbbf24;">${escapeHtml(scribeName)}</strong></span>
+          <button class="btn btn-outline btn-xs" style="padding: 2px 7px; font-size: 0.72rem;" onclick="openChangeScribeModal('${team.id}')">Changer</button>
+        </div>
+        <div style="font-size: 0.72rem; color: #64748b; margin-bottom: 0.35rem; text-transform: uppercase;">Membres du groupe :</div>
+        <div style="display: flex; flex-direction: column; gap: 0.3rem;">
+          ${(team.members || []).map(m => {
+            const isScribe = m.id === team.scribe_participant_id || m.is_scribe;
+            return `
+              <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.78rem; padding: 0.2rem 0; border-bottom: 1px solid rgba(255,255,255,0.03);">
+                <span>${escapeHtml(m.first_name)} ${escapeHtml(m.last_name)} ${isScribe ? '<span style="color:#fbbf24; font-size:0.7rem; margin-left:4px;">(✍️ Rédacteur)</span>' : '<span style="color:#64748b; font-size:0.7rem; margin-left:4px;">(Conseiller)</span>'}</span>
+                <button class="btn btn-danger-outline btn-xs" style="padding: 1px 6px; font-size: 0.68rem;" onclick="confirmRemoveParticipant('${m.id}', '${escapeHtml(m.first_name)} ${escapeHtml(m.last_name)}')" title="Retirer ce participant s'il a quitté l'atelier">Retirer ❌</button>
+              </div>
+            `;
+          }).join('')}
         </div>
       </div>
 
@@ -1534,12 +1917,17 @@ function startPresentationMode() {
 // ====================================================================
 async function refreshWorkshopData(updateUiFeedback = true) {
   try {
-    const [resTeams, resParticipants, resDeliverables] = await Promise.all([
+    const [resSession, resTeams, resParticipants, resDeliverables] = await Promise.all([
+      fetch('/api/session'),
       fetch('/api/teams'),
       fetch('/api/participants'),
       fetch('/api/deliverables')
     ]);
 
+    if (resSession.ok) {
+      const sessData = await resSession.json();
+      state.sessionPhase = sessData.phase || 'registration';
+    }
     if (resTeams.ok) state.teams = await resTeams.json();
     if (resParticipants.ok) state.participants = await resParticipants.json();
     let deliverables = [];
@@ -1550,6 +1938,9 @@ async function refreshWorkshopData(updateUiFeedback = true) {
       t.deliverables = deliverables.filter(d => d.team_id === t.id);
     });
 
+    // Mettre à jour le flux des participants dans la salle d'attente
+    renderWaitingLiveFeed(state.participants);
+
     // Mettre à jour les compteurs du dashboard
     const elParts = document.getElementById('statParticipantsCount');
     const elTeams = document.getElementById('statTeamsCount');
@@ -1559,18 +1950,24 @@ async function refreshWorkshopData(updateUiFeedback = true) {
     if (elTeams) elTeams.textContent = state.teams.length;
     if (elDels) elDels.textContent = deliverables.length;
 
-    // Si nous sommes sur le Dashboard, rafraîchir la carte
+    // Si nous sommes sur le Dashboard (animateur), rafraîchir la carte et les cartes d'équipes
     if (state.currentView === 'view-dashboard') {
       renderVillageMap();
     }
 
-    // Si un participant local existe, vérifier s'il a été affecté à une équipe
+    // Si un participant local existe, vérifier son affectation et ses droits
     if (state.currentUser) {
       const updatedUser = state.participants.find(p => p.id === state.currentUser.id);
       if (updatedUser) {
         state.currentUser = updatedUser;
+        localStorage.setItem('smurf_iot_user', JSON.stringify(updatedUser));
         updateParticipantTeamStatus(updatedUser);
       }
+    }
+
+    // Si nous sommes sur l'espace de travail, actualiser les informations de l'équipe
+    if (state.currentView === 'view-workspace' && state.activeTeamId) {
+      onTeamSelectionChanged();
     }
   } catch (err) {
     if (updateUiFeedback) {
