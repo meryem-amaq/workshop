@@ -199,7 +199,7 @@ export default function CarteInteractiveVillage({
 
       if (count > 1) {
         // Rayon de dispersion en pixels selon le nombre d'équipes à la même étape
-        const radius = count <= 3 ? 34 : 44;
+        const radius = count <= 3 ? 36 : 46;
         const angle = (peerIndex / count) * 2 * Math.PI - Math.PI / 2;
         offsetX = Math.cos(angle) * radius;
         offsetY = Math.sin(angle) * radius;
@@ -218,33 +218,79 @@ export default function CarteInteractiveVillage({
   }, [teamsState]);
 
   return (
-    <div className="village-interactive-container relative w-full rounded-2xl overflow-hidden shadow-2xl border border-slate-800 bg-[#070d19]">
+    <div
+      style={{
+        position: 'relative',
+        width: '100%',
+        borderRadius: '16px',
+        overflow: 'hidden',
+        boxShadow: '0 20px 40px rgba(0,0,0,0.6)',
+        border: '1px solid rgba(255,255,255,0.1)',
+        background: '#070d19'
+      }}
+    >
       
       {/* Barre d'outils et légende en haut de la carte */}
-      <div className="village-interactive-header flex flex-wrap items-center justify-between gap-4 p-4 bg-slate-900/90 backdrop-blur-md border-b border-slate-800 z-20">
-        <div className="flex items-center gap-3">
-          <span className="text-2xl animate-bounce">🍄</span>
+      <div
+        style={{
+          display: 'flex',
+          flexWrap: 'wrap',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: '12px',
+          padding: '1rem 1.25rem',
+          background: 'rgba(15, 23, 42, 0.95)',
+          backdropFilter: 'blur(12px)',
+          borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+          zIndex: 30
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <span style={{ fontSize: '1.5rem' }}>🍄</span>
           <div>
-            <h3 className="text-white font-bold text-lg leading-tight">
+            <h3 style={{ color: '#fff', fontWeight: '800', fontSize: '1.1rem', margin: 0, lineHeight: 1.2 }}>
               La Carte Interactive du Village IoT
             </h3>
-            <p className="text-xs text-slate-400">
-              Déplacement en direct des équipes le long des 6 Maisons champignons
+            <p style={{ color: '#94a3b8', fontSize: '0.8rem', margin: 0 }}>
+              Progression en temps réel des équipes à travers les 6 Maisons champignons
             </p>
           </div>
         </div>
 
         {/* Contrôles de simulation / Test */}
-        <div className="flex items-center gap-2">
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           {simulationActive && (
-            <span className="text-xs text-emerald-400 bg-emerald-950/80 border border-emerald-500/40 px-2.5 py-1 rounded-full animate-pulse">
-              ✨ Démo active : Les Bâtisseurs ont avancé à l'Étape 2 !
+            <span
+              style={{
+                fontSize: '0.75rem',
+                color: '#4ade80',
+                background: 'rgba(6, 78, 59, 0.7)',
+                border: '1px solid rgba(74, 222, 128, 0.4)',
+                padding: '4px 10px',
+                borderRadius: '20px',
+                fontWeight: 600
+              }}
+            >
+              ✨ Démo active : Les Bâtisseurs sont passés à l'Étape 2 !
             </span>
           )}
           <button
             type="button"
             onClick={() => simulateAdvanceTeam(1)}
-            className="px-3 py-1.5 text-xs font-semibold text-sky-300 bg-sky-950/80 hover:bg-sky-900 border border-sky-500/40 rounded-lg transition-all shadow-sm hover:scale-105 active:scale-95"
+            style={{
+              padding: '6px 14px',
+              fontSize: '0.78rem',
+              fontWeight: '700',
+              color: '#38bdf8',
+              background: 'rgba(8, 47, 73, 0.8)',
+              border: '1px solid rgba(56, 189, 248, 0.5)',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}
             title="Tester l'animation fluide de déplacement"
           >
             🏃 Faire Avancer Équipe 1 (+1 Étape)
@@ -253,18 +299,45 @@ export default function CarteInteractiveVillage({
       </div>
 
       {/* L'Arène Visuelle 3D de la Carte */}
-      <div className="village-map-arena relative w-full h-[580px] overflow-hidden bg-[#070d19] select-none">
+      <div
+        style={{
+          position: 'relative',
+          width: '100%',
+          height: '560px',
+          overflow: 'hidden',
+          background: '#070d19',
+          userSelect: 'none'
+        }}
+      >
         
         {/* 1. Image de fond isométrique du Village */}
         <img
           src="/assets/images/village-banner.jpg"
           alt="Village des Schtroumpfs"
-          className="absolute inset-0 w-full h-full object-cover brightness-90 contrast-110 pointer-events-none"
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            filter: 'brightness(0.9) contrast(1.1)',
+            pointerEvents: 'none',
+            zIndex: 1
+          }}
         />
 
         {/* 2. Chemins lumineux SVG reliant les 6 Maisons */}
         <svg
-          className="village-paths-svg absolute inset-0 w-full h-full pointer-events-none z-10"
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            pointerEvents: 'none',
+            zIndex: 5
+          }}
           viewBox="0 0 1200 600"
           preserveAspectRatio="none"
         >
@@ -322,10 +395,17 @@ export default function CarteInteractiveVillage({
           return (
             <div
               key={house.num}
-              className={`village-house-anchor absolute z-20 cursor-pointer transform -translate-x-1/2 -translate-y-1/2 transition-transform duration-300 hover:scale-110`}
               style={{
+                position: 'absolute',
                 left: `${house.x}%`,
-                top: `${house.y}%`
+                top: `${house.y}%`,
+                transform: 'translate(-50%, -50%)',
+                zIndex: 10,
+                cursor: 'pointer',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                transition: 'transform 0.2s ease'
               }}
               onClick={() => {
                 setActiveHouseModal(house);
@@ -334,29 +414,72 @@ export default function CarteInteractiveVillage({
             >
               {/* Cercle Pin de la maison */}
               <div
-                className={`w-14 h-14 rounded-full flex flex-col items-center justify-center relative backdrop-blur-md border-2 shadow-lg transition-all ${
-                  house.isVictory
-                    ? 'bg-amber-950/80 border-amber-400 shadow-amber-500/50'
-                    : 'bg-slate-900/85 border-sky-400 shadow-sky-500/40'
-                }`}
+                style={{
+                  width: '54px',
+                  height: '54px',
+                  borderRadius: '50%',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  position: 'relative',
+                  backdropFilter: 'blur(10px)',
+                  border: house.isVictory ? '2.5px solid #f59e0b' : '2.5px solid #38bdf8',
+                  background: house.isVictory ? 'rgba(69, 26, 3, 0.85)' : 'rgba(15, 23, 42, 0.85)',
+                  boxShadow: house.isVictory
+                    ? '0 0 20px rgba(245, 158, 11, 0.6)'
+                    : '0 0 20px rgba(56, 189, 248, 0.5)'
+                }}
               >
-                <span className="text-xl leading-none">{house.icon}</span>
+                <span style={{ fontSize: '1.3rem', lineHeight: 1 }}>{house.icon}</span>
                 <span
-                  className={`absolute -top-2.5 px-2 py-0.5 text-[10px] font-black rounded-full uppercase tracking-wider text-white shadow ${
-                    house.isVictory ? 'bg-amber-500' : 'bg-sky-500'
-                  }`}
+                  style={{
+                    position: 'absolute',
+                    top: '-8px',
+                    padding: '1px 6px',
+                    fontSize: '9px',
+                    fontWeight: '900',
+                    borderRadius: '10px',
+                    textTransform: 'uppercase',
+                    color: '#fff',
+                    background: house.isVictory ? '#f59e0b' : '#0284c7',
+                    boxShadow: '0 2px 4px rgba(0,0,0,0.4)'
+                  }}
                 >
                   M{house.num}
                 </span>
               </div>
 
               {/* Étiquette sous la maison */}
-              <div className="mt-1.5 px-2.5 py-0.5 rounded-full bg-slate-950/90 border border-slate-700/80 text-center whitespace-nowrap shadow-md">
-                <span className="text-[11px] font-bold text-sky-300">
+              <div
+                style={{
+                  marginTop: '4px',
+                  padding: '2px 8px',
+                  borderRadius: '20px',
+                  background: 'rgba(15, 23, 42, 0.92)',
+                  border: '1px solid rgba(255, 255, 255, 0.15)',
+                  textAlign: 'center',
+                  whiteSpace: 'nowrap',
+                  boxShadow: '0 4px 10px rgba(0,0,0,0.5)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px'
+                }}
+              >
+                <span style={{ fontSize: '11px', fontWeight: '800', color: '#38bdf8' }}>
                   {house.name}
                 </span>
                 {teamsAtHouse.length > 0 && (
-                  <span className="ml-1 px-1.5 py-0.2 text-[9px] font-bold bg-sky-500/30 text-sky-200 rounded-full">
+                  <span
+                    style={{
+                      fontSize: '9px',
+                      fontWeight: '800',
+                      background: 'rgba(56, 189, 248, 0.25)',
+                      color: '#7dd3fc',
+                      padding: '1px 5px',
+                      borderRadius: '10px'
+                    }}
+                  >
                     {teamsAtHouse.length}
                   </span>
                 )}
@@ -372,13 +495,18 @@ export default function CarteInteractiveVillage({
           return (
             <div
               key={team.id}
-              className="village-team-avatar-wrapper absolute z-30 flex flex-col items-center cursor-pointer select-none"
               style={{
-                // Coordonnées avec interpolation fluide
+                position: 'absolute',
                 left: `calc(${team.baseX}% + ${team.offsetX}px)`,
                 top: `calc(${team.baseY}% + ${team.offsetY}px)`,
                 transform: 'translate(-50%, -100%)',
-                transition: 'left 1.2s cubic-bezier(0.34, 1.56, 0.64, 1), top 1.2s cubic-bezier(0.34, 1.56, 0.64, 1), transform 0.3s ease'
+                zIndex: 25,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                cursor: 'pointer',
+                userSelect: 'none',
+                transition: 'left 1.2s cubic-bezier(0.34, 1.56, 0.64, 1), top 1.2s cubic-bezier(0.34, 1.56, 0.64, 1)'
               }}
               onClick={(e) => {
                 e.stopPropagation();
@@ -386,24 +514,88 @@ export default function CarteInteractiveVillage({
               }}
             >
               {/* Bulle flottante avec le groupName (au-dessus de l'avatar) */}
-              <div className="team-floating-bubble mb-1.5 px-3 py-1 bg-gradient-to-r from-sky-600 to-blue-700 border border-sky-300/80 rounded-full shadow-lg shadow-sky-500/40 text-center relative transform hover:scale-105 transition-transform">
-                <span className="text-white font-extrabold text-xs whitespace-nowrap tracking-wide drop-shadow">
+              <div
+                style={{
+                  marginBottom: '4px',
+                  padding: '3px 10px',
+                  background: 'linear-gradient(135deg, #0284c7 0%, #1d4ed8 100%)',
+                  border: '1.5px solid rgba(125, 211, 252, 0.9)',
+                  borderRadius: '20px',
+                  boxShadow: '0 4px 14px rgba(2, 132, 199, 0.5), 0 2px 4px rgba(0,0,0,0.6)',
+                  textAlign: 'center',
+                  position: 'relative',
+                  whiteSpace: 'nowrap'
+                }}
+              >
+                <span
+                  style={{
+                    color: '#fff',
+                    fontWeight: '800',
+                    fontSize: '11px',
+                    letterSpacing: '0.3px',
+                    textShadow: '0 1px 2px rgba(0,0,0,0.5)'
+                  }}
+                >
                   {team.groupName || `Groupe ${team.id}`}
                 </span>
                 {/* Flèche pointeur vers le bas */}
-                <div className="absolute left-1/2 -bottom-1 -translate-x-1/2 w-2 h-2 bg-blue-700 rotate-45 border-r border-b border-sky-300/80"></div>
+                <div
+                  style={{
+                    position: 'absolute',
+                    left: '50%',
+                    bottom: '-4px',
+                    transform: 'translateX(-50%) rotate(45deg)',
+                    width: '7px',
+                    height: '7px',
+                    background: '#1d4ed8',
+                    borderRight: '1.5px solid rgba(125, 211, 252, 0.9)',
+                    borderBottom: '1.5px solid rgba(125, 211, 252, 0.9)'
+                  }}
+                />
               </div>
 
-              {/* Avatar 3D du Schtroumpf */}
-              <div className="team-avatar-token relative w-12 h-12 rounded-full p-0.5 bg-gradient-to-tr from-sky-400 via-blue-500 to-indigo-600 shadow-xl shadow-sky-500/50 hover:scale-115 transition-transform animate-pulse">
+              {/* Avatar 3D du Schtroumpf (Dimensions fixées et compactes) */}
+              <div
+                style={{
+                  position: 'relative',
+                  width: '50px',
+                  height: '50px',
+                  borderRadius: '50%',
+                  padding: '2px',
+                  background: 'linear-gradient(135deg, #38bdf8 0%, #3b82f6 50%, #6366f1 100%)',
+                  boxShadow: '0 0 16px rgba(56, 189, 248, 0.6), 0 4px 10px rgba(0,0,0,0.6)'
+                }}
+              >
                 <img
                   src={avatarUrl}
                   alt={team.groupName}
-                  className="w-full h-full rounded-full object-cover border-2 border-white"
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    borderRadius: '50%',
+                    objectFit: 'cover',
+                    display: 'block',
+                    border: '2px solid #ffffff'
+                  }}
                 />
                 {/* Badge profil miniature */}
                 <div
-                  className="absolute -bottom-1 -right-1 w-5 h-5 bg-slate-900 border border-sky-400 rounded-full flex items-center justify-center text-[10px] text-white"
+                  style={{
+                    position: 'absolute',
+                    bottom: '-2px',
+                    right: '-2px',
+                    width: '18px',
+                    height: '18px',
+                    background: '#0f172a',
+                    border: '1.5px solid #38bdf8',
+                    borderRadius: '50%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '9px',
+                    color: '#fff',
+                    boxShadow: '0 2px 4px rgba(0,0,0,0.5)'
+                  }}
                   title={`Profil : ${team.personalityProfile}`}
                 >
                   ⚡
@@ -418,40 +610,84 @@ export default function CarteInteractiveVillage({
       {/* 5. Modale d'inspection d'une Maison */}
       {activeHouseModal && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-fadeIn"
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 100,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '1rem',
+            background: 'rgba(7, 13, 25, 0.85)',
+            backdropFilter: 'blur(8px)'
+          }}
           onClick={() => setActiveHouseModal(null)}
         >
           <div
-            className="bg-slate-900 border border-sky-500/40 rounded-2xl p-6 max-w-md w-full shadow-2xl relative"
+            style={{
+              background: '#0f172a',
+              border: '1px solid rgba(56, 189, 248, 0.4)',
+              borderRadius: '16px',
+              padding: '1.5rem',
+              maxWidth: '440px',
+              width: '100%',
+              boxShadow: '0 25px 50px -12px rgba(0,0,0,0.8)',
+              position: 'relative'
+            }}
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
-              <div className="flex items-center gap-2">
-                <span className="text-2xl">{activeHouseModal.icon}</span>
-                <h4 className="text-white font-bold text-lg">
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                paddingBottom: '0.75rem',
+                borderBottom: '1px solid rgba(255, 255, 255, 0.1)'
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ fontSize: '1.5rem' }}>{activeHouseModal.icon}</span>
+                <h4 style={{ color: '#fff', fontWeight: '800', fontSize: '1.1rem', margin: 0 }}>
                   {activeHouseModal.fullName}
                 </h4>
               </div>
               <button
                 type="button"
-                className="text-slate-400 hover:text-white text-xl font-bold p-1"
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: '#94a3b8',
+                  fontSize: '1.25rem',
+                  fontWeight: 'bold',
+                  cursor: 'pointer',
+                  padding: '4px'
+                }}
                 onClick={() => setActiveHouseModal(null)}
               >
                 ✕
               </button>
             </div>
 
-            <p className="mt-3 text-sm text-slate-300">
+            <p style={{ marginTop: '0.75rem', fontSize: '0.88rem', color: '#cbd5e1', lineHeight: 1.5 }}>
               {activeHouseModal.desc}
             </p>
 
-            <div className="mt-4 pt-4 border-t border-slate-800">
-              <h5 className="text-xs font-bold text-sky-400 uppercase tracking-wider mb-2">
+            <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid rgba(255, 255, 255, 0.1)' }}>
+              <h5
+                style={{
+                  fontSize: '0.75rem',
+                  fontWeight: '800',
+                  color: '#38bdf8',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.5px',
+                  marginBottom: '0.5rem'
+                }}
+              >
                 Équipes actuellement à cette étape :
               </h5>
-              <div className="flex flex-wrap gap-2">
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
                 {teamsState.filter((t) => (t.currentStage || 1) === activeHouseModal.num).length === 0 ? (
-                  <span className="text-xs text-slate-500 italic">
+                  <span style={{ fontSize: '0.8rem', color: '#64748b', fontStyle: 'italic' }}>
                     Aucune équipe pour le moment.
                   </span>
                 ) : (
@@ -460,7 +696,18 @@ export default function CarteInteractiveVillage({
                     .map((t) => (
                       <span
                         key={t.id}
-                        className="inline-flex items-center gap-1.5 px-3 py-1 bg-sky-950/80 border border-sky-500/40 text-sky-200 text-xs font-semibold rounded-full"
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          padding: '4px 10px',
+                          background: 'rgba(8, 47, 73, 0.8)',
+                          border: '1px solid rgba(56, 189, 248, 0.4)',
+                          color: '#bae6fd',
+                          fontSize: '0.78rem',
+                          fontWeight: '700',
+                          borderRadius: '20px'
+                        }}
                       >
                         👥 {t.groupName}
                       </span>
@@ -469,10 +716,19 @@ export default function CarteInteractiveVillage({
               </div>
             </div>
 
-            <div className="mt-6 flex justify-end">
+            <div style={{ marginTop: '1.25rem', display: 'flex', justifyContent: 'flex-end' }}>
               <button
                 type="button"
-                className="px-4 py-2 bg-sky-600 hover:bg-sky-500 text-white text-sm font-semibold rounded-lg shadow-md transition-colors"
+                style={{
+                  padding: '6px 16px',
+                  background: '#0284c7',
+                  color: '#fff',
+                  fontSize: '0.85rem',
+                  fontWeight: '700',
+                  borderRadius: '8px',
+                  border: 'none',
+                  cursor: 'pointer'
+                }}
                 onClick={() => setActiveHouseModal(null)}
               >
                 Fermer
