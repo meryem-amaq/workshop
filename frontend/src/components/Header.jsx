@@ -9,7 +9,7 @@ export default function Header() {
   return (
     <header className="app-header">
       <div className="header-container-pro single-row">
-        
+
         {/* Zone 1 : Logo uniquement à gauche */}
         <div className="header-logo-only" onClick={() => navigate('/')} style={{ cursor: 'pointer' }} title="Accueil Workshop">
           <img

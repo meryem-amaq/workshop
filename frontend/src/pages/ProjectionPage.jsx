@@ -113,17 +113,17 @@ export default function ProjectionPage() {
   return (
     <div className="view-panel active">
       <div className="projection-clean-container">
-        
+
         {/* =========================================================
             GRILLE PRINCIPALE EN 2 COLONNES (60% GAUCHE / 40% DROITE)
             ========================================================= */}
         <div className="projection-main-split-grid">
-          
+
           {/* =========================================================
               COLONNE DE GAUCHE (60% - CARTE D'ACTION PRINCIPALE)
               ========================================================= */}
           <section className="projection-col-card projection-card-left-60">
-            
+
             {/* Titre de la carte mis en avant */}
             <div className="qr-action-header">
               <h2 className="qr-action-main-title">
@@ -183,7 +183,7 @@ export default function ProjectionPage() {
               COLONNE DE DROITE (40% - CARTE D'ÉTAT EN TEMPS RÉEL)
               ========================================================= */}
           <section className="projection-col-card projection-card-right-40">
-            
+
             {/* Titre de la carte mis en avant */}
             <div className="dashboard-header-row">
               <h2 className="dashboard-main-title">
@@ -197,7 +197,7 @@ export default function ProjectionPage() {
 
             {/* Intégration de l'Univers : Jauge Circulaire + Schtroumpf Professeur */}
             <div className="dashboard-gauge-character-box">
-              
+
               {/* Jauge de progression circulaire avec grand nombre */}
               <div className="circular-kpi-wrap">
                 <svg className="circular-gauge-svg" viewBox="0 0 100 100">
