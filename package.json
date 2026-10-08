@@ -6,9 +6,13 @@
   "scripts": {
     "start": "node server/server.js",
     "dev": "node --watch server/server.js",
-    "build": "cd frontend && npm run build",
+    "build": "npm --prefix frontend install && npm --prefix frontend run build",
+    "heroku-postbuild": "npm --prefix frontend install && npm --prefix frontend run build",
     "frontend:dev": "cd frontend && npm run dev",
     "db:init": "node server/init-db.js"
+  },
+  "engines": {
+    "node": ">=18.x"
   },
   "dependencies": {
     "cors": "^2.8.5",
