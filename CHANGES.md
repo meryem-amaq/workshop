@@ -4,6 +4,28 @@ Ce document consigne chronologiquement l'ensemble des refactorisations effectué
 
 ---
 
+## [Phase 3 - Frontend] Étape 3.21 : Création du Composant Interactif CarteInteractiveVillage & Intégration Dashboard Admin
+
+### Date : 2026-10-08
+
+### Fichiers Créés :
+- [`frontend/src/components/village/CarteInteractiveVillage.jsx`](file:///Users/ids/Documents/amine%20worshop/frontend/src/components/village/CarteInteractiveVillage.jsx) :
+  - Composant interactif 3D de la carte du Village IoT consommant la structure `[{ id, groupName, personalityProfile, currentStage }, ...]`.
+  - Chemins lumineux SVG avec dégradé néon, lueur `glowEffect` et animation pointillée dynamique de flux de particules.
+  - Déplacement ultra-fluide des avatars (`transition: left 1.2s, top 1.2s cubic-bezier(0.34, 1.56, 0.64, 1)`).
+  - Bulles flottantes avec `groupName` au-dessus de chaque avatar (flèche pointeur vers le bas).
+  - Algorithme anti-superposition (constellation orbitale) lorsque plusieurs équipes partagent la même étape.
+  - Simulation intégrée (avancement Étape 1 ➔ 2 après 3s) et contrôles manuels pour les tests.
+
+### Fichiers Modifiés :
+- [`frontend/src/pages/AdminDashboardPage.jsx`](file:///Users/ids/Documents/amine%20worshop/frontend/src/pages/AdminDashboardPage.jsx) :
+  - Intégration du composant `<CarteInteractiveVillage />` avec synchronisation temps réel des équipes de l'atelier.
+
+### Tests de Non-Régression Validés :
+- Build Vite de production : `npm --prefix frontend run build` (Code retour 0, 64 modules transformés avec succès).
+
+---
+
 ## [Phase 1 - Backend] Étape 1.1 : Centralisation de la Configuration et des Constantes
 
 ### Date : 2026-10-08

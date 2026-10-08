@@ -312,15 +312,15 @@ export default function TeamWorkspacePage() {
 
           {/* Espace principal de saisie des 6 Maisons */}
           <main className="workspace-main">
-            {/* Stepper des 6 Maisons du Village IoT */}
+            {/* Stepper épuré des 6 Maisons du Village IoT */}
             <div className="houses-stepper" id="housesStepper">
               {[
-                { num: 1, name: 'Besoin', pct: '16%' },
-                { num: 2, name: 'Idée', pct: '33%' },
-                { num: 3, name: 'Technique', pct: '50%' },
-                { num: 4, name: 'Prototype', pct: '66%' },
-                { num: 5, name: 'Business', pct: '83%' },
-                { num: 6, name: 'Pitch', pct: '100%' }
+                { num: 1, name: 'Besoin' },
+                { num: 2, name: 'Idée' },
+                { num: 3, name: 'Technique' },
+                { num: 4, name: 'Prototype' },
+                { num: 5, name: 'Business' },
+                { num: 6, name: 'Pitch' }
               ].map((h) => {
                 const isActive = activeHouse === h.num;
                 const currentTeamHouse = currentTeam.current_house || 1;
@@ -343,7 +343,7 @@ export default function TeamWorkspacePage() {
                 else if (isActive) circleContent = '▶';
                 else if (isLocked) circleContent = '🔒';
 
-                let houseIcon = isLocked ? '🔒' : '🏠';
+                let statusLabel = isCompleted ? 'Terminé' : isActive ? 'En cours' : 'Verrouillé';
 
                 return (
                   <div
@@ -355,8 +355,8 @@ export default function TeamWorkspacePage() {
                   >
                     <div className="stepper-circle">{circleContent}</div>
                     <div className="stepper-meta">
-                      <span className="stepper-name">{houseIcon} {h.name} {isCompleted ? '✓' : isActive ? '▶' : ''}</span>
-                      <span className="stepper-pct">{isLocked ? 'Verrouillé' : h.pct}</span>
+                      <span className="stepper-name">Maison {h.num} : {h.name}</span>
+                      <span className="stepper-status-badge">{statusLabel}</span>
                     </div>
                   </div>
                 );
