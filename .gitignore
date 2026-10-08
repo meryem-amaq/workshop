@@ -1,5 +1,7 @@
 node_modules/
+frontend/node_modules/
 .env
 .DS_Store
 server/data-store.json
 *.log
+scratch/

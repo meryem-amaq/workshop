@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pupitre Animateur & Grand Écran | Le Village IoT des Schtroumpfs</title>
+  <meta name="description" content="Console de supervision et vidéoprojection du workshop d'innovation IoT gamifié Le Village des Schtroumpfs.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* Spécificités Pupitre Animateur */
+    .admin-badge-header {
+      background: linear-gradient(135deg, rgba(239, 68, 68, 0.25), rgba(220, 38, 38, 0.35));
+      border: 1px solid rgba(239, 68, 68, 0.5);
+      color: #fca5a5;
+      padding: 4px 10px;
+      border-radius: var(--radius-sm);
+      font-size: 0.72rem;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .admin-badge-header::before {
+      content: '👑';
+    }
+  </style>
+</head>
+<body class="is-admin">
+  <!-- Barre de navigation supérieure Animateur -->
+  <header class="app-header">
+    <div class="header-container">
+      <div class="brand">
+        <img src="assets/images/logo.jpg" alt="Logo Schtroumpf IoT" class="brand-logo" id="headerLogoImg">
+        <div class="brand-text">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <h1 class="brand-title">Le Village IoT <span class="highlight">des Schtroumpfs</span></h1>
+            <span class="admin-badge-header">Pupitre Animateur</span>
+          </div>
+          <p class="brand-subtitle">Console de Pilotage & Vidéoprojection Grand Écran</p>
+        </div>
+      </div>
+
+      <!-- Navigation Animateur en 5 outils dédiés -->
+      <nav class="nav-tabs" id="adminNavTabs">
+        <button class="nav-tab active" data-view="view-projection" id="tabProjection" onclick="switchAdminView('view-projection')">
+          <span class="tab-icon">📱</span>
+          <span class="tab-label">1. Accueil / Projection (QR Code)</span>
+        </button>
+        <button class="nav-tab" data-view="view-launch" id="tabLaunch" onclick="switchAdminView('view-launch')">
+          <span class="tab-icon">👥</span>
+          <span class="tab-label">2. Constitution des Groupes</span>
+        </button>
+        <button class="nav-tab" data-view="view-dashboard" id="tabDashboard" onclick="switchAdminView('view-dashboard')">
+          <span class="tab-icon">🍄</span>
+          <span class="tab-label">3. Carte 3D Village</span>
+        </button>
+        <button class="nav-tab" data-view="view-stages" id="tabStages" onclick="switchAdminView('view-stages')">
+          <span class="tab-icon">📋</span>
+          <span class="tab-label">4. Suivi 6 Maisons</span>
+        </button>
+        <button class="nav-tab" data-view="view-restitution" id="tabRestitution" onclick="switchAdminView('view-restitution')">
+          <span class="tab-icon">📊</span>
+          <span class="tab-label">5. Restitution & Pitch</span>
+        </button>
+      </nav>
+
+      <!-- Contrôles rapides & Statut MySQL -->
+      <div class="header-status">
+        <button type="button" class="btn btn-secondary btn-sm" onclick="switchAdminView('view-projection')" title="Afficher l'écran d'accueil avec le grand QR Code">
+          <span>📱 Grand QR Code</span>
+        </button>
+        <button type="button" class="btn btn-outline btn-sm" onclick="loadDemoData()" title="Charger 15 participants et leurs livrables pour démo">
+          <span>🧪 Démo</span>
+        </button>
+        <button type="button" class="btn btn-danger-outline btn-sm" onclick="confirmResetWorkshop()" title="Réinitialiser l'ensemble du workshop">
+          <span>🔄 Réinitialiser</span>
+        </button>
+        <div class="status-pill" id="dbStatusPill" onclick="openDbStatusModal()" title="Inspecter l'état de la base de données">
+          <span class="status-dot"></span>
+          <span class="status-text" id="dbStatusText">MySQL Connecté</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Toast notifications -->
+  <div id="toastContainer" class="toast-container" aria-live="polite"></div>
+
+  <!-- Contenu Principal Animateur -->
+  <main class="main-content">
+
+    <!-- ===================================================================
+         VUE 1 : ACCUEIL / PROJECTION GRAND ÉCRAN (GRAND QR CODE HD & COMPTEUR LIVE)
+         =================================================================== -->
+    <section id="view-projection" class="view-panel active">
+      <div class="projection-container">
+        
+        <!-- En-tête de bienvenue de la projection -->
+        <div class="projection-header-hero">
+          <span class="projection-hero-badge">🍄 Vidéoprojection Grand Écran • Accueil Workshop</span>
+          <h2 class="projection-title">Bienvenue au Workshop IoT des Schtroumpfs !</h2>
+          <p class="projection-subtitle">
+            Sortez vos smartphones, scannez le QR Code ci-dessous avec votre appareil photo et répondez aux 15 questions pour découvrir votre profil d'innovateur.
+          </p>
+        </div>
+
+        <!-- Disposition 2 colonnes : Grand QR Code HD à gauche & Compteur / Mur Live à droite -->
+        <div class="projection-grid-layout">
+          
+          <!-- Colonne Gauche : Carte QR Code HD & URL Directe -->
+          <div class="projection-qr-card">
+            <h3 style="color: #fff; font-size: 1.35rem; margin-bottom: 0.25rem;">📱 Scannez pour Participer</h3>
+            <p style="color: #94a3b8; font-size: 0.88rem; margin-bottom: 0.75rem;">Ouverture immédiate sur smartphone (sans téléchargement)</p>
+
+            <div class="projection-qr-box">
+              <img id="projectionQrImg" src="" alt="QR Code Workshop HD" class="projection-qr-img">
+              <canvas id="projectionQrCanvas" width="270" height="270" style="display:none;"></canvas>
+            </div>
+
+            <div id="projectionIpInfo" style="color: #38bdf8; font-size: 0.95rem; font-weight: 700; margin-top: 0.5rem;">
+              🌐 Wi-Fi Local : Chargement...
+            </div>
+            <p style="font-size: 0.8rem; color: #94a3b8; margin: 4px 0 12px;">Connectez votre téléphone au même réseau Wi-Fi que cet écran.</p>
+
+            <div class="projection-url-box">
+              <span style="font-size: 0.75rem; text-transform: uppercase; color: #94a3b8; font-weight: bold; display: block; margin-bottom: 4px;">Ou tapez le lien dans votre navigateur :</span>
+              <div class="projection-direct-url" id="projectionDirectUrlText">http://localhost:3000/?join=1</div>
+              <button type="button" class="btn btn-outline btn-xs mt-2" onclick="copyWorkshopUrl()">📋 Copier le lien</button>
+            </div>
+          </div>
+
+          <!-- Colonne Droite : Compteur en Direct & Mur des Arrivées -->
+          <div class="projection-counter-card">
+            
+            <!-- Compteur géant en direct -->
+            <div class="counter-stat-box">
+              <div>
+                <div class="counter-big-num" id="projectionLiveCount">0</div>
+              </div>
+              <div class="counter-label-group">
+                <div class="counter-main-label">Participants Prêts</div>
+                <div class="counter-sub-label">Profils Schtroumpfs reçus en direct</div>
+              </div>
+            </div>
+
+            <!-- Mur en direct des participants connectés -->
+            <div class="projection-live-wall-box">
+              <div class="live-wall-header" style="margin-bottom: 0.75rem;">
+                <span style="display: flex; align-items: center; gap: 8px;">
+                  <span class="status-dot" style="background:#10b981; box-shadow:0 0 10px #10b981;"></span>
+                  <span>Participants Arrivés en Direct :</span>
+                </span>
+                <span id="projectionLiveRatio" style="font-size: 0.8rem; color: #94a3b8;">En attente de participants...</span>
+              </div>
+
+              <!-- Grille des participants avec leurs avatars 3D -->
+              <div class="projection-live-wall-grid" id="projectionLiveWall">
+                <!-- Rempli en temps réel par admin.js -->
+              </div>
+            </div>
+
+            <!-- Bouton de bascule vers la constitution des groupes -->
+            <div class="projection-actions mt-auto">
+              <button type="button" class="btn btn-primary btn-block btn-lg pulse-glow" onclick="switchAdminView('view-launch')">
+                <span>⚡ Passer à la Constitution des Groupes (<span id="projectionBtnCount">0</span> inscrits)</span>
+                <span class="btn-arrow">➔</span>
+              </button>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ===================================================================
+         VUE 2 : CONSTITUTION DES GROUPES (PROFILS 3D & RETARDATAIRES)
+         =================================================================== -->
+    <section id="view-launch" class="view-panel">
+      <div class="dashboard-container">
+        
+        <!-- Panneau de Commande de Constitution des Groupes -->
+        <div class="animator-control-bar">
+          <div class="control-bar-left">
+            <div class="animator-badge">👥 Espace Constitution des Groupes Homogènes</div>
+            <div class="live-stats">
+              <span class="stat-item"><strong id="launchParticipantsCount">0</strong> Participants Inscrits</span>
+              <span class="stat-separator">•</span>
+              <span class="stat-item"><strong id="launchTeamsCount">0</strong> Groupes Homogènes</span>
+              <span class="stat-separator">•</span>
+              <span class="stat-item" id="launchPhaseBadge">Phase : Inscription</span>
+            </div>
+          </div>
+
+          <div class="control-bar-actions">
+            <button class="btn btn-warning btn-sm" onclick="triggerAutoAssignUnassigned()" id="btnAutoAssignUnassigned" style="display: none; box-shadow: 0 0 15px rgba(245, 158, 11, 0.4);">
+              ⚡ Rattacher les Retardataires (<span id="unassignedCountBadge">0</span>)
+            </button>
+            <button class="btn btn-secondary btn-sm" onclick="switchAdminView('view-projection')" id="btnShowQrLaunch">
+              📱 Revenir au QR Code
+            </button>
+            <button class="btn btn-primary btn-sm pulse-glow" onclick="triggerAutoAssignTeams()" id="btnFormTeams">
+              ⚡ Former les 5 Groupes Homogènes
+            </button>
+            <button class="btn btn-outline btn-sm" onclick="loadDemoData()" id="btnLoadDemo" title="Charge 15 participants, 5 équipes et leurs livrables">
+              🧪 Charger Données Démo
+            </button>
+            <button class="btn btn-danger-outline btn-sm" onclick="confirmResetWorkshop()" id="btnResetWorkshop" title="Effacer et redémarrer">
+              🔄 Réinitialiser
+            </button>
+          </div>
+        </div>
+
+        <!-- Répartition des 5 Archétypes en Direct -->
+        <div class="archetypes-summary-card" id="archetypesSummaryCard" style="margin-bottom: 1.5rem; background: rgba(255,255,255,0.02); border: 1px solid var(--border-glass); border-radius: var(--radius-lg); padding: 1.25rem;">
+          <h4 style="font-size: 0.85rem; color: #94a3b8; text-transform: uppercase; margin-bottom: 0.75rem;">Répartition des 5 Familles Schtroumpfs :</h4>
+          <div class="archetypes-preview-row" id="launchArchetypeChipsRow" style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+            <!-- Généré dynamiquement avec avatars et compteurs -->
+          </div>
+        </div>
+
+        <!-- GRILLE NOMINATIVE DES PARTICIPANTS INSCRITS AVEC LEURS AVATARS 3D -->
+        <div class="admin-prelaunch-card" id="adminPrelaunchCard" style="margin-bottom: 2rem;">
+          <div class="prelaunch-header">
+            <div class="prelaunch-meta">
+              <div class="prelaunch-badge">🍄 Profils Schtroumpfs Reçus</div>
+              <h3 class="prelaunch-title">👥 Liste Complète des Participants & Caractères 3D (<span id="adminReadyCount">0</span>)</h3>
+              <p class="prelaunch-desc">Chaque participant est présenté avec son visuel Schtroumpf 3D, son profil psychologique dominant, ses scores sur 75 pts et son rôle.</p>
+            </div>
+            <div class="prelaunch-action">
+              <button class="btn btn-primary btn-lg pulse-glow" id="btnAdminLaunchTeams" onclick="triggerAutoAssignTeams()">
+                <span>⚡ Former les Groupes (<span id="btnLaunchCount">0</span>)</span>
+                <span class="btn-arrow">➔</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Grille Visuelle des Participants Inscrits (Cartes 3D) -->
+          <div class="admin-participants-grid" id="adminParticipantsGrid">
+            <!-- Rendu en direct par admin.js -->
+          </div>
+        </div>
+
+        <!-- LISTE DES GROUPES HOMOGÈNES CONSTITUÉS -->
+        <div class="formed-teams-wrapper" id="formedTeamsWrapper">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <h3 style="color: #fff; font-size: 1.2rem; margin: 0;">🛖 Équipes Formées & Rédacteurs Désignés</h3>
+            <span style="font-size: 0.8rem; color: #94a3b8;">Gérez le porteur de stylo (rédacteur officiel) pour chaque groupe</span>
+          </div>
+          <div class="dashboard-teams-grid" id="launchTeamsGrid">
+            <!-- Rendu par admin.js -->
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ===================================================================
+         VUE 3 : CARTE 3D DU VILLAGE IoT (GRAND ÉCRAN / VIDÉO-PROJECTEUR)
+         =================================================================== -->
+    <section id="view-dashboard" class="view-panel">
+      <div class="dashboard-container">
+        
+        <!-- En-tête statistiques globales du Village -->
+        <div class="animator-control-bar" style="margin-bottom: 1.25rem;">
+          <div class="control-bar-left">
+            <div class="animator-badge">🍄 Carte 3D Interactive du Village IoT</div>
+            <div class="live-stats">
+              <span class="stat-item"><strong id="statParticipantsCount">0</strong> Inscrits</span>
+              <span class="stat-separator">•</span>
+              <span class="stat-item"><strong id="statTeamsCount">0</strong> Équipes</span>
+              <span class="stat-separator">•</span>
+              <span class="stat-item"><strong id="statDeliverablesCount">0</strong> Livrables</span>
+            </div>
+          </div>
+
+          <div class="control-bar-actions">
+            <button class="btn btn-outline btn-sm" onclick="switchAdminView('view-launch')">
+              👥 Gérer les Groupes
+            </button>
+            <button class="btn btn-outline btn-sm" onclick="switchAdminView('view-stages')">
+              📋 Voir Détail 6 Maisons
+            </button>
+            <button class="btn btn-secondary btn-sm" onclick="switchAdminView('view-projection')">
+              📱 Grand QR Code
+            </button>
+          </div>
+        </div>
+
+        <!-- CARTE VISUELLE DU VILLAGE DES SCHTROUMPFS - STANDALONE -->
+        <div class="village-map-card">
+          <div class="village-map-header">
+            <div>
+              <h2 class="village-map-title">La Carte Interactive du Village IoT</h2>
+              <p class="village-map-desc">Suivez la progression des équipes à travers les 6 Maisons champignons en temps réel.</p>
+            </div>
+            <div class="village-legend">
+              <span class="legend-dot art"></span> Artistes
+              <span class="legend-dot prof"></span> Savants
+              <span class="legend-dot crit"></span> Rigoureux
+              <span class="legend-dot emp"></span> Solidaires
+              <span class="legend-dot sprt"></span> Bâtisseurs
+            </div>
+          </div>
+
+          <!-- L'arène visuelle 3D du Village -->
+          <div class="village-arena" id="villageArena">
+            <!-- Arrière-plan généré du village -->
+            <img src="assets/images/village-banner.jpg" alt="Village des Schtroumpfs" class="village-bg-img" id="villageBgImg">
+
+            <!-- Chemin SVG lumineux reliant les 6 maisons -->
+            <svg class="village-trail-svg" viewBox="0 0 1200 600" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="trailGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.9" />
+                  <stop offset="50%" stop-color="#f59e0b" stop-opacity="0.9" />
+                  <stop offset="100%" stop-color="#10b981" stop-opacity="0.9" />
+                </linearGradient>
+                <filter id="glowEffect" x="-20%" y="-20%" width="140%" height="140%">
+                  <feGaussianBlur stdDeviation="5" result="blur" />
+                  <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                </filter>
+              </defs>
+              <path id="villageTrailPath" d="M 120 480 Q 250 280 320 200 T 520 380 T 700 180 T 890 350 T 1080 180" 
+                    fill="none" stroke="url(#trailGradient)" stroke-width="8" stroke-dasharray="12 8" filter="url(#glowEffect)" />
+            </svg>
+
+            <!-- Les 6 Maisons Champignons positionnées sur la carte -->
+            <div class="village-house-node house-1" data-house="1" onclick="openHouseDetailsModal(1)">
+              <div class="house-pin-head">
+                <span class="house-pin-pct">16%</span>
+                <span class="house-pin-icon">🛖</span>
+              </div>
+              <div class="house-card-tag">
+                <span class="house-tag-num">Maison 1</span>
+                <span class="house-tag-title">Besoin</span>
+              </div>
+              <div class="house-teams-dock" id="dock-house-1">
+                <!-- Avatars des équipes positionnés ici -->
+              </div>
+            </div>
+
+            <div class="village-house-node house-2" data-house="2" onclick="openHouseDetailsModal(2)">
+              <div class="house-pin-head">
+                <span class="house-pin-pct">33%</span>
+                <span class="house-pin-icon">💡</span>
+              </div>
+              <div class="house-card-tag">
+                <span class="house-tag-num">Maison 2</span>
+                <span class="house-tag-title">Idée IoT</span>
+              </div>
+              <div class="house-teams-dock" id="dock-house-2"></div>
+            </div>
+
+            <div class="village-house-node house-3" data-house="3" onclick="openHouseDetailsModal(3)">
+              <div class="house-pin-head">
+                <span class="house-pin-pct">50%</span>
+                <span class="house-pin-icon">⚙️</span>
+              </div>
+              <div class="house-card-tag">
+                <span class="house-tag-num">Maison 3</span>
+                <span class="house-tag-title">Faisabilité</span>
+              </div>
+              <div class="house-teams-dock" id="dock-house-3"></div>
+            </div>
+
+            <div class="village-house-node house-4" data-house="4" onclick="openHouseDetailsModal(4)">
+              <div class="house-pin-head">
+                <span class="house-pin-pct">66%</span>
+                <span class="house-pin-icon">🔌</span>
+              </div>
+              <div class="house-card-tag">
+                <span class="house-tag-num">Maison 4</span>
+                <span class="house-tag-title">Prototype</span>
+              </div>
+              <div class="house-teams-dock" id="dock-house-4"></div>
+            </div>
+
+            <div class="village-house-node house-5" data-house="5" onclick="openHouseDetailsModal(5)">
+              <div class="house-pin-head">
+                <span class="house-pin-pct">83%</span>
+                <span class="house-pin-icon">📊</span>
+              </div>
+              <div class="house-card-tag">
+                <span class="house-tag-num">Maison 5</span>
+                <span class="house-tag-title">Business</span>
+              </div>
+              <div class="house-teams-dock" id="dock-house-5"></div>
+            </div>
+
+            <div class="village-house-node house-6" data-house="6" onclick="openHouseDetailsModal(6)">
+              <div class="house-pin-head victory">
+                <span class="house-pin-pct">100%</span>
+                <span class="house-pin-icon">🏆</span>
+              </div>
+              <div class="house-card-tag victory">
+                <span class="house-tag-num">Maison 6</span>
+                <span class="house-tag-title">Marché & Pitch</span>
+              </div>
+              <div class="house-teams-dock" id="dock-house-6"></div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ===================================================================
+         VUE 4 : SUIVI DÉTAILLÉ DES ÉTAPES PAR GROUPE (LES 6 MAISONS EN DÉTAIL)
+         =================================================================== -->
+    <section id="view-stages" class="view-panel">
+      <div class="dashboard-container">
+        <div class="animator-control-bar">
+          <div class="control-bar-left">
+            <div class="animator-badge">📋 Suivi Détaillé des 6 Maisons par Équipe</div>
+            <p class="control-bar-desc" style="margin: 0.25rem 0 0; font-size: 0.85rem; color: #94a3b8;">
+              Consultez l'avancement jalon par jalon (Besoin, Idée, Faisabilité, Prototype, Business, Marché) et les livrables saisis en direct.
+            </p>
+          </div>
+          <div class="control-bar-actions">
+            <button class="btn btn-outline btn-sm" onclick="refreshAdminData()">🔄 Rafraîchir en Direct</button>
+            <button class="btn btn-primary btn-sm" onclick="switchAdminView('view-dashboard')">🍄 Voir la Carte 3D</button>
+          </div>
+        </div>
+
+        <!-- Filtres par équipe -->
+        <div class="restitution-filter-row" id="stagesFilterRow" style="margin-bottom: 1.5rem;">
+          <!-- Boutons filtres générés dynamiquement -->
+        </div>
+
+        <!-- Grille des Équipes & Décomposition des 6 Maisons -->
+        <div class="stages-teams-list" id="stagesTeamsList" style="display: flex; flex-direction: column; gap: 1.5rem;">
+          <!-- Injecté dynamiquement par admin.js -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================================
+         VUE 5 : PAGE DE RESTITUTION FINALE & SOUTENANCE PITCH
+         =================================================================== -->
+    <section id="view-restitution" class="view-panel">
+      <div class="restitution-container">
+        
+        <!-- En-tête de restitution & Boutons d'export -->
+        <div class="restitution-header-card no-print">
+          <div class="restitution-title-wrap">
+            <h2>Compte Rendu & Restitution Globale des Projets IoT</h2>
+            <p>Archive complète des livrables validés par les équipes à travers les 6 maisons du Village.</p>
+          </div>
+
+          <div class="restitution-export-actions">
+            <button class="btn btn-outline btn-sm" onclick="window.print()" id="btnExportPdf">
+              🖨️ Exporter en PDF / Imprimer
+            </button>
+            <button class="btn btn-primary btn-sm" onclick="exportMarkdownReport()" id="btnExportMd">
+              📥 Télécharger Rapport Markdown (.md)
+            </button>
+            <button class="btn btn-secondary btn-sm" onclick="startPresentationMode()" id="btnPresentationMode">
+              📽️ Mode Présentation Grand Écran
+            </button>
+          </div>
+        </div>
+
+        <!-- Chronomètre 3 Minutes Soutenance Pitch pour l'Animateur -->
+        <div class="pitch-builder-box no-print" style="margin-bottom: 1.5rem; background: rgba(15,23,42,0.85); border: 1px solid var(--border-glass); border-radius: var(--radius-lg); padding: 1.25rem;">
+          <div class="pitch-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+            <div>
+              <h3 style="color: #fff; margin: 0; font-size: 1.25rem;">🎤 Chronomètre Soutenance Pitch (3 Minutes / 180s)</h3>
+              <p class="pitch-subtitle" style="margin: 4px 0 0; color: #94a3b8; font-size: 0.85rem;">Pilotez le temps de passage des équipes lors de la soutenance finale devant le grand écran.</p>
+            </div>
+            <div class="pitch-timer-widget" style="display: flex; align-items: center; gap: 12px; background: rgba(0,0,0,0.3); padding: 8px 16px; border-radius: 12px; border: 1px solid rgba(56, 189, 248, 0.3);">
+              <div class="timer-display" id="adminPitchTimerDisplay" style="font-size: 2rem; font-weight: 900; font-family: monospace; color: #38bdf8;">03:00</div>
+              <div class="timer-controls" style="display: flex; gap: 6px;">
+                <button type="button" class="btn btn-xs btn-primary" id="btnAdminStartTimer" onclick="toggleAdminPitchTimer()">Démarrer</button>
+                <button type="button" class="btn btn-xs btn-outline" onclick="resetAdminPitchTimer()">Reset</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Filtre par équipe pour la restitution -->
+        <div class="restitution-filter-row no-print" id="restitutionFilterRow">
+          <button class="filter-pill active" onclick="filterRestitutionTeam('all')">Tous les Groupes</button>
+          <!-- Boutons des équipes injectés dynamiquement -->
+        </div>
+
+        <!-- Conteneur des Fiches Complètes de Restitution -->
+        <div class="restitution-cards-stack" id="restitutionCardsStack">
+          <!-- Injecté dynamiquement par admin.js -->
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ===================================================================
+       MODALES DU PUPITRE ANIMATEUR
+       =================================================================== -->
+
+  <!-- Modale Changement de Rédacteur Unique -->
+  <div class="modal-backdrop" id="modalChangeScribe" onclick="closeModalOnBackdrop(event, 'modalChangeScribe')">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>✍️ Désigner le Rédacteur du Groupe</h3>
+        <button class="modal-close" onclick="closeModal('modalChangeScribe')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-instruction">Choisissez le membre de l'équipe qui saisira les livrables pour les 6 Maisons :</p>
+        <div class="form-group">
+          <label for="selectNewScribe">Sélectionnez le nouveau rédacteur :</label>
+          <select id="selectNewScribe" class="form-select"></select>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-outline" onclick="closeModal('modalChangeScribe')">Annuler</button>
+          <button class="btn btn-primary" onclick="confirmChangeScribe()">Valider la désignation</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modale Inspection Maison / Animateur -->
+  <div class="modal-backdrop" id="modalHouseDetails" onclick="closeModalOnBackdrop(event, 'modalHouseDetails')">
+    <div class="modal-card modal-card-lg">
+      <div class="modal-header">
+        <h3 id="modalHouseTitle">Détails de la Maison</h3>
+        <button class="modal-close" onclick="closeModal('modalHouseDetails')">&times;</button>
+      </div>
+      <div class="modal-body" id="modalHouseBody">
+        <!-- Rempli par admin.js -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Modale Statut MySQL / Base de données -->
+  <div class="modal-backdrop" id="modalDbStatus" onclick="closeModalOnBackdrop(event, 'modalDbStatus')">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>🗄️ État de la Base de Données</h3>
+        <button class="modal-close" onclick="closeModal('modalDbStatus')">&times;</button>
+      </div>
+      <div class="modal-body" id="modalDbDetails">
+        <!-- Rempli par admin.js -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Modale de Déverrouillage Code PIN Animateur (Sécurité) -->
+  <div class="modal-backdrop" id="modalAdminAuth" onclick="closeModalOnBackdrop(event, 'modalAdminAuth')">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>👑 Sécurité Pupitre Animateur</h3>
+        <button class="modal-close" onclick="closeModal('modalAdminAuth')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-instruction">Entrez le code d'accès animateur pour piloter le workshop et commander les équipes :</p>
+        <div class="form-group">
+          <label for="adminPinInput">Code PIN Animateur :</label>
+          <input type="password" id="adminPinInput" class="form-input text-center" placeholder="Tapez le code (ex: admin)" onkeydown="if(event.key==='Enter') submitAdminPin()">
+          <div id="adminPinError" style="display:none; color: var(--color-mushroom-red); font-size: 0.85rem; margin-top: 0.5rem; text-align: center;">Code d'accès incorrect. (Code par défaut : « admin »)</div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-outline" onclick="closeModal('modalAdminAuth')">Fermer</button>
+          <button class="btn btn-primary" onclick="submitAdminPin()">Déverrouiller le Pupitre</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="admin.js"></script>
+</body>
+</html>

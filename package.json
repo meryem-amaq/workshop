@@ -6,6 +6,8 @@
   "scripts": {
     "start": "node server/server.js",
     "dev": "node --watch server/server.js",
+    "build": "cd frontend && npm run build",
+    "frontend:dev": "cd frontend && npm run dev",
     "db:init": "node server/init-db.js"
   },
   "dependencies": {

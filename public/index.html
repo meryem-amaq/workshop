@@ -2,143 +2,113 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Le Village IoT des Schtroumpfs | Workshop Innovation Gamifié</title>
-  <meta name="description" content="Plateforme interactive de pilotage du workshop d'innovation IoT gamifié basé sur les 5 profils de Schtroumpfs et les 6 Maisons du Village IoT.">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Le Village IoT des Schtroumpfs | Mon Expérience Mobile</title>
+  <meta name="description" content="Espace participant mobile du workshop d'innovation IoT gamifié Le Village des Schtroumpfs.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
+  <style>
+    /* Optimisations mobiles exclusives au participant */
+    body {
+      padding-bottom: 2rem;
+    }
+    .participant-header-user {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(56, 189, 248, 0.12);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #38bdf8;
+    }
+    .participant-header-user img {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+    /* Masquer le sélecteur d'équipe externe pour le participant (son équipe est unique et figée) */
+    .participant-fixed-team-header {
+      background: rgba(15, 23, 42, 0.7);
+      border: 1px solid var(--border-glass);
+      border-radius: var(--radius-lg);
+      padding: 1.25rem;
+      margin-bottom: 1.25rem;
+    }
+  </style>
 </head>
-<body>
-  <!-- Barre de navigation supérieure -->
+<body class="is-participant">
+  <!-- Barre de navigation supérieure simplifiée pour mobile -->
   <header class="app-header">
     <div class="header-container">
       <div class="brand">
         <img src="assets/images/logo.jpg" alt="Logo Schtroumpf IoT" class="brand-logo" id="headerLogoImg">
         <div class="brand-text">
           <h1 class="brand-title">Le Village IoT <span class="highlight">des Schtroumpfs</span></h1>
-          <p class="brand-subtitle">Workshop Innovation • 5 Profils • 6 Maisons IoT</p>
+          <p class="brand-subtitle">Workshop Innovation Gamifié</p>
         </div>
       </div>
 
-      <!-- Navigation par Rôles / Vues -->
-      <nav class="nav-tabs" id="mainNavTabs">
-        <button class="nav-tab active" data-view="view-participant" id="tabParticipant">
-          <span class="tab-icon">📱</span>
-          <span class="tab-label" id="tabLabelParticipant">1. Inscription & Test</span>
-        </button>
-        <button class="nav-tab" data-view="view-workspace" id="tabWorkspace" style="display: none;">
-          <span class="tab-icon">✍️</span>
-          <span class="tab-label" id="tabLabelWorkspace">2. Mon Équipe</span>
-        </button>
-        <button class="nav-tab admin-only" data-view="view-dashboard" id="tabDashboard">
-          <span class="tab-icon">🍄</span>
-          <span class="tab-label">3. Dashboard Village (Animateur)</span>
-        </button>
-        <button class="nav-tab admin-only" data-view="view-restitution" id="tabRestitution">
-          <span class="tab-icon">📊</span>
-          <span class="tab-label">4. Restitution</span>
-        </button>
-      </nav>
-
-      <!-- Badge Statut MySQL & Contrôle de Rôle -->
+      <!-- Statut du participant connecté -->
       <div class="header-status">
-        <button type="button" class="role-toggle-btn participant-badge" id="btnAdminAccess" onclick="openAdminAuthModal()" title="Accès réservé à l'animateur du workshop">
-          <span>🔒 Espace Animateur</span>
-        </button>
-        <button type="button" class="role-toggle-btn admin-badge" id="btnAdminExit" onclick="exitAdminMode()" title="Revenir à la vue participant" style="display: none;">
-          <span>👑 Mode Animateur (Quitter)</span>
-        </button>
-        <div class="status-pill" id="dbStatusPill" title="Cliquez pour inspecter la connexion base de données">
+        <div id="participantUserBadge" class="participant-header-user" style="display: none; cursor: pointer;" onclick="toggleParticipantProfileView()" title="Basculer entre Mon Profil et Mon Espace Équipe">
+          <img id="headerUserAvatar" src="assets/images/professeur.jpg" alt="Avatar">
+          <span id="headerUserName">Participant</span>
+        </div>
+        <div class="status-pill" id="participantOnlinePill" title="Connexion au serveur du workshop">
           <span class="status-dot"></span>
-          <span class="status-text" id="dbStatusText">MySQL Connecté</span>
+          <span class="status-text">Connecté</span>
         </div>
       </div>
     </div>
   </header>
 
-  <!-- Bannière Alerte / Notification Globale -->
+  <!-- Bannière Toast -->
   <div id="toastContainer" class="toast-container" aria-live="polite"></div>
 
-  <!-- Contenu Principal Multi-Vues (SPA) -->
+  <!-- Contenu Principal Participant -->
   <main class="main-content">
 
     <!-- ===================================================================
-         VUE 1 : INSCRIPTION & QUESTIONNAIRE DE PERSONNALITÉ (MOBILE FIRST)
+         VUE 1 : WORKFLOW PARTICIPANT (IDENTIFICATION, QUIZ, ATTENTE)
          =================================================================== -->
     <section id="view-participant" class="view-panel active">
       <div class="participant-container">
-        
-        <!-- ÉCRAN 1.1 : Accueil & QR Code Uniquement (Affichage Grand Écran / Invitation) -->
-        <div id="screen-qr" class="mobile-card step-screen active">
-          <div class="card-hero">
-            <img src="assets/images/archetypes.jpg" alt="Les 5 Schtroumpfs" class="hero-image">
-            <div class="hero-badge">Workshop Innovation IoT</div>
-          </div>
-          <div class="card-body">
-            <h2 class="card-title">Le Village IoT des Schtroumpfs</h2>
-            <p class="card-desc">
-              Bienvenue au workshop d'innovation ! Scannez le QR Code ci-dessous avec l'appareil photo de votre smartphone pour démarrer l'aventure et passer le test de positionnement comportemental.
-            </p>
 
-            <!-- CARTE DU QR CODE POUR ACCÈS MOBILE RAPIDE -->
-            <div class="qr-join-card">
-              <div class="qr-join-header">
-                <span class="qr-join-icon">📱</span>
-                <div>
-                  <h3 class="qr-join-title">Scannez pour Passer le Test sur Mobile</h3>
-                  <p class="qr-join-subtitle">Pointez l'appareil photo de votre smartphone vers ce QR Code :</p>
-                </div>
-              </div>
-              <div class="qr-canvas-preview-wrap">
-                <img id="registrationQrImg" src="" alt="QR Code Workshop" style="display:none; width: 190px; height: 190px; border-radius: 8px; margin: 0 auto;">
-                <canvas id="registrationQrCanvas" width="190" height="190"></canvas>
-              </div>
-              <div class="qr-join-url-row">
-                <input type="text" id="registrationDirectUrl" class="form-input text-center" readonly value="http://localhost:3000/?join=1">
-                <button type="button" class="btn btn-outline btn-xs" onclick="copyRegistrationUrl()">Copier le lien</button>
-              </div>
-            </div>
-
-            <!-- BOUTON D'ACCÈS POUR PARTICIPER SUR CE NAVIGATEUR (SANS SMARTPHONE) -->
-            <div class="direct-start-wrap">
-              <button type="button" class="btn btn-primary btn-block btn-lg pulse-glow" onclick="goToIdentifyScreen()" id="btnStartDirect">
-                <span>📱 Participer depuis ce navigateur (Saisir Nom & Prénom)</span>
-                <span class="btn-arrow">➔</span>
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- ÉCRAN 1.2 : Identification du Participant (Affiché après Scan du QR Code ou Clic) -->
-        <div id="screen-identify" class="mobile-card step-screen">
+        <!-- ÉCRAN 1.1 : Identification du Participant (Prénom & Nom) -->
+        <div id="screen-identify" class="mobile-card step-screen active">
           <div class="card-hero card-hero-mini">
             <img src="assets/images/archetypes.jpg" alt="Les 5 Schtroumpfs" class="hero-image">
-            <div class="hero-badge">Étape 1 : Identification</div>
+            <div class="hero-badge">Étape 1 : Bienvenue</div>
           </div>
           <div class="card-body">
             <div class="identify-header-box text-center">
               <h2 class="card-title">Bienvenue dans l'Atelier IoT !</h2>
               <p class="card-desc">
-                Veuillez renseigner votre prénom et nom pour démarrer votre évaluation de personnalité.
+                Entrez votre prénom et votre nom pour passer le test comportemental et découvrir votre profil Schtroumpf d'innovateur.
               </p>
             </div>
 
-            <!-- FORMULAIRE NOM & PRÉNOM -->
+            <!-- Formulaire Nom & Prénom -->
             <form id="formRegistration" class="auth-form" onsubmit="event.preventDefault(); startPersonalityTest();">
               <div class="form-section-divider">
-                <span>IDENTIFICATION DU PARTICIPANT</span>
+                <span>VOS COORDONNÉES</span>
               </div>
               <div class="form-group">
                 <label for="inputFirstName">Prénom *</label>
-                <input type="text" id="inputFirstName" class="form-input" placeholder="Ex: Amin" required autocomplete="given-name">
+                <input type="text" id="inputFirstName" class="form-input" placeholder="Ex: Amin" autocomplete="given-name" required>
               </div>
               <div class="form-group">
                 <label for="inputLastName">Nom *</label>
-                <input type="text" id="inputLastName" class="form-input" placeholder="Ex: Benali" required autocomplete="family-name">
+                <input type="text" id="inputLastName" class="form-input" placeholder="Ex: Benali" autocomplete="family-name" required>
               </div>
 
+              <!-- Rappel des 5 Familles Schtroumpfs -->
               <div class="archetypes-preview-row">
                 <div class="mini-archetype-chip" title="Créatif & Visuel"><span class="chip-color art"></span> Artiste</div>
                 <div class="mini-archetype-chip" title="Analytique & Structuré"><span class="chip-color prof"></span> Professeur (Théoricien)</div>
@@ -151,17 +121,11 @@
                 <span>Commencer le Questionnaire (15 Questions)</span>
                 <span class="btn-arrow">➔</span>
               </button>
-
-              <div class="text-center mt-3">
-                <button type="button" class="btn btn-ghost btn-sm" onclick="goToQrScreen()">
-                  ← Revenir à l'écran du QR Code
-                </button>
-              </div>
             </form>
           </div>
         </div>
 
-        <!-- ÉCRAN 1.2 : Questionnaire d'Analyse de Personnalité (15 Questions sur échelle 1 à 5) -->
+        <!-- ÉCRAN 1.2 : Questionnaire d'Analyse de Personnalité (15 Questions) -->
         <div id="screen-quiz" class="mobile-card step-screen">
           <div class="quiz-progress-bar-wrap">
             <div class="quiz-progress-track">
@@ -173,12 +137,12 @@
             </div>
           </div>
 
-          <!-- Rappel de l'échelle d'évaluation officielle 1 à 5 -->
+          <!-- Échelle de notation 1 à 5 -->
           <div class="likert-legend-bar">
             <span class="legend-scale-title">Échelle d'évaluation :</span>
             <div class="legend-scale-items">
-              <span><strong>1</strong> = Pas du tout d'accord</span>
-              <span><strong>3</strong> = Neutre / Parfois vrai</span>
+              <span><strong>1</strong> = Pas d'accord</span>
+              <span><strong>3</strong> = Neutre</span>
               <span><strong>5</strong> = Tout à fait d'accord</span>
             </div>
           </div>
@@ -189,12 +153,12 @@
                 <span class="question-tag" id="questionCategory">Affirmation 1 / 15</span>
                 <span class="question-subtext" id="questionSubtext">Évaluez de 1 à 5</span>
               </div>
-              <h3 class="question-title" id="questionPrompt">Face à un obstacle ou un problème, mon réflexe immédiat est de passer à l'action sur le terrain plutôt que de trop réfléchir.</h3>
+              <h3 class="question-title" id="questionPrompt">Chargement de la question...</h3>
             </div>
 
             <!-- Échelle Likert 1 à 5 interactive -->
             <div class="likert-options-container" id="quizOptionsContainer">
-              <!-- Injecté dynamiquement par app.js -->
+              <!-- Injecté dynamiquement par participant.js -->
             </div>
 
             <div class="quiz-nav-row mt-4">
@@ -208,7 +172,7 @@
           </div>
         </div>
 
-        <!-- ÉCRAN 1.3 : Attribution du Profil, Grille des 5 Scores & Attente -->
+        <!-- ÉCRAN 1.3 : Attribution du Profil 3D, Scores & Salle d'Attente Interactive -->
         <div id="screen-result" class="mobile-card step-screen">
           <div class="result-header">
             <div class="result-confetti">🎉</div>
@@ -216,6 +180,20 @@
             <p class="result-lead">Votre profil psychologique Schtroumpf a été calculé avec succès :</p>
           </div>
 
+          <!-- BANNIÈRE IMMÉDIATE DÈS QUE L'ÉQUIPE EST CONSTITUÉE -->
+          <div class="team-formed-alert-banner" id="resTeamFormedBanner" style="display: none;">
+            <div class="alert-banner-icon">🎉</div>
+            <div class="alert-banner-content" style="flex: 1;">
+              <div style="font-size: 0.75rem; text-transform: uppercase; color: #38bdf8; font-weight: bold; letter-spacing: 0.05em;">Groupe Constitué !</div>
+              <h3 id="resTeamFormedTitle" style="color: #fff; margin: 0.2rem 0; font-size: 1.15rem;">Votre équipe est prête</h3>
+              <p id="resTeamFormedRole" style="margin: 0; font-size: 0.85rem; color: #cbd5e1;">Rôle : Rédacteur ou Conseiller</p>
+              <button type="button" class="btn btn-primary btn-block btn-lg pulse-glow mt-3" onclick="switchToWorkspaceWithTeam()">
+                🚀 Entrer dans l'Espace Équipe ➔
+              </button>
+            </div>
+          </div>
+
+          <!-- Carte 3D du Profil Schtroumpf -->
           <div class="archetype-showcase-card" id="archetypeShowcaseCard">
             <div class="showcase-avatar-frame">
               <img src="assets/images/professeur.jpg" alt="Avatar Schtroumpf" class="showcase-avatar" id="resArchetypeAvatar">
@@ -239,18 +217,14 @@
 
               <!-- Grille Officielle des Scores sur 75 points & Pourcentages -->
               <div class="official-scoring-table-wrap">
-                <h4 class="scoring-table-heading">📊 Grille de Calcul Officielle & Répartition (/75 pts) :</h4>
-                <div class="scoring-table" id="resOfficialScoringTable">
-                  <!-- Rendu dynamique par app.js -->
-                </div>
+                <h4 class="scoring-table-heading">📊 Grille Officielle de Vos Scores (/75 pts) :</h4>
+                <div class="scoring-table" id="resOfficialScoringTable"></div>
               </div>
 
               <!-- Barres visuelles de répartition -->
               <div class="scores-distribution">
                 <div class="score-dist-title">Part relative dans votre profil global :</div>
-                <div class="score-bars-container" id="resScoresBars">
-                  <!-- Barres générées dynamiquement -->
-                </div>
+                <div class="score-bars-container" id="resScoresBars"></div>
               </div>
             </div>
           </div>
@@ -268,7 +242,7 @@
                 <div class="waiting-main-meta">
                   <h4 class="waiting-title">⏳ Salle d'Attente en Direct</h4>
                   <p class="waiting-desc">
-                    Votre profil est enregistré ! Restez sur cet écran : dès que l'animateur lancera la répartition, votre groupe s'affichera automatiquement ici.
+                    Votre profil est enregistré ! Dès que l'animateur lance la répartition, votre groupe s'affichera automatiquement ici.
                   </p>
                   
                   <!-- Chrono & Compteur de participants -->
@@ -290,9 +264,7 @@
                   <span class="feed-dot-pulse"></span>
                   <span class="feed-label">Participations reçues en direct :</span>
                 </div>
-                <div class="waiting-live-feed" id="waitingLiveFeed">
-                  <!-- Alimenté en temps réel par app.js -->
-                </div>
+                <div class="waiting-live-feed" id="waitingLiveFeed"></div>
               </div>
             </div>
 
@@ -322,9 +294,7 @@
                 <!-- Liste de tous les membres du groupe -->
                 <div class="assigned-members-box">
                   <h4 class="members-box-title">👥 Membres de votre groupe (<span id="assignedMembersCount">0</span>) :</h4>
-                  <div class="team-members-list-grid" id="assignedMembersList">
-                    <!-- Généré dynamiquement avec badge Rédacteur / Conseiller -->
-                  </div>
+                  <div class="team-members-list-grid" id="assignedMembersList"></div>
                 </div>
 
                 <!-- Bouton d'accès vers l'espace de travail -->
@@ -344,63 +314,48 @@
     </section>
 
     <!-- ===================================================================
-         VUE 2 : ESPACE DE TRAVAIL PAR GROUPE (PORTÉ DE STYLO / RÉDACTEUR)
+         VUE 2 : ESPACE DE TRAVAIL EXCLUSIF DE L'ÉQUIPE DU PARTICIPANT
          =================================================================== -->
     <section id="view-workspace" class="view-panel">
       <div class="workspace-layout">
 
-        <!-- Barre latérale / Sélecteur d'équipe & Membres -->
-        <aside class="workspace-sidebar">
+        <!-- Carte d'en-tête de l'équipe du participant -->
+        <aside class="workspace-sidebar" style="width: 100%; margin-bottom: 1.5rem;">
           <div class="sidebar-card">
-            <h3 class="sidebar-title">Équipe en Cours</h3>
-            <div class="team-selector-wrap">
-              <label for="selectCurrentTeam">Choisir le groupe :</label>
-              <select id="selectCurrentTeam" class="form-select" onchange="onTeamSelectionChanged()">
-                <option value="">-- Sélectionnez votre équipe --</option>
-              </select>
-            </div>
-
-            <!-- Carte récapitulative de l'équipe active -->
-            <div class="active-team-card" id="activeTeamCard">
-              <div class="active-team-head">
-                <img src="assets/images/professeur.jpg" alt="Avatar" class="active-team-avatar" id="teamCardAvatar">
+            <div class="active-team-head" style="display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 1rem;">
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <img src="assets/images/professeur.jpg" alt="Avatar" class="active-team-avatar" id="teamCardAvatar" style="width: 56px; height: 56px; border-radius: 14px; object-fit: cover;">
                 <div>
-                  <h4 class="active-team-name" id="teamCardName">Sélectionnez une équipe</h4>
-                  <span class="active-team-trait" id="teamCardTrait">Profil Schtroumpf</span>
+                  <h3 class="active-team-name" id="teamCardName" style="color: #fff; margin: 0; font-size: 1.25rem;">Mon Équipe IoT</h3>
+                  <span class="active-team-trait" id="teamCardTrait" style="font-size: 0.82rem; color: #38bdf8;">Archétype Schtroumpf</span>
                 </div>
               </div>
-
-              <!-- Rédacteur désigné / Contrôle de rôle -->
-              <div class="scribe-callout" id="scribeCallout">
-                <div class="scribe-header">
-                  <span class="scribe-badge">✍️ Rédacteur Unique (Porteur de stylo)</span>
-                </div>
-                <div class="scribe-name" id="teamCardScribeName">Thomas Dupont</div>
-                <p class="scribe-helper">Seul le rédacteur possède les droits pour enregistrer les livrables. Les autres membres sont conseillers.</p>
-                <button class="btn btn-outline btn-xs" id="btnChangeScribe" onclick="openChangeScribeModal()">
-                  Modifier le rédacteur
-                </button>
-              </div>
-
-              <!-- Liste des membres du groupe -->
-              <div class="team-members-list-wrap">
-                <span class="section-micro-title">Membres du groupe (<span id="teamMemberCount">0</span>) :</span>
-                <ul class="team-members-list" id="teamMembersList">
-                  <li class="member-empty">Aucune équipe active</li>
-                </ul>
-              </div>
+              <button type="button" class="btn btn-outline btn-xs" onclick="toggleParticipantProfileView()" title="Consulter mes forces et mes scores Schtroumpf">
+                👤 Mon Profil 3D
+              </button>
             </div>
 
-            <!-- Aide & Méthodologie Schtroumpf -->
-            <div class="methodology-card">
-              <h4>🍄 Le Saviez-vous ?</h4>
-              <p id="methodologyTip">Chaque étape (« Maison ») valide un jalon décisif du produit connecté. Ne brûlez pas les étapes !</p>
+            <!-- Statut du Rédacteur & Rôle -->
+            <div class="scribe-callout" id="scribeCallout">
+              <div class="scribe-header">
+                <span class="scribe-badge">✍️ Rédacteur Unique (Porteur de stylo)</span>
+              </div>
+              <div class="scribe-name" id="teamCardScribeName">Thomas Dupont</div>
+              <p class="scribe-helper">Seul le rédacteur possède les droits pour enregistrer les livrables. Les autres membres sont conseillers.</p>
+            </div>
+
+            <!-- Liste des camarades de l'équipe -->
+            <div class="team-members-list-wrap mt-3">
+              <span class="section-micro-title">Membres de votre groupe (<span id="teamMemberCount">0</span>) :</span>
+              <ul class="team-members-list" id="teamMembersList">
+                <li class="member-empty">Chargement des membres...</li>
+              </ul>
             </div>
           </div>
         </aside>
 
         <!-- Espace principal de saisie des 6 Maisons -->
-        <div class="workspace-main">
+        <div class="workspace-main" style="width: 100%;">
           
           <!-- Stepper des 6 Maisons du Village IoT -->
           <div class="houses-stepper" id="housesStepper">
@@ -527,19 +482,20 @@
                   </div>
                   <div class="form-group">
                     <label for="h2_connectivity">Mode de communication retenu</label>
-                    <input type="text" id="h2_connectivity" class="form-input" placeholder="Ex: LoRaWAN 868MHz, BLE 5.0, Wi-Fi 6, NB-IoT..." required>
+                    <input type="text" id="h2_connectivity" class="form-input" placeholder="Ex: LoRaWAN, BLE 5.2, Wi-Fi, NB-IoT..." required>
                   </div>
                 </div>
 
                 <div class="form-group">
-                  <label for="h2_actions">Action & Valeur ajoutée déclenchée pour l'utilisateur</label>
-                  <textarea id="h2_actions" rows="3" class="form-textarea" placeholder="Ex: Alerte push prédictive avant effondrement de colonie, signalement lumineux discret bienveillant..." required></textarea>
+                  <label for="h2_actions">Action déclenchée & Valeur pour l'utilisateur</label>
+                  <textarea id="h2_actions" rows="3" class="form-textarea" placeholder="Ex: Alerte push immédiate sur smartphone si anomalie thermique + rapport d'analyse hebdomadaire..." required></textarea>
                 </div>
 
                 <div class="house-actions-row">
                   <button type="button" class="btn btn-outline" onclick="switchHouseTab(1)">← Retour Maison 1</button>
+                  <button type="button" class="btn btn-outline" onclick="saveDraft(2)">Sauvegarder Brouillon</button>
                   <button type="submit" class="btn btn-primary" id="btnSubmitH2">
-                    Valider la Maison 2 et Aller à la Faisabilité ➔
+                    Valider la Maison 2 et Aller à la Maison 3 (Faisabilité) ➔
                   </button>
                 </div>
               </form>
@@ -548,67 +504,41 @@
             <!-- MAISON 3 : FAISABILITÉ (50%) -->
             <div id="house-form-3" class="house-content-panel">
               <div class="house-panel-header">
-                <div class="house-badge">Maison 3 • Chaîne Technique</div>
-                <h2>Maison 3 : Faisabilité Technique & Architecture (50%)</h2>
+                <div class="house-badge">Maison 3 • Architecture Technique</div>
+                <h2>Maison 3 : Faisabilité & Architecture IoT (50%)</h2>
                 <p class="house-intro">
-                  Détaillez la chaîne complète : du monde physique réel jusqu'à l'écran de l'utilisateur final.
+                  Définissez la chaîne complète de transmission de données : capteur ➔ nœud ➔ réseau ➔ traitement cloud ➔ application.
                 </p>
               </div>
 
               <form id="formHouse3" onsubmit="event.preventDefault(); submitDeliverable(3);">
-                <!-- Schéma interactif de chaîne IoT -->
-                <div class="iot-chain-diagram">
-                  <div class="chain-node">
-                    <span class="chain-step-num">1</span>
-                    <span class="chain-icon">📡</span>
-                    <span class="chain-title">Capteurs / Inputs</span>
-                  </div>
-                  <div class="chain-arrow">➔</div>
-                  <div class="chain-node">
-                    <span class="chain-step-num">2</span>
-                    <span class="chain-icon">⚙️</span>
-                    <span class="chain-title">Traitement Edge</span>
-                  </div>
-                  <div class="chain-arrow">➔</div>
-                  <div class="chain-node">
-                    <span class="chain-step-num">3</span>
-                    <span class="chain-icon">📶</span>
-                    <span class="chain-title">Réseau & Comms</span>
-                  </div>
-                  <div class="chain-arrow">➔</div>
-                  <div class="chain-node">
-                    <span class="chain-step-num">4</span>
-                    <span class="chain-icon">📱</span>
-                    <span class="chain-title">Cloud & Dashboard</span>
-                  </div>
-                </div>
-
-                <div class="grid-2-col mt-4">
+                <div class="grid-2-col">
                   <div class="form-group">
-                    <label for="h3_sensors">1. Capteurs & Sondes physiques</label>
-                    <input type="text" id="h3_sensors" class="form-input" placeholder="Ex: DS18B20 étanche, Accéléromètre piezo, Microphone I2S..." required>
+                    <label for="h3_sensors">Capteurs sélectionnés & Précision requise</label>
+                    <input type="text" id="h3_sensors" class="form-input" placeholder="Ex: BME280 (Temp/Hum/Pression), Accéléromètre ADXL345..." required>
                   </div>
                   <div class="form-group">
-                    <label for="h3_processing">2. Microcontrôleur & Énergie</label>
-                    <input type="text" id="h3_processing" class="form-input" placeholder="Ex: ESP32 avec mode Deep Sleep, Batterie 18650 + mini panneau solaire 2W..." required>
+                    <label for="h3_processing">Microcontrôleur & Gestion Énergie</label>
+                    <input type="text" id="h3_processing" class="form-input" placeholder="Ex: ESP32-S3 en deep sleep, Batterie LiPo 2500mAh + petit panneau solaire..." required>
                   </div>
                 </div>
 
                 <div class="grid-2-col">
                   <div class="form-group">
-                    <label for="h3_protocol">3. Protocole réseau & Transport</label>
-                    <input type="text" id="h3_protocol" class="form-input" placeholder="Ex: LoRaWAN 868MHz (Passerelle The Things Network), MQTT TLS..." required>
+                    <label for="h3_protocol">Protocole réseau & Fréquence d'envoi</label>
+                    <input type="text" id="h3_protocol" class="form-input" placeholder="Ex: LoRa 868 MHz toutes les 15 min, MQTT sur Wi-Fi local..." required>
                   </div>
                   <div class="form-group">
-                    <label for="h3_cloudUser">4. Plateforme Cloud & Restitution Utilisateur</label>
-                    <input type="text" id="h3_cloudUser" class="form-input" placeholder="Ex: InfluxDB + Dashboard Grafana sur mobile / Alertes SMS Twilio..." required>
+                    <label for="h3_cloudUser">Plateforme Cloud & Restitution Utilisateur</label>
+                    <input type="text" id="h3_cloudUser" class="form-input" placeholder="Ex: Node-RED + InfluxDB + Dashboard mobile Flutter..." required>
                   </div>
                 </div>
 
                 <div class="house-actions-row">
                   <button type="button" class="btn btn-outline" onclick="switchHouseTab(2)">← Retour Maison 2</button>
+                  <button type="button" class="btn btn-outline" onclick="saveDraft(3)">Sauvegarder Brouillon</button>
                   <button type="submit" class="btn btn-primary" id="btnSubmitH3">
-                    Valider la Maison 3 et Passer au Prototype ➔
+                    Valider la Maison 3 et Aller à la Maison 4 (Prototype) ➔
                   </button>
                 </div>
               </form>
@@ -617,31 +547,32 @@
             <!-- MAISON 4 : PROTOTYPE (66%) -->
             <div id="house-form-4" class="house-content-panel">
               <div class="house-panel-header">
-                <div class="house-badge">Maison 4 • Maquette & Scénario</div>
-                <h2>Maison 4 : Prototype & Scénario d'Usage (66%)</h2>
+                <div class="house-badge">Maison 4 • Maquette Physique</div>
+                <h2>Maison 4 : Maquette & Prototypage Rapide (66%)</h2>
                 <p class="house-intro">
-                  Définissez l'enveloppe physique du produit, l'expérience vécue par l'utilisateur et le protocole de validation.
+                  Comment valider votre idée avant la production ? Décrivez le prototype physique et le protocole de test utilisateur.
                 </p>
               </div>
 
               <form id="formHouse4" onsubmit="event.preventDefault(); submitDeliverable(4);">
                 <div class="form-group">
                   <label for="h4_prototypeType">Design de la Maquette Physique & Boîtier</label>
-                  <input type="text" id="h4_prototypeType" class="form-input" placeholder="Ex: Boîtier étanche IP67 en plastique bio-sourcé imprimé 3D avec fixation magnétique..." required>
+                  <input type="text" id="h4_prototypeType" class="form-input" placeholder="Ex: Boîtier étanche IP67 imprimé 3D avec fixation magnétique..." required>
                 </div>
 
                 <div class="form-group">
                   <label for="h4_usageScenario">Scénario d'usage pas-à-pas (De l'installation à la notification)</label>
-                  <textarea id="h4_usageScenario" rows="3" class="form-textarea" placeholder="1. L'utilisateur positionne le capteur. 2. La LED verte confirme l'appairage. 3. En cas d'incident, un message clair s'affiche..." required></textarea>
+                  <textarea id="h4_usageScenario" rows="3" class="form-textarea" placeholder="1. L'utilisateur positionne le capteur. 2. La LED confirme l'appairage. 3. En cas d'incident, alerte sur mobile..." required></textarea>
                 </div>
 
                 <div class="form-group">
                   <label for="h4_testProtocol">Protocole de Test & Métrique de Validation</label>
-                  <input type="text" id="h4_testProtocol" class="form-input" placeholder="Ex: Test d'étanchéité 24h, autonomie mesurée sur 30 jours, temps de réaction < 2 secondes..." required>
+                  <input type="text" id="h4_testProtocol" class="form-input" placeholder="Ex: Test d'étanchéité 24h, autonomie 30 jours, temps de réaction < 2s..." required>
                 </div>
 
                 <div class="house-actions-row">
                   <button type="button" class="btn btn-outline" onclick="switchHouseTab(3)">← Retour Maison 3</button>
+                  <button type="button" class="btn btn-outline" onclick="saveDraft(4)">Sauvegarder Brouillon</button>
                   <button type="submit" class="btn btn-primary" id="btnSubmitH4">
                     Valider la Maison 4 et Passer au Business Model ➔
                   </button>
@@ -660,48 +591,48 @@
               </div>
 
               <form id="formHouse5" onsubmit="event.preventDefault(); submitDeliverable(5);">
-                <!-- Grille BMC interactive -->
                 <div class="bmc-grid">
                   <div class="bmc-box bmc-partners">
                     <span class="bmc-label">🤝 1. Partenaires Clés</span>
-                    <textarea id="bmc_partners" class="bmc-input" placeholder="Fournisseurs télécom, mutuelles, distributeurs..." required></textarea>
+                    <textarea id="bmc_partners" class="bmc-input" placeholder="Fournisseurs télécom, mutuelles..." required></textarea>
                   </div>
                   <div class="bmc-box bmc-activities">
                     <span class="bmc-label">⚡ 2. Activités Clés</span>
-                    <textarea id="bmc_activities" class="bmc-input" placeholder="R&D, fabrication, maintenance firmware..." required></textarea>
+                    <textarea id="bmc_activities" class="bmc-input" placeholder="R&D, fabrication, maintenance..." required></textarea>
                   </div>
                   <div class="bmc-box bmc-value">
                     <span class="bmc-label">💎 3. Proposition de Valeur</span>
-                    <textarea id="bmc_value" class="bmc-input" placeholder="Gain de temps, sérénité, économie d'énergie..." required></textarea>
+                    <textarea id="bmc_value" class="bmc-input" placeholder="Gain de temps, sérénité..." required></textarea>
                   </div>
                   <div class="bmc-box bmc-relations">
                     <span class="bmc-label">💬 4. Relations Clients</span>
-                    <textarea id="bmc_relations" class="bmc-input" placeholder="Support automatisé, communauté, hotline..." required></textarea>
+                    <textarea id="bmc_relations" class="bmc-input" placeholder="Support automatisé, hotline..." required></textarea>
                   </div>
                   <div class="bmc-box bmc-segments">
                     <span class="bmc-label">👥 5. Segments Clients</span>
-                    <textarea id="bmc_segments" class="bmc-input" placeholder="Particuliers seniors, B2B exploitants..." required></textarea>
+                    <textarea id="bmc_segments" class="bmc-input" placeholder="Particuliers, professionnels..." required></textarea>
                   </div>
                   <div class="bmc-box bmc-resources">
                     <span class="bmc-label">🔧 6. Ressources Clés</span>
-                    <textarea id="bmc_resources" class="bmc-input" placeholder="Brevets, ingénieurs IoT, serveurs souverains..." required></textarea>
+                    <textarea id="bmc_resources" class="bmc-input" placeholder="Brevets, serveurs cloud..." required></textarea>
                   </div>
                   <div class="bmc-box bmc-channels">
-                    <span class="bmc-label">🚀 7. Canaux de Distribution</span>
-                    <textarea id="bmc_channels" class="bmc-input" placeholder="E-commerce direct, revendeurs spécialisés..." required></textarea>
+                    <span class="bmc-label">🚀 7. Canaux</span>
+                    <textarea id="bmc_channels" class="bmc-input" placeholder="E-commerce direct, revendeurs..." required></textarea>
                   </div>
                   <div class="bmc-box bmc-costs">
-                    <span class="bmc-label">💰 8. Structure de Coûts</span>
-                    <textarea id="bmc_costs" class="bmc-input" placeholder="BOM électronique, hébergement cloud, marketing..." required></textarea>
+                    <span class="bmc-label">💰 8. Coûts</span>
+                    <textarea id="bmc_costs" class="bmc-input" placeholder="Composants, hébergement..." required></textarea>
                   </div>
                   <div class="bmc-box bmc-revenues">
-                    <span class="bmc-label">📈 9. Flux de Revenus</span>
-                    <textarea id="bmc_revenues" class="bmc-input" placeholder="Vente matérielle 89€ + Abonnement 4.90€/mois..." required></textarea>
+                    <span class="bmc-label">📈 9. Revenus</span>
+                    <textarea id="bmc_revenues" class="bmc-input" placeholder="Vente 89€ + Abonnement 4.90€/mois..." required></textarea>
                   </div>
                 </div>
 
                 <div class="house-actions-row mt-4">
                   <button type="button" class="btn btn-outline" onclick="switchHouseTab(4)">← Retour Maison 4</button>
+                  <button type="button" class="btn btn-outline" onclick="saveDraft(5)">Sauvegarder Brouillon</button>
                   <button type="submit" class="btn btn-primary" id="btnSubmitH5">
                     Valider la Maison 5 et Passer au Marché ➔
                   </button>
@@ -723,11 +654,11 @@
                 <div class="grid-2-col">
                   <div class="form-group">
                     <label for="h6_launchPlan">Mini-Plan de Lancement (Go-to-market)</label>
-                    <textarea id="h6_launchPlan" rows="3" class="form-textarea" placeholder="Ex: Phase 1 : Test pilote 30 unités. Phase 2 : Campagne participative Ulule. Phase 3 : Réseau de distribution B2B..." required></textarea>
+                    <textarea id="h6_launchPlan" rows="3" class="form-textarea" placeholder="Ex: Phase 1 : Test pilote 30 unités. Phase 2 : Campagne Ulule..." required></textarea>
                   </div>
                   <div class="form-group">
                     <label for="h6_targetMetrics">Objectifs chiffrés à 12 mois</label>
-                    <textarea id="h6_targetMetrics" rows="3" class="form-textarea" placeholder="Ex: 500 unités déployées, Chiffre d'affaires 75 k€, Score de satisfaction > 90%..." required></textarea>
+                    <textarea id="h6_targetMetrics" rows="3" class="form-textarea" placeholder="Ex: 500 unités déployées, 75 k€ CA, satisfaction > 90%..." required></textarea>
                   </div>
                 </div>
 
@@ -736,7 +667,7 @@
                   <div class="pitch-header">
                     <div>
                       <h3>🎤 Le Pitch 3 Minutes (180s)</h3>
-                      <p class="pitch-subtitle">Structure recommandée : Accroche (30s) • Problème (30s) • Solution IoT (60s) • Business & Marché (40s) • Appel à l'action (20s)</p>
+                      <p class="pitch-subtitle">Structure recommandée : Accroche (30s) • Problème (30s) • Solution IoT (60s) • Business (40s) • Appel à l'action (20s)</p>
                     </div>
 
                     <!-- Chrono interactif -->
@@ -757,6 +688,7 @@
 
                 <div class="house-actions-row mt-4">
                   <button type="button" class="btn btn-outline" onclick="switchHouseTab(5)">← Retour Maison 5</button>
+                  <button type="button" class="btn btn-outline" onclick="saveDraft(6)">Sauvegarder Brouillon</button>
                   <button type="submit" class="btn btn-success btn-lg" id="btnSubmitH6">
                     🏁 Valider la Maison 6 & Clôturer le Projet IoT (100%) !
                   </button>
@@ -770,325 +702,8 @@
       </div>
     </section>
 
-    <!-- ===================================================================
-         VUE 3 : LE DASHBOARD "VILLAGE DE SCHTROUMPFS" (VUE GLOBALE / ANIMATEUR)
-         =================================================================== -->
-    <section id="view-dashboard" class="view-panel">
-      <div class="dashboard-container">
-        
-        <!-- Panneau de Contrôle de l'Animateur -->
-        <div class="animator-control-bar">
-          <div class="control-bar-left">
-            <div class="animator-badge">🍄 Pupitre Grand Écran Animateur</div>
-            <div class="live-stats">
-              <span class="stat-item"><strong id="statParticipantsCount">0</strong> Participants</span>
-              <span class="stat-separator">•</span>
-              <span class="stat-item"><strong id="statTeamsCount">0</strong> Groupes Homogènes</span>
-              <span class="stat-separator">•</span>
-              <span class="stat-item"><strong id="statDeliverablesCount">0</strong> Livrables Validés</span>
-            </div>
-          </div>
-
-          <div class="control-bar-actions">
-            <button class="btn btn-secondary btn-sm" onclick="openQrModal()" id="btnShowQr">
-              📱 QR Code Inscription
-            </button>
-            <button class="btn btn-primary btn-sm" onclick="triggerAutoAssignTeams()" id="btnFormTeams">
-              ⚡ Former les Groupes Homogènes
-            </button>
-            <button class="btn btn-outline btn-sm" onclick="loadDemoData()" id="btnLoadDemo" title="Charge 15 participants, 5 équipes et leurs livrables">
-              🧪 Charger Données Démo
-            </button>
-            <button class="btn btn-danger-outline btn-sm" onclick="confirmResetWorkshop()" id="btnResetWorkshop" title="Effacer et redémarrer">
-              🔄 Réinitialiser
-            </button>
-          </div>
-        </div>
-
-        <!-- ===================================================================
-             PANNEAU PRÉ-CONSTITUTION : PARTICIPANTS EN ATTENTE (VUE ANIMATEUR)
-             Affichage nominatif de tous les inscrits avec profil AVANT lancement
-             =================================================================== -->
-        <div class="admin-prelaunch-card" id="adminPrelaunchCard">
-          <div class="prelaunch-header">
-            <div class="prelaunch-meta">
-              <div class="prelaunch-badge">🍄 Salle de Contrôle • Réception des Profils</div>
-              <h3 class="prelaunch-title">👥 Participants Inscrits & Prêts (<span id="adminReadyCount">0</span>)</h3>
-              <p class="prelaunch-desc">Visualisez chaque participant ayant complété son test avec son profil Schtroumpf dominant avant de déclencher la constitution des équipes homogènes.</p>
-            </div>
-            <div class="prelaunch-action">
-              <button class="btn btn-primary btn-lg pulse-glow" id="btnAdminLaunchTeams" onclick="triggerAutoAssignTeams()" disabled>
-                <span>⚡ Former les Groupes (<span id="btnLaunchCount">0</span>)</span>
-                <span class="btn-arrow">➔</span>
-              </button>
-            </div>
-          </div>
-
-          <!-- Grille Visuelle des Participants Inscrits -->
-          <div class="admin-participants-grid" id="adminParticipantsGrid">
-            <!-- Rendu en direct par app.js -->
-          </div>
-        </div>
-
-        <!-- CARTE VISUELLE DU VILLAGE DES SCHTROUMPFS -->
-        <div class="village-map-card">
-          <div class="village-map-header">
-            <div>
-              <h2 class="village-map-title">La Carte Interactive du Village IoT</h2>
-              <p class="village-map-desc">Suivez la progression des équipes à travers les 6 Maisons champignons en temps réel.</p>
-            </div>
-            <div class="village-legend">
-              <span class="legend-dot art"></span> Artistes
-              <span class="legend-dot prof"></span> Savants
-              <span class="legend-dot crit"></span> Rigoureux
-              <span class="legend-dot emp"></span> Solidaires
-              <span class="legend-dot sprt"></span> Bâtisseurs
-            </div>
-          </div>
-
-          <!-- L'arène visuelle du Village -->
-          <div class="village-arena" id="villageArena">
-            <!-- Arrière-plan généré du village -->
-            <img src="assets/images/village-banner.jpg" alt="Village des Schtroumpfs" class="village-bg-img" id="villageBgImg">
-
-            <!-- Chemin SVG lumineux reliant les 6 maisons -->
-            <svg class="village-trail-svg" viewBox="0 0 1200 600" preserveAspectRatio="none">
-              <defs>
-                <linearGradient id="trailGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.9" />
-                  <stop offset="50%" stop-color="#f59e0b" stop-opacity="0.9" />
-                  <stop offset="100%" stop-color="#10b981" stop-opacity="0.9" />
-                </linearGradient>
-                <filter id="glowEffect" x="-20%" y="-20%" width="140%" height="140%">
-                  <feGaussianBlur stdDeviation="5" result="blur" />
-                  <feComposite in="SourceGraphic" in2="blur" operator="over" />
-                </filter>
-              </defs>
-              <path id="villageTrailPath" d="M 120 480 Q 250 280 320 200 T 520 380 T 700 180 T 890 350 T 1080 180" 
-                    fill="none" stroke="url(#trailGradient)" stroke-width="8" stroke-dasharray="12 8" filter="url(#glowEffect)" />
-            </svg>
-
-            <!-- Les 6 Maisons Champignons positionnées sur la carte -->
-            <div class="village-house-node house-1" data-house="1" onclick="openHouseDetailsModal(1)">
-              <div class="house-pin-head">
-                <span class="house-pin-pct">16%</span>
-                <span class="house-pin-icon">🛖</span>
-              </div>
-              <div class="house-card-tag">
-                <span class="house-tag-num">Maison 1</span>
-                <span class="house-tag-title">Besoin</span>
-              </div>
-              <div class="house-teams-dock" id="dock-house-1">
-                <!-- Avatars des équipes positionnés ici -->
-              </div>
-            </div>
-
-            <div class="village-house-node house-2" data-house="2" onclick="openHouseDetailsModal(2)">
-              <div class="house-pin-head">
-                <span class="house-pin-pct">33%</span>
-                <span class="house-pin-icon">💡</span>
-              </div>
-              <div class="house-card-tag">
-                <span class="house-tag-num">Maison 2</span>
-                <span class="house-tag-title">Idée IoT</span>
-              </div>
-              <div class="house-teams-dock" id="dock-house-2"></div>
-            </div>
-
-            <div class="village-house-node house-3" data-house="3" onclick="openHouseDetailsModal(3)">
-              <div class="house-pin-head">
-                <span class="house-pin-pct">50%</span>
-                <span class="house-pin-icon">⚙️</span>
-              </div>
-              <div class="house-card-tag">
-                <span class="house-tag-num">Maison 3</span>
-                <span class="house-tag-title">Faisabilité</span>
-              </div>
-              <div class="house-teams-dock" id="dock-house-3"></div>
-            </div>
-
-            <div class="village-house-node house-4" data-house="4" onclick="openHouseDetailsModal(4)">
-              <div class="house-pin-head">
-                <span class="house-pin-pct">66%</span>
-                <span class="house-pin-icon">🔌</span>
-              </div>
-              <div class="house-card-tag">
-                <span class="house-tag-num">Maison 4</span>
-                <span class="house-tag-title">Prototype</span>
-              </div>
-              <div class="house-teams-dock" id="dock-house-4"></div>
-            </div>
-
-            <div class="village-house-node house-5" data-house="5" onclick="openHouseDetailsModal(5)">
-              <div class="house-pin-head">
-                <span class="house-pin-pct">83%</span>
-                <span class="house-pin-icon">📊</span>
-              </div>
-              <div class="house-card-tag">
-                <span class="house-tag-num">Maison 5</span>
-                <span class="house-tag-title">Business</span>
-              </div>
-              <div class="house-teams-dock" id="dock-house-5"></div>
-            </div>
-
-            <div class="village-house-node house-6" data-house="6" onclick="openHouseDetailsModal(6)">
-              <div class="house-pin-head victory">
-                <span class="house-pin-pct">100%</span>
-                <span class="house-pin-icon">🏆</span>
-              </div>
-              <div class="house-card-tag victory">
-                <span class="house-tag-num">Maison 6</span>
-                <span class="house-tag-title">Marché & Pitch</span>
-              </div>
-              <div class="house-teams-dock" id="dock-house-6"></div>
-            </div>
-
-          </div>
-        </div>
-
-        <!-- Table de bord de suivi & Avancement des Équipes -->
-        <div class="dashboard-teams-grid" id="dashboardTeamsGrid">
-          <!-- Injecté dynamiquement par app.js -->
-        </div>
-
-      </div>
-    </section>
-
-    <!-- ===================================================================
-         VUE 4 : PAGE DE COMPTE RENDU & RESTITUTION FINALE
-         =================================================================== -->
-    <section id="view-restitution" class="view-panel">
-      <div class="restitution-container">
-        
-        <!-- En-tête de restitution & Boutons d'export -->
-        <div class="restitution-header-card no-print">
-          <div class="restitution-title-wrap">
-            <h2>Compte Rendu & Restitution Globale des Projets IoT</h2>
-            <p>Archive complète des livrables validés par les équipes à travers les 6 maisons du Village.</p>
-          </div>
-
-          <div class="restitution-export-actions">
-            <button class="btn btn-outline btn-sm" onclick="window.print()" id="btnExportPdf">
-              🖨️ Exporter en PDF / Imprimer
-            </button>
-            <button class="btn btn-primary btn-sm" onclick="exportMarkdownReport()" id="btnExportMd">
-              📥 Télécharger Rapport Markdown (.md)
-            </button>
-            <button class="btn btn-secondary btn-sm" onclick="startPresentationMode()" id="btnPresentationMode">
-              📽️ Mode Présentation Grand Écran
-            </button>
-          </div>
-        </div>
-
-        <!-- Filtre par équipe pour la restitution -->
-        <div class="restitution-filter-row no-print" id="restitutionFilterRow">
-          <button class="filter-pill active" onclick="filterRestitutionTeam('all')">Tous les Groupes</button>
-          <!-- Boutons des équipes injectés dynamiquement -->
-        </div>
-
-        <!-- Conteneur des Fiches Complètes de Restitution -->
-        <div class="restitution-cards-stack" id="restitutionCardsStack">
-          <!-- Injecté dynamiquement par app.js -->
-        </div>
-
-      </div>
-    </section>
-
   </main>
 
-  <!-- ===================================================================
-       MODALES & DIALOGUES INTERACTIFS
-       =================================================================== -->
-
-  <!-- Modale QR Code Inscription Mobile -->
-  <div class="modal-backdrop" id="modalQrCode" onclick="closeModalOnBackdrop(event, 'modalQrCode')">
-    <div class="modal-card">
-      <div class="modal-header">
-        <h3>📱 Scannez pour Rejoindre le Workshop</h3>
-        <button class="modal-close" onclick="closeModal('modalQrCode')">&times;</button>
-      </div>
-      <div class="modal-body text-center">
-        <p class="modal-instruction">Ouvrez l'appareil photo de votre smartphone pour accéder directement au test de personnalité :</p>
-        <div class="qr-canvas-box" id="qrCanvasBox">
-          <canvas id="qrCodeCanvas" width="220" height="220"></canvas>
-        </div>
-        <div class="qr-link-copy">
-          <input type="text" id="qrDirectUrl" class="form-input text-center" readonly value="http://localhost:3000">
-          <button class="btn btn-outline btn-xs mt-2" onclick="copyWorkshopUrl()">Copier le lien</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Modale Changement de Rédacteur Unique -->
-  <div class="modal-backdrop" id="modalChangeScribe" onclick="closeModalOnBackdrop(event, 'modalChangeScribe')">
-    <div class="modal-card">
-      <div class="modal-header">
-        <h3>✍️ Désigner le Rédacteur du Groupe</h3>
-        <button class="modal-close" onclick="closeModal('modalChangeScribe')">&times;</button>
-      </div>
-      <div class="modal-body">
-        <p class="modal-instruction">Choisissez le membre de l'équipe qui saisira les livrables pour les 6 Maisons :</p>
-        <div class="form-group">
-          <label for="selectNewScribe">Sélectionnez le nouveau rédacteur :</label>
-          <select id="selectNewScribe" class="form-select"></select>
-        </div>
-        <div class="modal-footer">
-          <button class="btn btn-outline" onclick="closeModal('modalChangeScribe')">Annuler</button>
-          <button class="btn btn-primary" onclick="confirmChangeScribe()">Valider la désignation</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Modale Inspection Maison / Animateur -->
-  <div class="modal-backdrop" id="modalHouseDetails" onclick="closeModalOnBackdrop(event, 'modalHouseDetails')">
-    <div class="modal-card modal-card-lg">
-      <div class="modal-header">
-        <h3 id="modalHouseTitle">Détails de la Maison</h3>
-        <button class="modal-close" onclick="closeModal('modalHouseDetails')">&times;</button>
-      </div>
-      <div class="modal-body" id="modalHouseBody">
-        <!-- Rempli par app.js -->
-      </div>
-    </div>
-  </div>
-
-  <!-- Modale Statut MySQL / Base de données -->
-  <div class="modal-backdrop" id="modalDbStatus" onclick="closeModalOnBackdrop(event, 'modalDbStatus')">
-    <div class="modal-card">
-      <div class="modal-header">
-        <h3>🗄️ État de la Base de Données</h3>
-        <button class="modal-close" onclick="closeModal('modalDbStatus')">&times;</button>
-      </div>
-      <div class="modal-body" id="modalDbDetails">
-        <!-- Rempli par app.js -->
-      </div>
-    </div>
-  </div>
-
-  <!-- Modale Authentification Animateur -->
-  <div class="modal-backdrop" id="modalAdminAuth" onclick="closeModalOnBackdrop(event, 'modalAdminAuth')">
-    <div class="modal-card">
-      <div class="modal-header">
-        <h3>👑 Accès Espace Animateur</h3>
-        <button class="modal-close" onclick="closeModal('modalAdminAuth')">&times;</button>
-      </div>
-      <div class="modal-body">
-        <p class="modal-instruction">Entrez le code d'accès animateur pour piloter le workshop, former les groupes et gérer les rédacteurs :</p>
-        <div class="form-group">
-          <label for="adminPinInput">Code PIN Animateur :</label>
-          <input type="password" id="adminPinInput" class="form-input text-center" placeholder="Tapez le code (ex: admin)" onkeydown="if(event.key==='Enter') submitAdminPin()">
-          <div id="adminPinError" style="display:none; color: var(--color-mushroom-red); font-size: 0.85rem; margin-top: 0.5rem; text-align: center;">Code d'accès incorrect. (Code par défaut : « admin »)</div>
-        </div>
-        <div class="modal-footer">
-          <button class="btn btn-outline" onclick="closeModal('modalAdminAuth')">Annuler</button>
-          <button class="btn btn-primary" onclick="submitAdminPin()">Déverrouiller l'Espace Animateur</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <script src="app.js"></script>
+  <script src="participant.js"></script>
 </body>
 </html>
