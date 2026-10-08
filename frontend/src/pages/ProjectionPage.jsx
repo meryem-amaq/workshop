@@ -11,14 +11,16 @@ export default function ProjectionPage() {
   const [dataUrl, setDataUrl] = useState('');
   const [localIp, setLocalIp] = useState('');
   const [port, setPort] = useState(3000);
+  const [isCloud, setIsCloud] = useState(false);
   const canvasRef = useRef(null);
 
   useEffect(() => {
     let isMounted = true;
     const fetchQr = async () => {
-      let target = `${window.location.origin}/register?join=1`;
+      const currentOrigin = window.location.origin;
+      let target = `${currentOrigin}/?join=1`;
       try {
-        const res = await fetch('/api/qrcode');
+        const res = await fetch(`/api/qrcode?url=${encodeURIComponent(target)}`);
         if (res.ok) {
           const data = await res.json();
           if (!isMounted) return;
@@ -26,6 +28,7 @@ export default function ProjectionPage() {
           if (data.dataUrl) setDataUrl(data.dataUrl);
           if (data.localIp) setLocalIp(data.localIp);
           if (data.port) setPort(data.port);
+          if (data.isCloud !== undefined) setIsCloud(data.isCloud);
         }
       } catch (e) {
         console.warn('Erreur chargement QR Code:', e);
@@ -151,11 +154,11 @@ export default function ProjectionPage() {
               </div>
             </div>
 
-            {/* Une seule ligne d'information textuelle : Wi-Fi Local */}
+            {/* Une seule ligne d'information textuelle : Wi-Fi Local ou Serveur Cloud */}
             <div className="qr-wifi-single-line">
               <span className="wifi-neon-dot"></span>
               <span className="wifi-text-content">
-                Wi-Fi Local : <strong>{wifiDisplayUrl}</strong>
+                {isCloud ? 'Serveur Cloud :' : 'Wi-Fi Local :'} <strong>{qrUrl ? qrUrl.replace('/?join=1', '').replace('?join=1', '') : wifiDisplayUrl}</strong>
               </span>
             </div>
 

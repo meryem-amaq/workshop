@@ -78,16 +78,28 @@ router.get('/session', async (req, res) => {
   }
 });
 
-// 4. Générateur de QR Code scannable officiel
+// 4. Générateur de QR Code scannable officiel (Compatible Heroku, Cloud, Wi-Fi Local & LAN)
 router.get('/qrcode', async (req, res) => {
   try {
     const localIp = getLocalIp();
+    const host = req.headers['x-forwarded-host'] || req.headers.host || '';
+    const rawProto = req.headers['x-forwarded-proto'] || req.protocol || 'http';
+    const proto = String(rawProto).split(',')[0].trim();
+
+    const isCloud = host.includes('herokuapp.com') ||
+                    host.includes('onrender.com') ||
+                    host.includes('railway.app') ||
+                    host.includes('vercel.app') ||
+                    (!host.includes('localhost') && !host.includes('127.0.0.1') && !/^\d+\.\d+\.\d+\.\d+/.test(host));
+
     let targetUrl = req.query.url;
 
-    if (targetUrl) {
-      targetUrl = targetUrl.replace(/localhost/gi, localIp).replace(/127\.0\.0\.1/gi, localIp);
-    } else {
-      targetUrl = `http://${localIp}:${PORT}/?join=1`;
+    if (!targetUrl) {
+      if (isCloud && host) {
+        targetUrl = `${proto}://${host}/?join=1`;
+      } else {
+        targetUrl = `http://${localIp}:${PORT}/?join=1`;
+      }
     }
 
     if (QRCode) {
@@ -100,9 +112,17 @@ router.get('/qrcode', async (req, res) => {
           light: '#ffffff'
         }
       });
-      return res.json({ success: true, dataUrl, url: targetUrl, localIp, port: PORT });
+      return res.json({
+        success: true,
+        dataUrl,
+        url: targetUrl,
+        localIp,
+        host,
+        isCloud,
+        port: PORT
+      });
     }
-    res.json({ success: false, url: targetUrl, localIp, port: PORT });
+    res.json({ success: false, url: targetUrl, localIp, host, isCloud, port: PORT });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
