@@ -20,7 +20,7 @@ export default function ModalAdminAuth() {
       setPin('');
       closeAdminModal();
       if (['/', '/register', '/quiz', '/waiting'].includes(location.pathname)) {
-        navigate('/admin');
+        navigate('/village');
       }
     } else {
       setError(true);

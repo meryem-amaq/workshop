@@ -267,31 +267,7 @@
     <section id="view-dashboard" class="view-panel">
       <div class="dashboard-container">
         
-        <!-- En-tête statistiques globales du Village -->
-        <div class="animator-control-bar" style="margin-bottom: 1.25rem;">
-          <div class="control-bar-left">
-            <div class="animator-badge">🍄 Carte 3D Interactive du Village IoT</div>
-            <div class="live-stats">
-              <span class="stat-item"><strong id="statParticipantsCount">0</strong> Inscrits</span>
-              <span class="stat-separator">•</span>
-              <span class="stat-item"><strong id="statTeamsCount">0</strong> Équipes</span>
-              <span class="stat-separator">•</span>
-              <span class="stat-item"><strong id="statDeliverablesCount">0</strong> Livrables</span>
-            </div>
-          </div>
 
-          <div class="control-bar-actions">
-            <button class="btn btn-outline btn-sm" onclick="switchAdminView('view-launch')">
-              👥 Gérer les Groupes
-            </button>
-            <button class="btn btn-outline btn-sm" onclick="switchAdminView('view-stages')">
-              📋 Voir Détail 6 Maisons
-            </button>
-            <button class="btn btn-secondary btn-sm" onclick="switchAdminView('view-projection')">
-              📱 Grand QR Code
-            </button>
-          </div>
-        </div>
 
         <!-- CARTE VISUELLE DU VILLAGE DES SCHTROUMPFS - STANDALONE -->
         <div class="village-map-card">
@@ -312,7 +288,7 @@
           <!-- L'arène visuelle 3D du Village -->
           <div class="village-arena" id="villageArena">
             <!-- Arrière-plan généré du village -->
-            <img src="assets/images/village-banner.jpg" alt="Village des Schtroumpfs" class="village-bg-img" id="villageBgImg">
+            <img src="assets/images/village-banner.jpg?v=3" alt="Village des Schtroumpfs" class="village-bg-img" id="villageBgImg">
 
             <!-- Chemin SVG lumineux reliant les 6 maisons -->
             <svg class="village-trail-svg" viewBox="0 0 1200 600" preserveAspectRatio="none">
@@ -456,11 +432,8 @@
           </div>
 
           <div class="restitution-export-actions">
-            <button class="btn btn-outline btn-sm" onclick="window.print()" id="btnExportPdf">
-              🖨️ Exporter en PDF / Imprimer
-            </button>
-            <button class="btn btn-primary btn-sm" onclick="exportMarkdownReport()" id="btnExportMd">
-              📥 Télécharger Rapport Markdown (.md)
+            <button class="btn btn-primary btn-sm" onclick="exportPdfReport()" id="btnExportPdf">
+              📄 Télécharger Rapport PDF (.pdf)
             </button>
             <button class="btn btn-secondary btn-sm" onclick="startPresentationMode()" id="btnPresentationMode">
               📽️ Mode Présentation Grand Écran

@@ -46,31 +46,7 @@ export default function AdminDashboardPage() {
     <div className="view-panel active">
       <div className="dashboard-container">
         
-        {/* En-tête statistiques globales du Village (Carte Standalone) */}
-        <div className="animator-control-bar" style={{ marginBottom: '1.25rem' }}>
-          <div className="control-bar-left">
-            <div className="animator-badge">🍄 Carte 3D Interactive du Village IoT</div>
-            <div className="live-stats">
-              <span className="stat-item"><strong id="statParticipantsCount">{participants.length}</strong> Inscrits</span>
-              <span className="stat-separator">•</span>
-              <span className="stat-item"><strong id="statTeamsCount">{teams.length}</strong> Équipes</span>
-              <span className="stat-separator">•</span>
-              <span className="stat-item"><strong id="statDeliverablesCount">{deliverables.length}</strong> Livrables</span>
-            </div>
-          </div>
 
-          <div className="control-bar-actions">
-            <button type="button" className="btn btn-outline btn-sm" onClick={() => navigate('/launch')}>
-              👥 Gérer les Groupes
-            </button>
-            <button type="button" className="btn btn-outline btn-sm" onClick={() => navigate('/stages')}>
-              📋 Voir Détail 6 Maisons
-            </button>
-            <button type="button" className="btn btn-secondary btn-sm" onClick={openQrModal}>
-              📱 QR Code
-            </button>
-          </div>
-        </div>
 
         {/* CARTE INTERACTIVE DU VILLAGE DES SCHTROUMPFS */}
         <div style={{ marginBottom: '2rem' }}>

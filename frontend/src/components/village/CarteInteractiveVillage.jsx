@@ -1,65 +1,127 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 
-// Mapping des 6 Maisons du Village IoT (Coordonnées en % ajustables)
+// =========================================================================
+// 1. LES 6 GRANDES MAISONS DU VILLAGE IoT (Coordonnées calibrées plein écran)
+// =========================================================================
 export const VILLAGE_HOUSES = [
   {
     num: 1,
-    name: 'Besoin',
+    name: 'Maison 1 : Besoin',
     fullName: 'Maison 1 : Définition du Besoin',
-    desc: 'Identification de l’utilisateur cible et formulation canonique du problème.',
-    icon: '🛖',
-    x: 12, // left: 12%
-    y: 76  // top: 76%
+    desc: 'Identification précise de l’utilisateur cible et formulation canonique du problème réel.',
+    icon: '🪵',
+    color: '#fbbf24',
+    badge: '16%',
+    x: 18, // Grande chaumière rurale en bas à gauche
+    y: 72,
+    clickArea: { width: 170, height: 160 }
   },
   {
     num: 2,
-    name: 'Idée IOT',
-    fullName: 'Maison 2 : Concept Produit IoT',
-    desc: 'Idée innovante, capteurs sélectionnés et valeur ajoutée connectée.',
+    name: 'Maison 2 : Idée IoT',
+    fullName: 'Maison 2 : Concept & Idée IoT',
+    desc: 'Définition du produit connecté : capteurs physiques mesurés et action automatisée.',
     icon: '💡',
-    x: 27, // left: 27%
-    y: 36  // top: 36%
+    color: '#38bdf8',
+    badge: '33%',
+    x: 31, // Grand champignon bleu à ampoule
+    y: 49,
+    clickArea: { width: 160, height: 160 }
   },
   {
     num: 3,
-    name: 'Faisabilité',
+    name: 'Maison 3 : Faisabilité',
     fullName: 'Maison 3 : Faisabilité & Architecture',
-    desc: 'Chaîne technique : Capteurs ➔ Microcontrôleur ➔ Réseau ➔ Cloud.',
+    desc: 'Chaîne de valeur technique : Capteurs ➔ Microcontrôleur ➔ Réseau ➔ Cloud.',
     icon: '⚙️',
-    x: 45, // left: 45%
-    y: 66  // top: 66%
+    color: '#f97316',
+    badge: '50%',
+    x: 48, // Grand atelier cuivre & engrenages
+    y: 73,
+    clickArea: { width: 170, height: 160 }
   },
   {
     num: 4,
-    name: 'Prototype',
-    fullName: 'Maison 4 : Prototype & Scénario',
-    desc: 'Maquette physique, protocole de test de validation et storyboard d’usage.',
+    name: 'Maison 4 : Prototype',
+    fullName: 'Maison 4 : Prototype & Algorithme',
+    desc: 'Maquette physique, protocole de test de validation et scénario logique d’usage.',
     icon: '🔌',
-    x: 61, // left: 61%
-    y: 30  // top: 30%
+    color: '#00e5ff',
+    badge: '66%',
+    x: 53, // Grand dôme cyber-labo
+    y: 36,
+    clickArea: { width: 170, height: 150 }
   },
   {
     num: 5,
-    name: 'Business',
+    name: 'Maison 5 : Business',
     fullName: 'Maison 5 : Business Model Canvas',
-    desc: 'Matrice économique en 9 blocs démontrant la viabilité du projet.',
-    icon: '📊',
-    x: 77, // left: 77%
-    y: 64  // top: 64%
+    desc: 'Modèle économique en 9 blocs démontrant la viabilité financière et la proposition de valeur.',
+    icon: '💎',
+    color: '#10b981',
+    badge: '83%',
+    x: 69, // Grande pagode émeraude de valeur
+    y: 59,
+    clickArea: { width: 160, height: 160 }
   },
   {
     num: 6,
-    name: 'Marché',
+    name: 'Maison 6 : Pitch Final',
     fullName: 'Maison 6 : Marché & Pitch Final',
-    desc: 'Go-to-market, métriques à 12 mois et pitch oral de 3 minutes chrono.',
+    desc: 'Go-to-market, indicateurs cibles à 12 mois et soutenance orale de 3 minutes chrono.',
     icon: '🏆',
+    color: '#f59e0b',
+    badge: '100%',
     isVictory: true,
-    x: 90, // left: 90%
-    y: 28  // top: 28%
+    x: 84, // Grand château doré du Pitch Final
+    y: 28,
+    clickArea: { width: 200, height: 180 }
   }
 ];
 
-// Mapping des avatars Schtroumpf selon le personalityProfile
+// Tracé naturel des waypoints épousant les pavés dorés du village
+export const CIRCUIT_WAYPOINTS = {
+  // 1 ➔ 2 : De la Maison 1, suit les pavés vers la droite et monte à la Maison 2
+  '1-2': [
+    { x: 18, y: 72 },
+    { x: 24, y: 78 },
+    { x: 29, y: 68 },
+    { x: 31, y: 56 },
+    { x: 31, y: 49 } // Devant Maison 2
+  ],
+  // 2 ➔ 3 : De la Maison 2, descend sur le sentier et rejoint la Maison 3
+  '2-3': [
+    { x: 31, y: 49 },
+    { x: 34, y: 58 },
+    { x: 38, y: 72 },
+    { x: 43, y: 82 },
+    { x: 48, y: 73 } // Devant Maison 3
+  ],
+  // 3 ➔ 4 : De la Maison 3, traverse le pont de bois vers le dôme tech
+  '3-4': [
+    { x: 48, y: 73 },
+    { x: 47, y: 58 },
+    { x: 49, y: 46 },
+    { x: 53, y: 36 } // Devant Maison 4
+  ],
+  // 4 ➔ 5 : Du dôme tech, descend vers la pagode émeraude
+  '4-5': [
+    { x: 53, y: 36 },
+    { x: 58, y: 44 },
+    { x: 64, y: 49 },
+    { x: 69, y: 59 } // Devant Maison 5
+  ],
+  // 5 ➔ 6 : De la pagode émeraude, traverse le pont et gravit les escaliers jusqu'au château
+  '5-6': [
+    { x: 69, y: 59 },
+    { x: 75, y: 59 },
+    { x: 81, y: 52 },
+    { x: 78, y: 38 },
+    { x: 84, y: 28 } // Devant Château
+  ]
+};
+
+// Mapping des avatars Schtroumpf selon le profil
 export const PROFILE_AVATARS = {
   professeur: '/assets/images/professeur.jpg',
   savant: '/assets/images/professeur.jpg',
@@ -87,108 +149,187 @@ export function getAvatarForProfile(profile) {
   return '/assets/images/professeur.jpg';
 }
 
-/**
- * Composant CarteInteractiveVillage
- * 
- * @param {Array} props.teams - Liste des équipes : [{ id, groupName, personalityProfile, currentStage }, ...]
- * @param {Function} props.onTeamClick - Callback lors du clic sur un avatar d'équipe
- * @param {Function} props.onHouseClick - Callback lors du clic sur une maison
- * @param {Boolean} props.enableDemoSimulation - Active la démo 3s (Étape 1 -> 2)
- */
+export function formatShortTeamName(team) {
+  if (!team) return 'Équipe';
+  const raw = team.name || team.groupName || team.archetype || '';
+  if (raw.includes('Professeur')) return 'Professeur';
+  if (raw.includes('Artiste')) return 'Artiste';
+  if (raw.includes('Critique')) return 'Critique';
+  if (raw.includes('Empathique')) return 'Empathique';
+  if (raw.includes('Sportif')) return 'Sportif';
+  return raw.replace(/^Les Schtroumpfs /i, '').replace(/ \(.*\)/g, '').trim() || `Groupe ${team.id}`;
+}
+
 export default function CarteInteractiveVillage({
   teams: externalTeams,
   onTeamClick,
   onHouseClick,
-  enableDemoSimulation = true
+  enableDemoSimulation = false
 }) {
-  // Données de base par défaut pour tester le composant immédiatement
   const initialTeams = useMemo(() => [
     {
       id: 1,
-      groupName: 'Les Bâtisseurs',
+      name: 'Professeur',
+      groupName: 'Professeur',
       personalityProfile: 'Professeur',
-      currentStage: 1
+      archetype: 'professeur',
+      current_house: 1,
+      currentStage: 1,
+      scribe_name: 'Amin (Scribe)'
     },
     {
       id: 2,
-      groupName: 'Les Innovateurs',
+      name: 'Artiste',
+      groupName: 'Artiste',
       personalityProfile: 'Artiste',
-      currentStage: 1
+      archetype: 'artiste',
+      current_house: 1,
+      currentStage: 1,
+      scribe_name: 'Sara (Scribe)'
     },
     {
       id: 3,
-      groupName: 'Les Électrons',
+      name: 'Sportif',
+      groupName: 'Sportif',
       personalityProfile: 'Sportif',
-      currentStage: 2
+      archetype: 'sportif',
+      current_house: 2,
+      currentStage: 2,
+      scribe_name: 'Yassine (Scribe)'
     },
     {
       id: 4,
-      groupName: 'Les Alchimistes',
+      name: 'Critique',
+      groupName: 'Critique',
       personalityProfile: 'Critique',
-      currentStage: 3
+      archetype: 'critique',
+      current_house: 3,
+      currentStage: 3,
+      scribe_name: 'Meryem (Scribe)'
+    },
+    {
+      id: 5,
+      name: 'Empathique',
+      groupName: 'Empathique',
+      personalityProfile: 'Empathique',
+      archetype: 'empathique',
+      current_house: 5,
+      currentStage: 5,
+      scribe_name: 'Inès (Scribe)'
     }
   ], []);
 
-  // État local synchronisé avec les props ou simulation
   const [teamsState, setTeamsState] = useState(
     externalTeams && externalTeams.length > 0 ? externalTeams : initialTeams
   );
 
-  const [activeHouseModal, setActiveHouseModal] = useState(null);
-  const [simulationActive, setSimulationActive] = useState(false);
+  const [selectedTeamId, setSelectedTeamId] = useState(
+    teamsState[0]?.id || 1
+  );
 
-  // Mettre à jour si externalTeams change
+  const [animatedPositions, setAnimatedPositions] = useState({});
+  const [activeHouseModal, setActiveHouseModal] = useState(null);
+  const activeAnimationsRef = useRef({});
+
+  // Initialiser les positions de base
+  useEffect(() => {
+    const initialPos = {};
+    teamsState.forEach((t) => {
+      const stage = Math.min(Math.max(t.current_house || t.currentStage || 1, 1), 6);
+      const house = VILLAGE_HOUSES.find((h) => h.num === stage) || VILLAGE_HOUSES[0];
+      initialPos[t.id] = { x: house.x, y: house.y, isWalking: false };
+    });
+    setAnimatedPositions(initialPos);
+  }, []);
+
+  // Synchroniser avec les équipes externes
   useEffect(() => {
     if (externalTeams && externalTeams.length > 0) {
       setTeamsState(externalTeams);
+      if (!selectedTeamId) setSelectedTeamId(externalTeams[0].id);
     }
   }, [externalTeams]);
 
-  // Script de simulation : fait avancer l'équipe 1 de l'étape 1 à 2 au bout de 3 secondes
-  useEffect(() => {
-    if (!enableDemoSimulation) return;
+  // Fonction pour animer le personnage point par point le long du sentier
+  const animateAlongCircuit = (teamId, fromStage, toStage) => {
+    const key = `${fromStage}-${toStage}`;
+    let waypoints = CIRCUIT_WAYPOINTS[key];
 
-    const timer = setTimeout(() => {
-      setTeamsState((prevTeams) =>
-        prevTeams.map((team) => {
-          if (team.id === 1 && team.currentStage === 1) {
-            return { ...team, currentStage: 2 };
-          }
-          return team;
-        })
-      );
-      setSimulationActive(true);
-    }, 3000);
+    if (!waypoints) {
+      const targetHouse = VILLAGE_HOUSES.find((h) => h.num === toStage) || VILLAGE_HOUSES[0];
+      waypoints = [{ x: targetHouse.x, y: targetHouse.y }];
+    }
 
-    return () => clearTimeout(timer);
-  }, [enableDemoSimulation]);
+    let stepIndex = 0;
+    const stepDuration = 260; // ms par point de passage
 
-  // Bouton pour tester manuellement le passage d'étapes en direct
+    if (activeAnimationsRef.current[teamId]) {
+      clearInterval(activeAnimationsRef.current[teamId]);
+    }
+
+    setAnimatedPositions((prev) => ({
+      ...prev,
+      [teamId]: {
+        ...(prev[teamId] || { x: waypoints[0].x, y: waypoints[0].y }),
+        isWalking: true
+      }
+    }));
+
+    const interval = setInterval(() => {
+      if (stepIndex < waypoints.length) {
+        const pt = waypoints[stepIndex];
+        setAnimatedPositions((prev) => ({
+          ...prev,
+          [teamId]: { x: pt.x, y: pt.y, isWalking: true }
+        }));
+        stepIndex++;
+      } else {
+        clearInterval(interval);
+        delete activeAnimationsRef.current[teamId];
+        const finalHouse = VILLAGE_HOUSES.find((h) => h.num === toStage) || VILLAGE_HOUSES[0];
+        setAnimatedPositions((prev) => ({
+          ...prev,
+          [teamId]: { x: finalHouse.x, y: finalHouse.y, isWalking: false }
+        }));
+      }
+    }, stepDuration);
+
+    activeAnimationsRef.current[teamId] = interval;
+  };
+
+  // Simulation manuelle / Déplacement guidé sur le circuit
   const simulateAdvanceTeam = (teamId) => {
+    const team = teamsState.find((t) => t.id === teamId);
+    if (!team) return;
+
+    const current = team.current_house || team.currentStage || 1;
+    const next = current < 6 ? current + 1 : 1;
+
+    // Déclencher l'animation le long du sentier
+    animateAlongCircuit(teamId, current, next);
+
+    // Mettre à jour l'état de l'équipe
     setTeamsState((prev) =>
       prev.map((t) => {
         if (t.id === teamId) {
-          const next = t.currentStage < 6 ? t.currentStage + 1 : 1;
-          return { ...t, currentStage: next };
+          return { ...t, current_house: next, currentStage: next };
         }
         return t;
       })
     );
   };
 
-  // Algorithme Anti-Superposition : calcule les coordonnées décalées de chaque équipe
+  // Calcul des coordonnées décalées avec anti-superposition
   const positionedTeams = useMemo(() => {
-    // 1. Grouper les équipes par étape
     const stageGroups = {};
     teamsState.forEach((t) => {
-      const stage = Math.min(Math.max(t.currentStage || 1, 1), 6);
+      const stage = Math.min(Math.max(t.current_house || t.currentStage || 1, 1), 6);
       if (!stageGroups[stage]) stageGroups[stage] = [];
       stageGroups[stage].push(t);
     });
 
-    // 2. Calculer les décalages en constellation pour chaque équipe
     return teamsState.map((team) => {
-      const stage = Math.min(Math.max(team.currentStage || 1, 1), 6);
+      const stage = Math.min(Math.max(team.current_house || team.currentStage || 1, 1), 6);
       const house = VILLAGE_HOUSES.find((h) => h.num === stage) || VILLAGE_HOUSES[0];
       const peers = stageGroups[stage] || [];
       const peerIndex = peers.findIndex((p) => p.id === team.id);
@@ -198,558 +339,757 @@ export default function CarteInteractiveVillage({
       let offsetY = 0;
 
       if (count > 1) {
-        // Rayon de dispersion en pixels selon le nombre d'équipes à la même étape
         const radius = count <= 3 ? 36 : 46;
         const angle = (peerIndex / count) * 2 * Math.PI - Math.PI / 2;
         offsetX = Math.cos(angle) * radius;
         offsetY = Math.sin(angle) * radius;
       }
 
+      const animPos = animatedPositions[team.id];
+      const posX = animPos ? animPos.x : house.x;
+      const posY = animPos ? animPos.y : house.y;
+      const isWalking = animPos ? animPos.isWalking : false;
+
       return {
         ...team,
         stage,
         house,
-        baseX: house.x,
-        baseY: house.y,
-        offsetX,
-        offsetY
+        posX,
+        posY,
+        offsetX: isWalking ? 0 : offsetX,
+        offsetY: isWalking ? 0 : offsetY,
+        isWalking
       };
     });
-  }, [teamsState]);
+  }, [teamsState, animatedPositions]);
+
+  const selectedTeam = teamsState.find((t) => t.id === selectedTeamId) || teamsState[0];
 
   return (
-    <div
-      style={{
-        position: 'relative',
-        width: '100%',
-        borderRadius: '16px',
-        overflow: 'hidden',
-        boxShadow: '0 20px 40px rgba(0,0,0,0.6)',
-        border: '1px solid rgba(255,255,255,0.1)',
-        background: '#070d19'
-      }}
-    >
-      
-      {/* Barre d'outils et légende en haut de la carte */}
-      <div
-        style={{
-          display: 'flex',
-          flexWrap: 'wrap',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: '12px',
-          padding: '1rem 1.25rem',
-          background: 'rgba(15, 23, 42, 0.95)',
-          backdropFilter: 'blur(12px)',
-          borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-          zIndex: 30
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <span style={{ fontSize: '1.5rem' }}>🍄</span>
-          <div>
-            <h3 style={{ color: '#fff', fontWeight: '800', fontSize: '1.1rem', margin: 0, lineHeight: 1.2 }}>
-              La Carte Interactive du Village IoT
-            </h3>
-            <p style={{ color: '#94a3b8', fontSize: '0.8rem', margin: 0 }}>
-              Progression en temps réel des équipes à travers les 6 Maisons champignons
-            </p>
+    <div className="village-game-container">
+      {/* 1. Barre Supérieure Style Jeu Vidéo (Quest HUD) */}
+      <div className="village-game-hud">
+        <div className="village-hud-left">
+          <div className="village-hud-badge">
+            <span className="village-hud-icon">🍄</span>
+            <div>
+              <h3 className="village-hud-title">Carte d'Aventure du Village IoT</h3>
+              <p className="village-hud-sub">Suivez les équipes le long des 6 Maisons champignons</p>
+            </div>
           </div>
         </div>
 
-        {/* Contrôles de simulation / Test */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          {simulationActive && (
-            <span
-              style={{
-                fontSize: '0.75rem',
-                color: '#4ade80',
-                background: 'rgba(6, 78, 59, 0.7)',
-                border: '1px solid rgba(74, 222, 128, 0.4)',
-                padding: '4px 10px',
-                borderRadius: '20px',
-                fontWeight: 600
-              }}
-            >
-              ✨ Démo active : Les Bâtisseurs sont passés à l'Étape 2 !
-            </span>
-          )}
+        <div className="village-hud-right">
+          {/* Sélecteur d'équipes rapide avec noms courts */}
+          <div className="hud-team-pills">
+            {teamsState.map((t) => {
+              const isSelected = selectedTeamId === t.id;
+              const shortName = formatShortTeamName(t);
+              return (
+                <button
+                  key={t.id}
+                  type="button"
+                  className={`hud-team-pill ${isSelected ? 'active' : ''}`}
+                  onClick={() => setSelectedTeamId(t.id)}
+                >
+                  🏕️ {shortName}
+                </button>
+              );
+            })}
+          </div>
+
           <button
             type="button"
-            onClick={() => simulateAdvanceTeam(1)}
-            style={{
-              padding: '6px 14px',
-              fontSize: '0.78rem',
-              fontWeight: '700',
-              color: '#38bdf8',
-              background: 'rgba(8, 47, 73, 0.8)',
-              border: '1px solid rgba(56, 189, 248, 0.5)',
-              borderRadius: '8px',
-              cursor: 'pointer',
-              transition: 'all 0.2s ease',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px'
-            }}
-            title="Tester l'animation fluide de déplacement"
+            className="village-btn-advance"
+            onClick={() => simulateAdvanceTeam(selectedTeamId)}
+            title="Faire marcher le Scribe le long du sentier en pavés"
           >
-            🏃 Faire Avancer Équipe 1 (+1 Étape)
+            <span>🚶‍♂️</span> Faire Marcher {formatShortTeamName(selectedTeam)} (+1 Étape)
           </button>
         </div>
       </div>
 
-      {/* L'Arène Visuelle 3D de la Carte */}
-      <div
-        style={{
-          position: 'relative',
-          width: '100%',
-          height: '560px',
-          overflow: 'hidden',
-          background: '#070d19',
-          userSelect: 'none'
-        }}
-      >
+      {/* 2. Arène Visuelle Plein Écran Haute Immersion (Sans aucun trait parasite) */}
+      <div className="village-game-canvas-wrap">
         
-        {/* 1. Image de fond isométrique du Village */}
+        {/* Illustration Haute Définition Plein Écran (Sans légende ni bordure) */}
         <img
-          src="/assets/images/village-banner.jpg"
-          alt="Village des Schtroumpfs"
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            width: '100%',
-            height: '100%',
-            objectFit: 'cover',
-            filter: 'brightness(0.9) contrast(1.1)',
-            pointerEvents: 'none',
-            zIndex: 1
-          }}
+          src="/assets/images/village-banner.jpg?v=3"
+          alt="Village IoT des Schtroumpfs"
+          className="village-map-bg-img"
         />
 
-        {/* 2. Chemins lumineux SVG reliant les 6 Maisons */}
-        <svg
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            width: '100%',
-            height: '100%',
-            pointerEvents: 'none',
-            zIndex: 5
-          }}
-          viewBox="0 0 1200 600"
-          preserveAspectRatio="none"
-        >
-          <defs>
-            {/* Dégradé néon le long du sentier */}
-            <linearGradient id="villageNeonPath" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="#38bdf8" stopOpacity="0.95" />
-              <stop offset="35%" stopColor="#818cf8" stopOpacity="0.95" />
-              <stop offset="70%" stopColor="#f59e0b" stopOpacity="0.95" />
-              <stop offset="100%" stopColor="#10b981" stopOpacity="0.95" />
-            </linearGradient>
-
-            {/* Effet de brillance lueur néon */}
-            <filter id="villageGlow" x="-20%" y="-20%" width="140%" height="140%">
-              <feGaussianBlur stdDeviation="6" result="blur1" />
-              <feGaussianBlur stdDeviation="12" result="blur2" />
-              <feMerge>
-                <feMergeNode in="blur2" />
-                <feMergeNode in="blur1" />
-                <feMergeNode in="SourceGraphic" />
-              </feMerge>
-            </filter>
-          </defs>
-
-          {/* Ligne de fond lumineuse continue */}
-          <path
-            d="M 144 456 Q 240 320 324 216 T 540 396 T 732 180 T 924 384 T 1080 168"
-            fill="none"
-            stroke="url(#villageNeonPath)"
-            strokeWidth="8"
-            strokeOpacity="0.35"
-            strokeLinecap="round"
-            filter="url(#villageGlow)"
-          />
-
-          {/* Sentier pointillé animé (flux de particules lumineuses) */}
-          <path
-            d="M 144 456 Q 240 320 324 216 T 540 396 T 732 180 T 924 384 T 1080 168"
-            fill="none"
-            stroke="url(#villageNeonPath)"
-            strokeWidth="5"
-            strokeDasharray="14 10"
-            strokeLinecap="round"
-            filter="url(#villageGlow)"
-            className="village-trail-dash-anim"
-          />
-        </svg>
-
-        {/* 3. Les 6 Maisons / Étapes (Pins fixes) */}
+        {/* 3. Zones Interactives Cliquables sur les 6 Grandes Maisons */}
         {VILLAGE_HOUSES.map((house) => {
           const teamsAtHouse = teamsState.filter(
-            (t) => (t.currentStage || 1) === house.num
+            (t) => (t.current_house || t.currentStage || 1) === house.num
           );
 
           return (
             <div
               key={house.num}
+              className="village-house-interactive-zone"
               style={{
-                position: 'absolute',
                 left: `${house.x}%`,
                 top: `${house.y}%`,
-                transform: 'translate(-50%, -50%)',
-                zIndex: 10,
-                cursor: 'pointer',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                transition: 'transform 0.2s ease'
+                width: `${house.clickArea.width}px`,
+                height: `${house.clickArea.height}px`
               }}
               onClick={() => {
                 setActiveHouseModal(house);
                 if (onHouseClick) onHouseClick(house);
               }}
+              title={`Cliquer pour voir la mission : ${house.fullName}`}
             >
-              {/* Cercle Pin de la maison */}
-              <div
-                style={{
-                  width: '54px',
-                  height: '54px',
-                  borderRadius: '50%',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  position: 'relative',
-                  backdropFilter: 'blur(10px)',
-                  border: house.isVictory ? '2.5px solid #f59e0b' : '2.5px solid #38bdf8',
-                  background: house.isVictory ? 'rgba(69, 26, 3, 0.85)' : 'rgba(15, 23, 42, 0.85)',
-                  boxShadow: house.isVictory
-                    ? '0 0 20px rgba(245, 158, 11, 0.6)'
-                    : '0 0 20px rgba(56, 189, 248, 0.5)'
-                }}
-              >
-                <span style={{ fontSize: '1.3rem', lineHeight: 1 }}>{house.icon}</span>
-                <span
-                  style={{
-                    position: 'absolute',
-                    top: '-8px',
-                    padding: '1px 6px',
-                    fontSize: '9px',
-                    fontWeight: '900',
-                    borderRadius: '10px',
-                    textTransform: 'uppercase',
-                    color: '#fff',
-                    background: house.isVictory ? '#f59e0b' : '#0284c7',
-                    boxShadow: '0 2px 4px rgba(0,0,0,0.4)'
-                  }}
-                >
-                  M{house.num}
-                </span>
-              </div>
-
-              {/* Étiquette sous la maison */}
-              <div
-                style={{
-                  marginTop: '4px',
-                  padding: '2px 8px',
-                  borderRadius: '20px',
-                  background: 'rgba(15, 23, 42, 0.92)',
-                  border: '1px solid rgba(255, 255, 255, 0.15)',
-                  textAlign: 'center',
-                  whiteSpace: 'nowrap',
-                  boxShadow: '0 4px 10px rgba(0,0,0,0.5)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '4px'
-                }}
-              >
-                <span style={{ fontSize: '11px', fontWeight: '800', color: '#38bdf8' }}>
-                  {house.name}
-                </span>
-                {teamsAtHouse.length > 0 && (
-                  <span
-                    style={{
-                      fontSize: '9px',
-                      fontWeight: '800',
-                      background: 'rgba(56, 189, 248, 0.25)',
-                      color: '#7dd3fc',
-                      padding: '1px 5px',
-                      borderRadius: '10px'
-                    }}
-                  >
-                    {teamsAtHouse.length}
-                  </span>
-                )}
-              </div>
+              {/* Pastille discrète du nombre d'équipes si présentes */}
+              {teamsAtHouse.length > 0 && (
+                <div className="house-teams-badge-pill">
+                  {teamsAtHouse.length} {teamsAtHouse.length > 1 ? 'équipes' : 'équipe'}
+                </div>
+              )}
             </div>
           );
         })}
 
-        {/* 4. Les Avatars des Équipes (Déplacement animé et anti-superposition) */}
+        {/* 4. Les Personnages / Scribes des Équipes en Marche 3D Stylée */}
         {positionedTeams.map((team) => {
-          const avatarUrl = getAvatarForProfile(team.personalityProfile);
+          const avatarUrl = getAvatarForProfile(team.archetype || team.personalityProfile);
+          const isWalking = team.isWalking;
+          const isSelected = selectedTeamId === team.id;
+          const archetypeColor = team.house ? team.house.color : '#38bdf8';
+          const shortName = formatShortTeamName(team);
 
           return (
             <div
               key={team.id}
+              className={`village-team-character ${isWalking ? 'character-jumping' : 'character-idle'} ${isSelected ? 'character-selected' : ''}`}
               style={{
-                position: 'absolute',
-                left: `calc(${team.baseX}% + ${team.offsetX}px)`,
-                top: `calc(${team.baseY}% + ${team.offsetY}px)`,
-                transform: 'translate(-50%, -100%)',
-                zIndex: 25,
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                cursor: 'pointer',
-                userSelect: 'none',
-                transition: 'left 1.2s cubic-bezier(0.34, 1.56, 0.64, 1), top 1.2s cubic-bezier(0.34, 1.56, 0.64, 1)'
+                left: `calc(${team.posX}% + ${team.offsetX}px)`,
+                top: `calc(${team.posY}% + ${team.offsetY}px)`,
+                transition: isWalking
+                  ? 'left 0.26s cubic-bezier(0.25, 1, 0.5, 1), top 0.26s cubic-bezier(0.25, 1, 0.5, 1)'
+                  : 'left 0.55s cubic-bezier(0.34, 1.56, 0.64, 1), top 0.55s cubic-bezier(0.34, 1.56, 0.64, 1)'
               }}
               onClick={(e) => {
                 e.stopPropagation();
+                setSelectedTeamId(team.id);
                 if (onTeamClick) onTeamClick(team);
               }}
             >
-              {/* Bulle flottante avec le groupName (au-dessus de l'avatar) */}
-              <div
-                style={{
-                  marginBottom: '4px',
-                  padding: '3px 10px',
-                  background: 'linear-gradient(135deg, #0284c7 0%, #1d4ed8 100%)',
-                  border: '1.5px solid rgba(125, 211, 252, 0.9)',
-                  borderRadius: '20px',
-                  boxShadow: '0 4px 14px rgba(2, 132, 199, 0.5), 0 2px 4px rgba(0,0,0,0.6)',
-                  textAlign: 'center',
-                  position: 'relative',
-                  whiteSpace: 'nowrap'
-                }}
-              >
-                <span
-                  style={{
-                    color: '#fff',
-                    fontWeight: '800',
-                    fontSize: '11px',
-                    letterSpacing: '0.3px',
-                    textShadow: '0 1px 2px rgba(0,0,0,0.5)'
-                  }}
-                >
-                  {team.groupName || `Groupe ${team.id}`}
+              {/* Bulle d'identification concise (Professeur, Artiste, etc.) */}
+              <div className="team-character-speech-bubble">
+                <span className="team-character-name">
+                  {shortName}
                 </span>
-                {/* Flèche pointeur vers le bas */}
+                {team.scribe_name && (
+                  <span className="team-character-scribe-tag">
+                    ✍️ {team.scribe_name}
+                  </span>
+                )}
+                <div className="team-character-arrow" />
+              </div>
+
+              {/* Conteneur 3D du Pion avec Avatar */}
+              <div className="pawn-3d-wrapper">
+                <div className="team-avatar-frame" style={{ borderColor: archetypeColor }}>
+                  <img
+                    src={avatarUrl}
+                    alt={team.name || team.groupName}
+                    className="team-avatar-img"
+                  />
+                  <div className="team-avatar-status-dot">
+                    {isWalking ? '⚡' : '✨'}
+                  </div>
+                </div>
+
+                {/* Socle rotatif néon */}
                 <div
+                  className="pawn-3d-base"
                   style={{
-                    position: 'absolute',
-                    left: '50%',
-                    bottom: '-4px',
-                    transform: 'translateX(-50%) rotate(45deg)',
-                    width: '7px',
-                    height: '7px',
-                    background: '#1d4ed8',
-                    borderRight: '1.5px solid rgba(125, 211, 252, 0.9)',
-                    borderBottom: '1.5px solid rgba(125, 211, 252, 0.9)'
+                    background: `radial-gradient(ellipse at center, ${archetypeColor} 0%, rgba(2,132,199,0.3) 70%, transparent 100%)`,
+                    boxShadow: `0 0 14px ${archetypeColor}`
                   }}
                 />
               </div>
 
-              {/* Avatar 3D du Schtroumpf (Dimensions fixées et compactes) */}
-              <div
-                style={{
-                  position: 'relative',
-                  width: '50px',
-                  height: '50px',
-                  borderRadius: '50%',
-                  padding: '2px',
-                  background: 'linear-gradient(135deg, #38bdf8 0%, #3b82f6 50%, #6366f1 100%)',
-                  boxShadow: '0 0 16px rgba(56, 189, 248, 0.6), 0 4px 10px rgba(0,0,0,0.6)'
-                }}
-              >
-                <img
-                  src={avatarUrl}
-                  alt={team.groupName}
-                  style={{
-                    width: '100%',
-                    height: '100%',
-                    borderRadius: '50%',
-                    objectFit: 'cover',
-                    display: 'block',
-                    border: '2px solid #ffffff'
-                  }}
-                />
-                {/* Badge profil miniature */}
+              {/* Ombre portée dynamique 3D au sol */}
+              <div className={`pawn-ground-shadow ${isWalking ? 'shadow-jumping' : ''}`} />
+
+              {/* Onde de choc d'énergie à l'étape */}
+              {!isWalking && (
                 <div
-                  style={{
-                    position: 'absolute',
-                    bottom: '-2px',
-                    right: '-2px',
-                    width: '18px',
-                    height: '18px',
-                    background: '#0f172a',
-                    border: '1.5px solid #38bdf8',
-                    borderRadius: '50%',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: '9px',
-                    color: '#fff',
-                    boxShadow: '0 2px 4px rgba(0,0,0,0.5)'
-                  }}
-                  title={`Profil : ${team.personalityProfile}`}
-                >
-                  ⚡
-                </div>
-              </div>
+                  className="pawn-landing-ripple"
+                  style={{ borderColor: `${archetypeColor}99` }}
+                />
+              )}
             </div>
           );
         })}
 
       </div>
 
-      {/* 5. Modale d'inspection d'une Maison */}
+      {/* 5. Modale de Quête / Détails de la Maison */}
       {activeHouseModal && (
         <div
-          style={{
-            position: 'fixed',
-            inset: 0,
-            zIndex: 100,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '1rem',
-            background: 'rgba(7, 13, 25, 0.85)',
-            backdropFilter: 'blur(8px)'
-          }}
+          className="village-quest-modal-backdrop"
           onClick={() => setActiveHouseModal(null)}
         >
           <div
-            style={{
-              background: '#0f172a',
-              border: '1px solid rgba(56, 189, 248, 0.4)',
-              borderRadius: '16px',
-              padding: '1.5rem',
-              maxWidth: '440px',
-              width: '100%',
-              boxShadow: '0 25px 50px -12px rgba(0,0,0,0.8)',
-              position: 'relative'
-            }}
+            className="village-quest-modal-card"
             onClick={(e) => e.stopPropagation()}
           >
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                paddingBottom: '0.75rem',
-                borderBottom: '1px solid rgba(255, 255, 255, 0.1)'
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span style={{ fontSize: '1.5rem' }}>{activeHouseModal.icon}</span>
-                <h4 style={{ color: '#fff', fontWeight: '800', fontSize: '1.1rem', margin: 0 }}>
-                  {activeHouseModal.fullName}
-                </h4>
+            <div className="village-quest-modal-head">
+              <div className="quest-modal-title-wrap">
+                <span className="quest-modal-icon">{activeHouseModal.icon}</span>
+                <div>
+                  <h4 className="quest-modal-title">{activeHouseModal.fullName}</h4>
+                  <span className="quest-modal-stage-badge" style={{ background: activeHouseModal.color }}>
+                    Étape Officielle • {activeHouseModal.badge}
+                  </span>
+                </div>
               </div>
               <button
                 type="button"
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  color: '#94a3b8',
-                  fontSize: '1.25rem',
-                  fontWeight: 'bold',
-                  cursor: 'pointer',
-                  padding: '4px'
-                }}
+                className="quest-modal-close"
                 onClick={() => setActiveHouseModal(null)}
               >
                 ✕
               </button>
             </div>
 
-            <p style={{ marginTop: '0.75rem', fontSize: '0.88rem', color: '#cbd5e1', lineHeight: 1.5 }}>
-              {activeHouseModal.desc}
-            </p>
+            <div className="quest-modal-body">
+              <div className="quest-mission-box">
+                <div className="quest-mission-title">📜 MISSION DE L'ÉTAPE :</div>
+                <p className="quest-mission-desc">{activeHouseModal.desc}</p>
+              </div>
 
-            <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid rgba(255, 255, 255, 0.1)' }}>
-              <h5
-                style={{
-                  fontSize: '0.75rem',
-                  fontWeight: '800',
-                  color: '#38bdf8',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.5px',
-                  marginBottom: '0.5rem'
-                }}
-              >
-                Équipes actuellement à cette étape :
-              </h5>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                {teamsState.filter((t) => (t.currentStage || 1) === activeHouseModal.num).length === 0 ? (
-                  <span style={{ fontSize: '0.8rem', color: '#64748b', fontStyle: 'italic' }}>
-                    Aucune équipe pour le moment.
-                  </span>
-                ) : (
-                  teamsState
-                    .filter((t) => (t.currentStage || 1) === activeHouseModal.num)
-                    .map((t) => (
-                      <span
-                        key={t.id}
-                        style={{
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '6px',
-                          padding: '4px 10px',
-                          background: 'rgba(8, 47, 73, 0.8)',
-                          border: '1px solid rgba(56, 189, 248, 0.4)',
-                          color: '#bae6fd',
-                          fontSize: '0.78rem',
-                          fontWeight: '700',
-                          borderRadius: '20px'
-                        }}
-                      >
-                        👥 {t.groupName}
-                      </span>
-                    ))
-                )}
+              <div className="quest-teams-at-stage">
+                <h5 className="quest-teams-title">
+                  👥 Équipes actuellement dans cette Maison ({teamsState.filter((t) => (t.current_house || t.currentStage || 1) === activeHouseModal.num).length}) :
+                </h5>
+                <div className="quest-teams-list">
+                  {teamsState.filter((t) => (t.current_house || t.currentStage || 1) === activeHouseModal.num).length === 0 ? (
+                    <span className="quest-no-team-txt">
+                      Aucune équipe dans cette maison pour l'instant.
+                    </span>
+                  ) : (
+                    teamsState
+                      .filter((t) => (t.current_house || t.currentStage || 1) === activeHouseModal.num)
+                      .map((t) => (
+                        <span key={t.id} className="quest-team-chip">
+                          🏕️ {t.name || t.groupName}
+                        </span>
+                      ))
+                  )}
+                </div>
               </div>
             </div>
 
-            <div style={{ marginTop: '1.25rem', display: 'flex', justifyContent: 'flex-end' }}>
+            <div className="quest-modal-foot">
               <button
                 type="button"
-                style={{
-                  padding: '6px 16px',
-                  background: '#0284c7',
-                  color: '#fff',
-                  fontSize: '0.85rem',
-                  fontWeight: '700',
-                  borderRadius: '8px',
-                  border: 'none',
-                  cursor: 'pointer'
-                }}
+                className="btn btn-primary btn-sm"
                 onClick={() => setActiveHouseModal(null)}
               >
-                Fermer
+                Continuer l'Aventure ➔
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Style CSS inline pour l'animation du sentier */}
+      {/* Styles CSS Plein Écran & Haute Résolution */}
       <style>{`
-        @keyframes dashScroll {
-          from {
-            stroke-dashoffset: 48;
+        .village-game-container {
+          position: relative;
+          width: 100%;
+          border-radius: 20px;
+          overflow: hidden;
+          box-shadow: 0 25px 50px rgba(0, 0, 0, 0.8), 0 0 40px rgba(56, 189, 248, 0.15);
+          border: 1.5px solid rgba(56, 189, 248, 0.3);
+          background: #070d19;
+        }
+
+        .village-game-hud {
+          display: flex;
+          flex-wrap: wrap;
+          align-items: center;
+          justify-content: space-between;
+          gap: 12px;
+          padding: 1rem 1.5rem;
+          background: rgba(15, 23, 42, 0.95);
+          backdrop-filter: blur(16px);
+          border-bottom: 1.5px solid rgba(56, 189, 248, 0.2);
+          z-index: 30;
+        }
+
+        .village-hud-badge {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+        }
+
+        .village-hud-icon {
+          font-size: 1.8rem;
+          filter: drop-shadow(0 0 8px #38bdf8);
+        }
+
+        .village-hud-title {
+          color: #f8fafc;
+          font-family: var(--font-heading, sans-serif);
+          font-weight: 800;
+          font-size: 1.15rem;
+          margin: 0;
+          text-shadow: 0 0 12px rgba(56, 189, 248, 0.4);
+        }
+
+        .village-hud-sub {
+          color: #94a3b8;
+          font-size: 0.82rem;
+          margin: 0;
+        }
+
+        .village-hud-right {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          flex-wrap: wrap;
+        }
+
+        .hud-team-pills {
+          display: flex;
+          gap: 6px;
+          flex-wrap: wrap;
+        }
+
+        .hud-team-pill {
+          background: rgba(15, 23, 42, 0.8);
+          color: #94a3b8;
+          border: 1px solid rgba(56, 189, 248, 0.25);
+          padding: 5px 12px;
+          border-radius: 14px;
+          font-size: 11px;
+          font-weight: 700;
+          cursor: pointer;
+          transition: all 0.2s ease;
+        }
+
+        .hud-team-pill.active {
+          background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+          color: #fff;
+          border-color: #38bdf8;
+          box-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
+        }
+
+        .village-btn-advance {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          padding: 8px 16px;
+          font-size: 0.85rem;
+          font-weight: 700;
+          color: #ffffff;
+          background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+          border: 1px solid rgba(56, 189, 248, 0.5);
+          border-radius: 12px;
+          cursor: pointer;
+          box-shadow: 0 4px 15px rgba(2, 132, 199, 0.4);
+          transition: all 0.2s ease;
+        }
+
+        .village-btn-advance:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 6px 20px rgba(2, 132, 199, 0.6);
+          border-color: #38bdf8;
+        }
+
+        /* 2. Arène Plein Écran */
+        .village-game-canvas-wrap {
+          position: relative;
+          width: 100%;
+          min-height: 760px;
+          height: calc(100vh - 180px);
+          overflow: hidden;
+          background: #070c18;
+          user-select: none;
+        }
+
+        .village-map-bg-img {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          object-position: center;
+          filter: brightness(1.02) contrast(1.04);
+          pointer-events: none;
+          z-index: 1;
+        }
+
+        /* 3. Zones Interactives sur les Maisons */
+        .village-house-interactive-zone {
+          position: absolute;
+          transform: translate(-50%, -50%);
+          z-index: 10;
+          cursor: pointer;
+          display: flex;
+          align-items: flex-end;
+          justify-content: center;
+          border-radius: 24px;
+          transition: all 0.25s ease;
+        }
+
+        .village-house-interactive-zone:hover {
+          background: rgba(56, 189, 248, 0.08);
+          box-shadow: inset 0 0 25px rgba(56, 189, 248, 0.35);
+        }
+
+        .house-teams-badge-pill {
+          background: rgba(15, 23, 42, 0.92);
+          border: 1.5px solid rgba(56, 189, 248, 0.7);
+          color: #7dd3fc;
+          font-size: 11px;
+          font-weight: 800;
+          padding: 3px 10px;
+          border-radius: 14px;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.6);
+          margin-bottom: 8px;
+        }
+
+        /* 4. Avatars & Déplacement Animé 3D Façon Pion RPG */
+        @keyframes pawnHopPhysics {
+          0% {
+            transform: translateY(0) scale(1, 1) rotate(0deg);
           }
-          to {
-            stroke-dashoffset: 0;
+          20% {
+            transform: translateY(-5px) scale(0.95, 1.05) rotate(-3deg);
+          }
+          50% {
+            transform: translateY(-24px) scale(1.05, 0.95) rotate(4deg);
+          }
+          75% {
+            transform: translateY(-12px) scale(1, 1) rotate(-2deg);
+          }
+          100% {
+            transform: translateY(0) scale(1, 1) rotate(0deg);
           }
         }
-        .village-trail-dash-anim {
-          animation: dashScroll 2s linear infinite;
+
+        @keyframes pawnIdleFloat {
+          0%, 100% {
+            transform: translateY(0);
+          }
+          50% {
+            transform: translateY(-6px);
+          }
+        }
+
+        @keyframes shadowHopPulse {
+          0%, 100% {
+            transform: scale(1);
+            opacity: 0.7;
+          }
+          50% {
+            transform: scale(0.5);
+            opacity: 0.25;
+          }
+        }
+
+        @keyframes landingRippleWave {
+          0% {
+            transform: scale(0.6);
+            opacity: 1;
+          }
+          100% {
+            transform: scale(2.4);
+            opacity: 0;
+          }
+        }
+
+        @keyframes pedestalRotateGlow {
+          0% {
+            transform: rotateX(70deg) rotateZ(0deg);
+          }
+          100% {
+            transform: rotateX(70deg) rotateZ(360deg);
+          }
+        }
+
+        .village-team-character {
+          position: absolute;
+          transform: translate(-50%, -100%);
+          z-index: 25;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          cursor: pointer;
+          user-select: none;
+        }
+
+        .character-jumping .pawn-3d-wrapper {
+          animation: pawnHopPhysics 0.26s cubic-bezier(0.25, 1, 0.5, 1) infinite;
+        }
+
+        .character-idle .pawn-3d-wrapper {
+          animation: pawnIdleFloat 2.8s ease-in-out infinite;
+        }
+
+        .character-selected .team-avatar-frame {
+          box-shadow: 0 0 25px #38bdf8, 0 0 45px #38bdf888 !important;
+          transform: scale(1.18);
+        }
+
+        .pawn-3d-wrapper {
+          position: relative;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          transform-style: preserve-3d;
+        }
+
+        .pawn-3d-base {
+          position: absolute;
+          bottom: -8px;
+          width: 58px;
+          height: 20px;
+          border-radius: 50%;
+          z-index: -1;
+          animation: pedestalRotateGlow 4s linear infinite;
+        }
+
+        .pawn-ground-shadow {
+          position: absolute;
+          bottom: -10px;
+          width: 48px;
+          height: 16px;
+          background: rgba(0, 0, 0, 0.65);
+          border-radius: 50%;
+          filter: blur(3px);
+          z-index: -2;
+          transition: transform 0.2s ease, opacity 0.2s ease;
+        }
+
+        .shadow-jumping {
+          animation: shadowHopPulse 0.26s ease infinite;
+        }
+
+        .pawn-landing-ripple {
+          position: absolute;
+          bottom: -10px;
+          width: 40px;
+          height: 18px;
+          border-radius: 50%;
+          border: 2px solid #38bdf8;
+          z-index: -3;
+          animation: landingRippleWave 2s cubic-bezier(0.2, 0.8, 0.2, 1) infinite;
+        }
+
+        .team-character-speech-bubble {
+          margin-bottom: 6px;
+          padding: 3px 12px;
+          background: linear-gradient(135deg, #0284c7 0%, #1e40af 100%);
+          border: 1.5px solid rgba(125, 211, 252, 0.9);
+          border-radius: 16px;
+          box-shadow: 0 4px 14px rgba(2, 132, 199, 0.6), 0 2px 4px rgba(0,0,0,0.6);
+          text-align: center;
+          position: relative;
+          white-space: nowrap;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          z-index: 30;
+        }
+
+        .team-character-name {
+          color: #fff;
+          font-weight: 800;
+          font-size: 11.5px;
+          text-shadow: 0 1px 2px rgba(0,0,0,0.6);
+        }
+
+        .team-character-scribe-tag {
+          color: #fef08a;
+          font-size: 9px;
+          font-weight: 700;
+        }
+
+        .team-character-arrow {
+          position: absolute;
+          left: 50%;
+          bottom: -4px;
+          transform: translateX(-50%) rotate(45deg);
+          width: 7px;
+          height: 7px;
+          background: #1e40af;
+          border-right: 1.5px solid rgba(125, 211, 252, 0.9);
+          border-bottom: 1.5px solid rgba(125, 211, 252, 0.9);
+        }
+
+        .team-avatar-frame {
+          position: relative;
+          width: 52px;
+          height: 52px;
+          border-radius: 50%;
+          padding: 2.5px;
+          background: linear-gradient(135deg, #38bdf8 0%, #3b82f6 50%, #f59e0b 100%);
+          box-shadow: 0 0 20px rgba(56, 189, 248, 0.8), 0 8px 16px rgba(0,0,0,0.7);
+          transition: transform 0.2s ease;
+        }
+
+        .village-team-character:hover .team-avatar-frame {
+          transform: scale(1.1);
+        }
+
+        .team-avatar-img {
+          width: 100%;
+          height: 100%;
+          border-radius: 50%;
+          object-fit: cover;
+          display: block;
+          border: 2px solid #ffffff;
+        }
+
+        .team-avatar-status-dot {
+          position: absolute;
+          bottom: -2px;
+          right: -2px;
+          width: 18px;
+          height: 18px;
+          background: #0f172a;
+          border: 1.5px solid #38bdf8;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 9px;
+          box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+
+        /* 5. Modale Quête */
+        .village-quest-modal-backdrop {
+          position: fixed;
+          inset: 0;
+          z-index: 100;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 1rem;
+          background: rgba(7, 13, 25, 0.85);
+          backdrop-filter: blur(10px);
+        }
+
+        .village-quest-modal-card {
+          background: #0f172a;
+          border: 1.5px solid rgba(56, 189, 248, 0.4);
+          border-radius: 18px;
+          padding: 1.5rem;
+          maxWidth: 460px;
+          width: 100%;
+          box-shadow: 0 25px 50px rgba(0,0,0,0.8), 0 0 30px rgba(56, 189, 248, 0.2);
+        }
+
+        .village-quest-modal-head {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding-bottom: 0.85rem;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .quest-modal-title-wrap {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+        }
+
+        .quest-modal-icon {
+          font-size: 1.8rem;
+        }
+
+        .quest-modal-title {
+          color: #fff;
+          font-weight: 800;
+          font-size: 1.15rem;
+          margin: 0;
+        }
+
+        .quest-modal-stage-badge {
+          display: inline-block;
+          font-size: 9px;
+          font-weight: 800;
+          padding: 2px 8px;
+          border-radius: 10px;
+          color: #fff;
+          margin-top: 3px;
+        }
+
+        .quest-modal-close {
+          background: none;
+          border: none;
+          color: #94a3b8;
+          font-size: 1.25rem;
+          cursor: pointer;
+        }
+
+        .quest-mission-box {
+          background: rgba(15, 23, 42, 0.6);
+          border: 1px solid rgba(56, 189, 248, 0.2);
+          border-radius: 12px;
+          padding: 1rem;
+          margin: 1rem 0;
+        }
+
+        .quest-mission-title {
+          font-size: 0.78rem;
+          font-weight: 800;
+          color: #38bdf8;
+          margin-bottom: 0.4rem;
+        }
+
+        .quest-mission-desc {
+          color: #cbd5e1;
+          font-size: 0.88rem;
+          line-height: 1.5;
+          margin: 0;
+        }
+
+        .quest-teams-title {
+          font-size: 0.8rem;
+          font-weight: 800;
+          color: #fbbf24;
+          margin-bottom: 0.5rem;
+        }
+
+        .quest-teams-list {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 8px;
+        }
+
+        .quest-team-chip {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          padding: 5px 12px;
+          background: rgba(8, 47, 73, 0.8);
+          border: 1px solid rgba(56, 189, 248, 0.4);
+          color: #bae6fd;
+          font-size: 0.8rem;
+          font-weight: 700;
+          borderRadius: 20px;
+        }
+
+        .quest-no-team-txt {
+          color: #64748b;
+          font-size: 0.82rem;
+          font-style: italic;
+        }
+
+        .quest-modal-foot {
+          margin-top: 1.25rem;
+          display: flex;
+          justify-content: flex-end;
         }
       `}</style>
     </div>

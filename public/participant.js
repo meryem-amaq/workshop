@@ -112,10 +112,10 @@ const ARCHETYPES = {
 function getArchetypeDisplayName(archKey) {
   const map = {
     Artiste: 'Artiste',
-    Professeur: 'Professeur (Théoricien)',
+    Professeur: 'Professeur',
     Critique: 'Critique',
-    Empathique: 'Empathique (Sentimental)',
-    Sportif: 'Sportif (Action Man)'
+    Empathique: 'Empathique',
+    Sportif: 'Sportif'
   };
   return map[archKey] || archKey;
 }

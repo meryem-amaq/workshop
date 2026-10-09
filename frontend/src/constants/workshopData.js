@@ -30,7 +30,7 @@ export const LIKERT_SCALE = [
 
 export const ARCHETYPES = {
   Artiste: {
-    name: 'Schtroumpf Artiste',
+    name: 'Artiste',
     displayName: 'Artiste',
     tagline: 'L\'imagination sans limites et le sens du design',
     avatar: '/assets/images/artiste.jpg',
@@ -45,12 +45,12 @@ export const ARCHETYPES = {
     ]
   },
   Professeur: {
-    name: 'Schtroumpf Professeur (Théoricien)',
-    displayName: 'Professeur (Théoricien)',
+    name: 'Professeur',
+    displayName: 'Professeur',
     tagline: 'L\'architecture rigoureuse et la logique technique',
     avatar: '/assets/images/professeur.jpg',
     color: '#0284c7',
-    badge: 'Professeur (Théoricien)',
+    badge: 'Professeur',
     associatedQuestions: 'Q3 + Q8 + Q13',
     desc: 'Vous décomposez chaque système en blocs fonctionnels clairs. Pour vous, un projet IoT doit être robuste, documenté et techniquement infaillible.',
     powers: [
@@ -60,7 +60,7 @@ export const ARCHETYPES = {
     ]
   },
   Critique: {
-    name: 'Schtroumpf Critique',
+    name: 'Critique',
     displayName: 'Critique',
     tagline: 'L\'exigence de faisabilité et le regard acéré',
     avatar: '/assets/images/critique.jpg',
@@ -75,12 +75,12 @@ export const ARCHETYPES = {
     ]
   },
   Empathique: {
-    name: 'Schtroumpf Empathique (Sentimental)',
-    displayName: 'Empathique (Sentimental)',
+    name: 'Empathique',
+    displayName: 'Empathique',
     tagline: 'Le facteur humain et l\'utilité sociétale',
     avatar: '/assets/images/empathique.jpg',
     color: '#10b981',
-    badge: 'Empathique (Sentimental)',
+    badge: 'Empathique',
     associatedQuestions: 'Q5 + Q10 + Q15',
     desc: 'Vous vous mettez à la place de l\'humain qui utilisera la technologie. Pour vous, un objet connecté doit apporter du réconfort, du lien social ou un vrai soulagement au quotidien.',
     powers: [
@@ -90,12 +90,12 @@ export const ARCHETYPES = {
     ]
   },
   Sportif: {
-    name: 'Schtroumpf Sportif (Action Man)',
-    displayName: 'Sportif (Action Man)',
+    name: 'Sportif',
+    displayName: 'Sportif',
     tagline: 'Le dynamisme athlétique et l\'énergie de concrétisation',
     avatar: '/assets/images/sportif.jpg',
     color: '#f59e0b',
-    badge: 'Sportif (Action Man)',
+    badge: 'Sportif',
     associatedQuestions: 'Q1 + Q6 + Q11',
     desc: 'Moins de paroles, plus d\'action ! Vous aimez tester des maquettes physiques, brancher des cartes et faire fonctionner le premier prototype au plus vite sur le terrain avec une énergie débordante.',
     powers: [
@@ -111,12 +111,12 @@ export function getArchetypeDisplayName(archKey) {
   if (meta && meta.displayName) return meta.displayName;
   const map = {
     Artiste: 'Artiste',
-    Professeur: 'Professeur (Théoricien)',
+    Professeur: 'Professeur',
     Critique: 'Critique',
-    Empathique: 'Empathique (Sentimental)',
-    Sportif: 'Sportif (Action Man)'
+    Empathique: 'Empathique',
+    Sportif: 'Sportif'
   };
-  return map[archKey] || archKey || 'Schtroumpf';
+  return map[archKey] || archKey || 'Artiste';
 }
 
 export const HOUSES_META = {

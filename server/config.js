@@ -54,11 +54,11 @@ const ARCHETYPES_LIST = ['Artiste', 'Professeur', 'Critique', 'Empathique', 'Spo
 
 // Noms officiels par défaut pour les équipes
 const TEAM_NAME_TEMPLATES = {
-  Artiste: 'Les Schtroumpfs Artistes',
-  Professeur: 'Les Schtroumpfs Professeurs (Théoriciens)',
-  Critique: 'Les Schtroumpfs Critiques',
-  Empathique: 'Les Schtroumpfs Empathiques (Sentimentaux)',
-  Sportif: 'Les Schtroumpfs Sportifs (Action Man)'
+  Artiste: 'Artiste',
+  Professeur: 'Professeur',
+  Critique: 'Critique',
+  Empathique: 'Empathique',
+  Sportif: 'Sportif'
 };
 
 // Métadonnées complètes des archétypes Schtroumpf (cartes de visite, couleurs, avatars, pouvoirs)

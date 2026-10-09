@@ -52,7 +52,7 @@ export default function Header() {
               </NavLink>
 
               <NavLink
-                to="/admin"
+                to="/village"
                 className={({ isActive }) => `nav-tab-pro ${isActive ? 'active' : ''}`}
               >
                 <span className="tab-icon">🍄</span>

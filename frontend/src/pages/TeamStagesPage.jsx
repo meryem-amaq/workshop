@@ -35,7 +35,7 @@ export default function TeamStagesPage() {
             <button type="button" className="btn btn-outline btn-sm" onClick={refreshWorkshopData}>
               🔄 Rafraîchir en Direct
             </button>
-            <button type="button" className="btn btn-primary btn-sm" onClick={() => navigate('/admin')}>
+            <button type="button" className="btn btn-primary btn-sm" onClick={() => navigate('/village')}>
               🍄 Voir la Carte 3D
             </button>
           </div>
