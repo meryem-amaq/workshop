@@ -178,7 +178,7 @@ export default function RegisterQuizPage() {
             lastName={lastName}
             setLastName={setLastName}
             onSubmit={handleStartQuiz}
-            onBack={() => navigate('/')}
+            onBack={() => navigate('/register')}
           />
         ) : (
           <QuizQuestionCard

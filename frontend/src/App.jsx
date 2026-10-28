@@ -19,8 +19,13 @@ import RestitutionPage from './pages/RestitutionPage';
 import ProjectionPage from './pages/ProjectionPage';
 import LoginPage from './pages/LoginPage';
 
+// Destination d'un participant dÈj‡ inscrit (jamais la page de login)
+function participantHome(currentUser) {
+  return currentUser ? (currentUser.team_id ? '/team' : '/waiting') : null;
+}
+
 function RootEntry() {
-  const { setAdminMode } = useWorkshop();
+  const { setAdminMode, currentUser, isAdmin } = useWorkshop();
   const isJoin = typeof window !== 'undefined' && window.location.search.includes('join=1');
   React.useEffect(() => {
     // Un scan du QR code = parcours participant : on quitte toute session admin
@@ -29,13 +34,24 @@ function RootEntry() {
   if (isJoin) {
     return <RegisterQuizPage />;
   }
+  if (!isAdmin && currentUser) {
+    return <Navigate to={participantHome(currentUser)} replace />;
+  }
   return <Navigate to="/login" replace />;
 }
 
 // Pages r√©serv√©es au Super Admin : redirection vers /login si non connect√©
 function AdminOnly({ children }) {
-  const { isAdmin } = useWorkshop();
-  return isAdmin ? children : <Navigate to="/login" replace />;
+  const { isAdmin, currentUser } = useWorkshop();
+  if (isAdmin) return children;
+  return <Navigate to={participantHome(currentUser) || '/login'} replace />;
+}
+
+// Toute URL inconnue : un participant inscrit reste dans son parcours
+function FallbackRoute() {
+  const { isAdmin, currentUser } = useWorkshop();
+  if (!isAdmin && currentUser) return <Navigate to={participantHome(currentUser)} replace />;
+  return <Navigate to="/login" replace />;
 }
 
 export default function App() {
@@ -71,7 +87,7 @@ export default function App() {
               <Route path="/home" element={<Navigate to="/login" replace />} />
 
               {/* Redirection universelle vers le Login */}
-              <Route path="*" element={<Navigate to="/login" replace />} />
+              <Route path="*" element={<FallbackRoute />} />
             </Routes>
           </main>
 
