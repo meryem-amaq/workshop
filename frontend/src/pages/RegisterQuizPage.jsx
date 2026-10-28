@@ -153,8 +153,8 @@ export default function RegisterQuizPage() {
       localStorage.removeItem('smurf_quiz_draft');
       setCurrentUser(data.participant);
       showToast('🎉 Profil Schtroumpf calculé avec succès !', 'success');
-      await refreshWorkshopData();
       navigate('/waiting');
+      refreshWorkshopData();
     } catch (err) {
       showToast(err.message, 'error');
     } finally {

@@ -19,9 +19,9 @@ import RestitutionPage from './pages/RestitutionPage';
 import ProjectionPage from './pages/ProjectionPage';
 import LoginPage from './pages/LoginPage';
 
-// Destination d'un participant déjà inscrit (uniquement vers /team si les équipes sont formées, sinon salle d'attente)
+// Destination d'un participant connecté
 function participantHome(currentUser, sessionPhase) {
-  if (!currentUser) return null;
+  if (!currentUser) return '/register';
   if (sessionPhase === 'teams_formed' && currentUser.team_id) {
     return '/team';
   }
@@ -29,46 +29,35 @@ function participantHome(currentUser, sessionPhase) {
 }
 
 function RootEntry() {
-  const { setAdminMode, setCurrentUser, isAdmin } = useWorkshop();
-  const isJoin = typeof window !== 'undefined' && window.location.search.includes('join=1');
+  const { currentUser, isAdmin, sessionPhase } = useWorkshop();
 
-  React.useEffect(() => {
-    // Si scan du QR code (?join=1) : on démarre une inscription toute neuve (nettoyage de toute session précédente)
-    if (isJoin) {
-      setAdminMode(false);
-      setCurrentUser(null);
-      try {
-        localStorage.removeItem('smurf_quiz_draft');
-      } catch (e) {}
-    }
-  }, [isJoin, setAdminMode, setCurrentUser]);
-
-  // 1. Scan du QR Code (?join=1) : C'est un ÉTUDIANT qui rejoint -> formulaire d'inscription (Nom & Prénom)
-  if (isJoin) {
-    return <RegisterQuizPage />;
+  // 1. Participant déjà inscrit : va directement dans son parcours (Salle d'attente ou Espace Équipe)
+  if (currentUser && !isAdmin) {
+    return <Navigate to={participantHome(currentUser, sessionPhase)} replace />;
   }
 
-  // 2. Super Admin déjà connecté : C'est l'ANIMATEUR -> Écran de Projection du Grand QR Code
+  // 2. Super Admin déjà connecté : va sur l'écran de projection du Grand QR Code
   if (isAdmin) {
     return <Navigate to="/projection" replace />;
   }
 
-  // 3. Clic sur "Open App" ou ouverture du site racine sans QR code :
-  // C'est l'ANIMATEUR sur son ordinateur -> Page de Connexion Officielle pour ouvrir le QR Code
+  // 3. Personne n'est connecté :
+  // Sur un ordinateur/tablette ouvrant le site racine, c'est l'animateur qui prépare l'atelier -> Page de Login
   return <Navigate to="/login" replace />;
 }
 
 function AdminOnly({ children }) {
   const { isAdmin, currentUser, sessionPhase } = useWorkshop();
   if (isAdmin) return children;
-  return <Navigate to={participantHome(currentUser, sessionPhase) || '/login'} replace />;
+  return <Navigate to={currentUser ? participantHome(currentUser, sessionPhase) : '/login'} replace />;
 }
 
-// Toute URL inconnue : un participant inscrit reste dans son parcours
+// Toute URL inconnue
 function FallbackRoute() {
   const { isAdmin, currentUser, sessionPhase } = useWorkshop();
-  if (!isAdmin && currentUser) return <Navigate to={participantHome(currentUser, sessionPhase)} replace />;
-  return <Navigate to="/login" replace />;
+  if (isAdmin) return <Navigate to="/projection" replace />;
+  if (currentUser) return <Navigate to={participantHome(currentUser, sessionPhase)} replace />;
+  return <Navigate to="/register" replace />;
 }
 
 export default function App() {
@@ -79,11 +68,11 @@ export default function App() {
           <Header />
           <main className="main-content">
             <Routes>
-              {/* Si ?join=1 (via QR Code) -> Questionnaire. Sinon -> /login pour l'Animateur */}
+              {/* Accueil intelligent */}
               <Route path="/" element={<RootEntry />} />
               <Route path="/login" element={<LoginPage />} />
 
-              {/* Parcours des Incubés / Participants (accessible via le QR Code) */}
+              {/* Parcours des Incubés / Participants (accessible par QR Code ou direct) */}
               <Route path="/register" element={<RegisterQuizPage />} />
               <Route path="/quiz" element={<RegisterQuizPage />} />
               <Route path="/waiting" element={<WaitingRoomPage />} />
@@ -103,7 +92,7 @@ export default function App() {
               <Route path="/restitution" element={<RestitutionPage />} />
               <Route path="/home" element={<Navigate to="/login" replace />} />
 
-              {/* Redirection universelle vers le Login */}
+              {/* Redirection universelle de secours */}
               <Route path="*" element={<FallbackRoute />} />
             </Routes>
           </main>

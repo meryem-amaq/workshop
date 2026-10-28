@@ -39,7 +39,7 @@ export default function ProjectionPage() {
 
     // En ligne (Heroku...) : l'adresse réelle du site ouvert = toujours valide.
     // En local : on remplace ensuite localhost par l'IP Wi-Fi (scannable par téléphone).
-    buildQr(`${origin}/?join=1`);
+    buildQr(`${origin}/register`);
 
     const fetchServerInfo = async () => {
       try {
@@ -53,7 +53,7 @@ export default function ProjectionPage() {
           if (srvPort) setPort(srvPort);
           setIsCloud(!isLocalHost);
           if (isLocalHost && ip) {
-            buildQr(`http://${ip}:${srvPort || window.location.port || 3000}/?join=1`);
+            buildQr(`http://${ip}:${srvPort || window.location.port || 3000}/register`);
           }
         }
       } catch (e) {

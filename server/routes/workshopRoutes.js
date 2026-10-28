@@ -98,9 +98,9 @@ router.get('/qrcode', async (req, res) => {
 
     if (!targetUrl) {
       if (isCloud && host) {
-        targetUrl = `${proto}://${host}/?join=1`;
+        targetUrl = `${proto}://${host}/register`;
       } else {
-        targetUrl = `http://${localIp}:${PORT}/?join=1`;
+        targetUrl = `http://${localIp}:${PORT}/register`;
       }
     }
 
