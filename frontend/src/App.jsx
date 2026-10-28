@@ -25,21 +25,20 @@ function participantHome(currentUser) {
 }
 
 function RootEntry() {
-  const { setAdminMode, currentUser, isAdmin } = useWorkshop();
+  const { setAdminMode } = useWorkshop();
   const isJoin = typeof window !== 'undefined' && window.location.search.includes('join=1');
   React.useEffect(() => {
     // Un scan du QR code = parcours participant : on quitte toute session admin
     if (isJoin) setAdminMode(false);
   }, [isJoin]);
+
+  // Si l'utilisateur arrive via le QR Code (?join=1), il va directement au questionnaire
   if (isJoin) {
     return <RegisterQuizPage />;
   }
-  if (!isAdmin && currentUser) {
-    return <Navigate to={participantHome(currentUser)} replace />;
-  }
+  // Sinon, toute personne qui tape l'URL accède directement à la page de Login
   return <Navigate to="/login" replace />;
 }
-
 // Pages réservées au Super Admin : redirection si non connecté
 function AdminOnly({ children }) {
   const { isAdmin, currentUser } = useWorkshop();

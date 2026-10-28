@@ -96,52 +96,40 @@ export default function LoginPage() {
           </p>
         </div>
 
-        {isAdmin ? (
-          /* État déjà connecté */
+        {/* Formulaire standard Email + Mot de passe - Toujours affiché */}
+        {isAdmin && (
           <div style={{
             background: 'rgba(16, 185, 129, 0.12)',
             border: '1px solid rgba(16, 185, 129, 0.35)',
-            borderRadius: '16px',
-            padding: '1.5rem',
-            marginBottom: '1rem'
+            borderRadius: '12px',
+            padding: '0.85rem 1rem',
+            marginBottom: '1.25rem',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '0.5rem',
+            textAlign: 'left'
           }}>
-            <div style={{ color: '#10b981', fontWeight: '700', fontSize: '1.05rem', marginBottom: '0.5rem' }}>
-              ✓ Vous êtes déjà connecté en Super Admin
+            <div>
+              <div style={{ color: '#10b981', fontWeight: '700', fontSize: '0.85rem' }}>
+                ✓ Connecté en Super Admin
+              </div>
+              <div style={{ color: '#94a3b8', fontSize: '0.75rem' }}>
+                Session active dans ce navigateur
+              </div>
             </div>
-            <p style={{ color: '#cbd5e1', fontSize: '0.85rem', marginBottom: '1.5rem' }}>
-              Vous avez accès à l'ensemble des modules d'animation et de supervision.
-            </p>
-
             <button
               type="button"
-              className="btn btn-primary btn-block btn-lg pulse-glow"
+              className="btn btn-primary btn-xs"
               onClick={() => navigate('/projection')}
-              style={{ width: '100%', minHeight: '48px', fontWeight: '700', marginBottom: '0.75rem' }}
+              style={{ fontSize: '0.78rem', padding: '0.35rem 0.65rem' }}
             >
-              📱 Accéder à la Projection (QR Code) ➔
-            </button>
-
-            <button
-              type="button"
-              className="btn btn-outline btn-block btn-sm"
-              onClick={() => navigate('/village')}
-              style={{ width: '100%', marginBottom: '1rem' }}
-            >
-              🍄 Voir la Carte 3D du Village
-            </button>
-
-            <button
-              type="button"
-              className="btn btn-ghost btn-xs"
-              style={{ color: '#ef4444', textDecoration: 'underline' }}
-              onClick={handleLogout}
-            >
-              🚪 Se déconnecter
+              Accéder ➔
             </button>
           </div>
-        ) : (
-          /* Formulaire standard Email + Mot de passe */
-          <form onSubmit={handleLogin} style={{ textAlign: 'left' }}>
+        )}
+
+        <form onSubmit={handleLogin} style={{ textAlign: 'left' }}>
 
             {/* Champ Email */}
             <div style={{ marginBottom: '1.25rem' }}>
@@ -253,7 +241,6 @@ export default function LoginPage() {
             </div>
 
           </form>
-        )}
 
         {/* Retour au site public */}
         <div style={{ marginTop: '1.75rem' }}>
