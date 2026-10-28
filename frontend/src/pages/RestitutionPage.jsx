@@ -1,17 +1,26 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useWorkshop } from '../context/WorkshopContext';
 import { getArchetypeDisplayName } from '../constants/workshopData';
 import { RestitutionTeamCard } from '../components/restitution';
 
 export default function RestitutionPage() {
-  const { teams, showToast } = useWorkshop();
+  const { teams, currentUser, isAdmin, activeTeamId, showToast } = useWorkshop();
+  const navigate = useNavigate();
   const [filterTeamId, setFilterTeamId] = useState('all');
 
-  const filteredTeams = filterTeamId === 'all' ? teams : teams.filter((t) => t.id === filterTeamId);
+  // Détection de l'équipe du participant (si non-admin)
+  const myTeamId = currentUser?.team_id || activeTeamId;
+  const myTeam = teams.find((t) => t.id === myTeamId) || (teams.length > 0 ? teams[0] : null);
+
+  // Restriction stricte : le participant ne voit QUE son équipe, sans les autres équipes !
+  const displayedTeams = isAdmin
+    ? (filterTeamId === 'all' ? teams : teams.filter((t) => t.id === filterTeamId))
+    : (myTeam ? [myTeam] : []);
 
   // Export en Document PDF imprimable haute fidélité
   const handleExportPdf = () => {
-    const teamsToExport = filterTeamId === 'all' ? teams : teams.filter((t) => t.id === filterTeamId);
+    const teamsToExport = displayedTeams;
     
     if (!teamsToExport || teamsToExport.length === 0) {
       showToast('⚠️ Aucun livrable disponible pour générer le PDF.', 'error');
@@ -32,11 +41,15 @@ export default function RestitutionPage() {
       minute: '2-digit'
     });
 
+    const reportTitle = isAdmin
+      ? 'Rapport Restitution Projets IoT - Le Village des Schtroumpfs'
+      : `Restitution Projet IoT - Équipe « ${myTeam?.name || ''} »`;
+
     let html = `<!DOCTYPE html>
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <title>Rapport Restitution Projets IoT - Le Village des Schtroumpfs</title>
+  <title>${reportTitle}</title>
   <style>
     @page {
       size: A4 portrait;
@@ -197,7 +210,7 @@ export default function RestitutionPage() {
   <div class="header-box">
     <div class="header-title">
       <h1>Le Village IoT des Schtroumpfs</h1>
-      <p>Compte Rendu & Restitution Officielle des Livrables</p>
+      <p>${isAdmin ? 'Compte Rendu & Restitution Officielle des Livrables' : `Fiche de Restitution Officielle — Équipe ${myTeam?.name || ''}`}</p>
     </div>
     <div class="header-date">
       Exporté le ${dateStr}
@@ -294,14 +307,27 @@ export default function RestitutionPage() {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', marginBottom: '1.5rem' }}>
           <div>
             <h2 style={{ fontSize: '1.6rem', color: '#fff', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span>📊 Restitution Finale des Projets IoT</span>
+              <span>📊 {isAdmin ? 'Restitution Finale des Projets IoT' : `Restitution des Livrables — Équipe « ${myTeam?.name || ''} »`}</span>
             </h2>
             <p style={{ color: '#94a3b8', fontSize: '0.88rem', margin: '0.25rem 0 0' }}>
-              Synthèse complète des livrables des 6 Maisons par groupe Schtroumpf pour le débriefing et la soutenance.
+              {isAdmin
+                ? 'Synthèse complète des livrables des 6 Maisons par groupe Schtroumpf pour le débriefing et la soutenance.'
+                : 'Fiche officielle de synthèse de votre équipe pour le pitch final et l\'évaluation.'}
             </p>
           </div>
 
-          <div style={{ display: 'flex', gap: '0.75rem' }}>
+          <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+            {!isAdmin && (
+              <button
+                type="button"
+                className="btn btn-outline btn-sm"
+                onClick={() => navigate('/team')}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
+              >
+                <span>←</span>
+                <span>Revenir à l'Espace Équipe</span>
+              </button>
+            )}
             <button type="button" className="btn btn-outline btn-sm" onClick={handleToggleFullscreen}>
               🖥️ Plein Écran
             </button>
@@ -311,36 +337,38 @@ export default function RestitutionPage() {
           </div>
         </div>
 
-        {/* Filter Pills */}
-        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '2rem' }}>
-          <button
-            type="button"
-            className={`filter-pill ${filterTeamId === 'all' ? 'active' : ''}`}
-            onClick={() => setFilterTeamId('all')}
-          >
-            Tous les Groupes ({teams.length})
-          </button>
-          {teams.map((t) => (
+        {/* Filter Pills — STRICTEMENT RÉSERVÉES AU SUPER ADMIN */}
+        {isAdmin && (
+          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '2rem' }}>
             <button
-              key={t.id}
               type="button"
-              className={`filter-pill ${filterTeamId === t.id ? 'active' : ''}`}
-              onClick={() => setFilterTeamId(t.id)}
+              className={`filter-pill ${filterTeamId === 'all' ? 'active' : ''}`}
+              onClick={() => setFilterTeamId('all')}
             >
-              {t.name}
+              Tous les Groupes ({teams.length})
             </button>
-          ))}
-        </div>
+            {teams.map((t) => (
+              <button
+                key={t.id}
+                type="button"
+                className={`filter-pill ${filterTeamId === t.id ? 'active' : ''}`}
+                onClick={() => setFilterTeamId(t.id)}
+              >
+                {t.name}
+              </button>
+            ))}
+          </div>
+        )}
 
         {/* Team Deliverables Sheets */}
-        {filteredTeams.length === 0 ? (
+        {displayedTeams.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '3rem', color: '#94a3b8', background: 'rgba(255,255,255,0.02)', borderRadius: '16px' }}>
             <h3>Aucun livrable disponible pour l'instant.</h3>
             <p>Les fiches de restitution apparaîtront au fur et à mesure que les équipes valident les 6 Maisons.</p>
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-            {filteredTeams.map((team) => (
+            {displayedTeams.map((team) => (
               <RestitutionTeamCard key={team.id} team={team} />
             ))}
           </div>

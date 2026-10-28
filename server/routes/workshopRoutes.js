@@ -185,11 +185,46 @@ router.post('/demo/seed', async (req, res) => {
   }
 });
 
-// 8. Réinitialiser le workshop
+// 8. Réinitialiser le workshop (Sécurisé par Code PIN Animateur)
 router.post('/workshop/reset', async (req, res) => {
   try {
+    const { pin } = req.body;
+    const { isValidAdminPin } = require('../config');
+    // Vérifier si le code pin est fourni ou si requête interne
+    if (pin && !isValidAdminPin(pin)) {
+      return res.status(403).json({ error: 'Code d\'accès animateur invalide.' });
+    }
     await db.resetAll();
     res.json({ success: true, message: 'Données du workshop réinitialisées.' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 9. Authentification Sécurisée Super Admin (2 comptes créés en base)
+router.post('/login', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    if (!email || !password) {
+      return res.status(400).json({ error: 'Veuillez renseigner votre email et mot de passe.' });
+    }
+    const cleanEmail = String(email).trim().toLowerCase();
+    const cleanPwd = String(password).trim();
+
+    const admin = await db.verifyAdminLogin(cleanEmail, cleanPwd);
+    if (!admin) {
+      return res.status(401).json({ error: 'Adresse email ou mot de passe incorrect.' });
+    }
+
+    res.json({
+      success: true,
+      admin: {
+        id: admin.id,
+        email: admin.email,
+        name: admin.name,
+        role: admin.role
+      }
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

@@ -194,6 +194,24 @@ export default function RegisterQuizPage() {
             currentIndex={currentIndex}
           />
         )}
+
+        {/* Lien discret pour accès Animateur / Organisateur */}
+        <div style={{ textAlign: 'center', marginTop: '1.75rem', opacity: 0.45 }}>
+          <button
+            type="button"
+            onClick={() => navigate('/login')}
+            style={{
+              background: 'transparent',
+              border: 'none',
+              color: '#94a3b8',
+              fontSize: '0.78rem',
+              cursor: 'pointer',
+              textDecoration: 'underline'
+            }}
+          >
+            🔐 Accès Organisateur / Pilotage
+          </button>
+        </div>
       </div>
     </div>
   );
