@@ -41,54 +41,9 @@ export default function House2Idee({
           ✍️ Votre travail et réponses pour la Maison 2 (Idée IoT) :
         </h4>
 
-        <div className="form-group" style={{ marginBottom: '1rem' }}>
-          <label style={{ display: 'block', fontSize: '0.85rem', color: '#94a3b8', marginBottom: '0.35rem' }}>
-            1. Nom du Concept Produit IoT :
-          </label>
-          <input
-            type="text"
-            disabled={!canEdit}
-            value={data.conceptName || ''}
-            onChange={(e) => onChange('conceptName', e.target.value)}
-            placeholder="Ex : AgroNode Solaire v1, Capteur SerreConnect..."
-            className="input-field"
-            style={{ width: '100%' }}
-          />
-        </div>
-
-        <div className="form-group" style={{ marginBottom: '1rem' }}>
-          <label style={{ display: 'block', fontSize: '0.85rem', color: '#94a3b8', marginBottom: '0.35rem' }}>
-            2. Grandeurs physiques mesurées (Capteurs) :
-          </label>
-          <input
-            type="text"
-            disabled={!canEdit}
-            value={data.measures || ''}
-            onChange={(e) => onChange('measures', e.target.value)}
-            placeholder="Ex : Humidité capacitive du sol, température de l'air, luminosité..."
-            className="input-field"
-            style={{ width: '100%' }}
-          />
-        </div>
-
-        <div className="form-group" style={{ marginBottom: '1rem' }}>
-          <label style={{ display: 'block', fontSize: '0.85rem', color: '#94a3b8', marginBottom: '0.35rem' }}>
-            3. Connectivité & Fréquence de transmission :
-          </label>
-          <input
-            type="text"
-            disabled={!canEdit}
-            value={data.connectivity || ''}
-            onChange={(e) => onChange('connectivity', e.target.value)}
-            placeholder="Ex : LoRaWAN toutes les 15 minutes, Bluetooth BLE pour appairage local..."
-            className="input-field"
-            style={{ width: '100%' }}
-          />
-        </div>
-
         <div className="form-group" style={{ marginBottom: '1.5rem' }}>
           <label style={{ display: 'block', fontSize: '0.85rem', color: '#94a3b8', marginBottom: '0.35rem' }}>
-            4. Action déclenchée & Valeur débloquée pour l'usager :
+            Votre réponse pour cette Maison :
           </label>
           <textarea
             rows={3}

@@ -41,54 +41,9 @@ export default function House4Prototype({
           ✍️ Votre travail et réponses pour la Maison 4 (Prototype) :
         </h4>
 
-        <div className="form-group" style={{ marginBottom: '1rem' }}>
-          <label style={{ display: 'block', fontSize: '0.85rem', color: '#94a3b8', marginBottom: '0.35rem' }}>
-            1. Description de la Maquette & Boîtier :
-          </label>
-          <input
-            type="text"
-            disabled={!canEdit}
-            value={data.prototypeType || ''}
-            onChange={(e) => onChange('prototypeType', e.target.value)}
-            placeholder="Ex : Boîtier étanche IP65 imprimé en 3D avec pointeau de sol et voyant LED..."
-            className="input-field"
-            style={{ width: '100%' }}
-          />
-        </div>
-
-        <div className="form-group" style={{ marginBottom: '1rem' }}>
-          <label style={{ display: 'block', fontSize: '0.85rem', color: '#38bdf8', marginBottom: '0.35rem' }}>
-            📸 2. Photo / Lien ou Schéma de la Maquette :
-          </label>
-          <input
-            type="text"
-            disabled={!canEdit}
-            value={data.prototypePhoto || ''}
-            onChange={(e) => onChange('prototypePhoto', e.target.value)}
-            placeholder="Ex : Lien image ou descriptif visuel (ex: Maquette carton + ESP32 + LED)..."
-            className="input-field"
-            style={{ width: '100%' }}
-          />
-        </div>
-
-        <div className="form-group" style={{ marginBottom: '1rem' }}>
-          <label style={{ display: 'block', fontSize: '0.85rem', color: '#94a3b8', marginBottom: '0.35rem' }}>
-            3. Scénario d'Usage Étape par Étape (Storyboard) :
-          </label>
-          <textarea
-            rows={3}
-            disabled={!canEdit}
-            value={data.usageScenario || ''}
-            onChange={(e) => onChange('usageScenario', e.target.value)}
-            placeholder="1. L'usager plante le boîtier en terre. 2. Il l'appaire via l'application mobile. 3. Le boîtier transmet les alertes automatiquement."
-            className="input-field"
-            style={{ width: '100%' }}
-          />
-        </div>
-
         <div className="form-group" style={{ marginBottom: '1.5rem' }}>
           <label style={{ display: 'block', fontSize: '0.85rem', color: '#94a3b8', marginBottom: '0.35rem' }}>
-            4. Protocole de Test & Critères de Validation du POC :
+            Votre réponse pour cette Maison :
           </label>
           <textarea
             rows={2}

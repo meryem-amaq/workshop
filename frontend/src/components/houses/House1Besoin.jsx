@@ -41,61 +41,12 @@ export default function House1Besoin({
           ✍️ Votre travail et réponses pour la Maison 1 (Besoin) :
         </h4>
 
-        <div className="form-group" style={{ marginBottom: '1rem' }}>
-          <label style={{ display: 'block', fontSize: '0.85rem', color: '#94a3b8', marginBottom: '0.35rem' }}>
-            1. Utilisateur Cible (Persona) :
-          </label>
-          <input
-            type="text"
-            disabled={!canEdit}
-            value={data.targetUser || ''}
-            onChange={(e) => onChange('targetUser', e.target.value)}
-            placeholder="Ex : Agriculteurs urbains en permaculture, Jardinier amateur..."
-            className="input-field"
-            style={{ width: '100%' }}
-          />
-        </div>
-
-        <div className="form-group" style={{ marginBottom: '1rem' }}>
-          <label style={{ display: 'block', fontSize: '0.85rem', color: '#94a3b8', marginBottom: '0.35rem' }}>
-            2. Formulation du Problème / Douleur majeure :
-          </label>
-          <textarea
-            rows={2}
-            disabled={!canEdit}
-            value={data.problem || ''}
-            onChange={(e) => onChange('problem', e.target.value)}
-            placeholder="Ex : La déshydratation imprévue des serres lors des fortes chaleurs..."
-            className="input-field"
-            style={{ width: '100%' }}
-          />
-        </div>
-
-        <div className="form-group" style={{ marginBottom: '1rem' }}>
-          <label style={{ display: 'block', fontSize: '0.85rem', color: '#94a3b8', marginBottom: '0.35rem' }}>
-            3. Cause racine / Pourquoi les solutions actuelles échouent :
-          </label>
-          <input
-            type="text"
-            disabled={!canEdit}
-            value={data.cause || ''}
-            onChange={(e) => onChange('cause', e.target.value)}
-            placeholder="Ex : Ils ne peuvent pas être présents en journée pour surveiller et réguler l'arrosage..."
-            className="input-field"
-            style={{ width: '100%' }}
-          />
-        </div>
-
         <div className="form-group" style={{ marginBottom: '1.5rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.35rem' }}>
             <label style={{ fontSize: '0.85rem', color: '#38bdf8', fontWeight: 'bold' }}>
-              4. Formulation Canonique Complète :
+              Votre réponse pour cette Maison :
             </label>
-            {canEdit && (
-              <button type="button" className="btn btn-outline btn-xs" onClick={onGenerateFormula}>
-                ⚡ Générer automatiquement
-              </button>
-            )}
+            
           </div>
           <textarea
             rows={3}

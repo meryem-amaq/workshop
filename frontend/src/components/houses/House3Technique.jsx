@@ -66,54 +66,9 @@ export default function House3Technique({
           ✍️ Votre travail et réponses pour la Maison 3 (Faisabilité) :
         </h4>
 
-        <div className="form-group" style={{ marginBottom: '1rem' }}>
-          <label style={{ display: 'block', fontSize: '0.85rem', color: '#94a3b8', marginBottom: '0.35rem' }}>
-            1. Bloc Capteurs & Conditionnement :
-          </label>
-          <input
-            type="text"
-            disabled={!canEdit}
-            value={data.sensors || ''}
-            onChange={(e) => onChange('sensors', e.target.value)}
-            placeholder="Ex : Sonde capacitive d'humidité du sol, DS18B20..."
-            className="input-field"
-            style={{ width: '100%' }}
-          />
-        </div>
-
-        <div className="form-group" style={{ marginBottom: '1rem' }}>
-          <label style={{ display: 'block', fontSize: '0.85rem', color: '#94a3b8', marginBottom: '0.35rem' }}>
-            2. Microcontrôleur & Gestion de l'énergie :
-          </label>
-          <input
-            type="text"
-            disabled={!canEdit}
-            value={data.processing || ''}
-            onChange={(e) => onChange('processing', e.target.value)}
-            placeholder="Ex : Microcontrôleur ESP32 avec mode Deep Sleep, Batterie LiPo 2000mAh..."
-            className="input-field"
-            style={{ width: '100%' }}
-          />
-        </div>
-
-        <div className="form-group" style={{ marginBottom: '1rem' }}>
-          <label style={{ display: 'block', fontSize: '0.85rem', color: '#94a3b8', marginBottom: '0.35rem' }}>
-            3. Protocole Réseau & Transport :
-          </label>
-          <input
-            type="text"
-            disabled={!canEdit}
-            value={data.protocol || ''}
-            onChange={(e) => onChange('protocol', e.target.value)}
-            placeholder="Ex : Réseau LoRaWAN longue portée (The Things Network, faible consommation)..."
-            className="input-field"
-            style={{ width: '100%' }}
-          />
-        </div>
-
         <div className="form-group" style={{ marginBottom: '1.5rem' }}>
           <label style={{ display: 'block', fontSize: '0.85rem', color: '#94a3b8', marginBottom: '0.35rem' }}>
-            4. Plateforme Utilisateur & Restitution / Actionneur :
+            Votre réponse pour cette Maison :
           </label>
           <textarea
             rows={3}
