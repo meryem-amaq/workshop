@@ -19,38 +19,42 @@ export default function ProjectionPage() {
   // 1. Génération infaillible du QR Code officiel Heroku
   useEffect(() => {
     let isMounted = true;
-    const targetWorkshopUrl = 'https://vast-shore-88233.herokuapp.com/?join=1';
+    const { origin, hostname } = window.location;
+    const isLocalHost = hostname === 'localhost' || hostname === '127.0.0.1';
 
-    // Génération CLIENT immédiate (100% fiable avec l'URL Heroku officielle)
-    QRCode.toDataURL(targetWorkshopUrl, {
-      margin: 2,
-      width: 480,
-      errorCorrectionLevel: 'H',
-      color: {
-        dark: '#070d19',
-        light: '#ffffff'
-      }
-    })
-      .then((generatedDataUrl) => {
-        if (isMounted) {
-          setDataUrl(generatedDataUrl);
-          setQrUrl(targetWorkshopUrl);
-        }
+    const buildQr = (url) =>
+      QRCode.toDataURL(url, {
+        margin: 2,
+        width: 480,
+        errorCorrectionLevel: 'H',
+        color: { dark: '#070d19', light: '#ffffff' }
       })
-      .catch((err) => console.error('Erreur génération QR Code client:', err));
+        .then((generatedDataUrl) => {
+          if (isMounted) {
+            setDataUrl(generatedDataUrl);
+            setQrUrl(url);
+          }
+        })
+        .catch((err) => console.error('Erreur génération QR Code client:', err));
 
-    // Consultation du serveur pour détecter l'IP locale Wi-Fi si disponible
+    // En ligne (Heroku...) : l'adresse réelle du site ouvert = toujours valide.
+    // En local : on remplace ensuite localhost par l'IP Wi-Fi (scannable par téléphone).
+    buildQr(`${origin}/?join=1`);
+
     const fetchServerInfo = async () => {
       try {
-        const res = await fetch(`/api/qrcode?url=${encodeURIComponent(fallbackTarget)}`);
+        const res = await fetch('/api/health');
         if (res.ok) {
           const data = await res.json();
           if (!isMounted) return;
-          if (data.localIp) setLocalIp(data.localIp);
-          if (data.port) setPort(data.port);
-          if (data.isCloud !== undefined) setIsCloud(data.isCloud);
-          // Si le serveur a une dataUrl et qu'on n'en a pas, l'utiliser
-          if (data.dataUrl && !dataUrl) setDataUrl(data.dataUrl);
+          const ip = data.network && data.network.localIp;
+          const srvPort = data.network && data.network.port;
+          if (ip) setLocalIp(ip);
+          if (srvPort) setPort(srvPort);
+          setIsCloud(!isLocalHost);
+          if (isLocalHost && ip) {
+            buildQr(`http://${ip}:${srvPort || window.location.port || 3000}/?join=1`);
+          }
         }
       } catch (e) {
         console.warn('Mode hors-ligne ou fallback local pour le QR code');
@@ -155,7 +159,7 @@ export default function ProjectionPage() {
     Sportif: participants.filter((p) => p.archetype === 'Sportif').length
   };
 
-  const directJoinUrl = qrUrl || 'https://vast-shore-88233.herokuapp.com/?join=1';
+  const directJoinUrl = qrUrl || `${window.location.origin}/?join=1`;
 
   return (
     <div className="view-panel active">
