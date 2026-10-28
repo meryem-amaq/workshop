@@ -19,23 +19,33 @@ import RestitutionPage from './pages/RestitutionPage';
 import ProjectionPage from './pages/ProjectionPage';
 import LoginPage from './pages/LoginPage';
 
-// Destination d'un participant déjà inscrit (jamais la page de login)
-function participantHome(currentUser) {
-  return currentUser ? (currentUser.team_id ? '/team' : '/waiting') : null;
+// Destination d'un participant déjà inscrit (uniquement vers /team si les équipes sont formées, sinon salle d'attente)
+function participantHome(currentUser, sessionPhase) {
+  if (!currentUser) return null;
+  if (sessionPhase === 'teams_formed' && currentUser.team_id) {
+    return '/team';
+  }
+  return '/waiting';
 }
 
 function RootEntry() {
-  const { setAdminMode, currentUser, isAdmin } = useWorkshop();
+  const { setAdminMode, currentUser, setCurrentUser, isAdmin, sessionPhase } = useWorkshop();
   const isJoin = typeof window !== 'undefined' && window.location.search.includes('join=1');
 
   React.useEffect(() => {
-    // Un scan du QR code = parcours participant : on quitte toute session admin
-    if (isJoin) setAdminMode(false);
-  }, [isJoin]);
+    // Si scan du QR code (?join=1) : on démarre une inscription toute neuve (nettoyage de toute session précédente)
+    if (isJoin) {
+      setAdminMode(false);
+      setCurrentUser(null);
+      try {
+        localStorage.removeItem('smurf_quiz_draft');
+      } catch (e) {}
+    }
+  }, [isJoin, setAdminMode, setCurrentUser]);
 
-  // 1. Participant déjà inscrit : reste dans son parcours (Salle d'attente ou Espace Équipe)
-  if (currentUser && !isAdmin) {
-    return <Navigate to={participantHome(currentUser)} replace />;
+  // 1. Scan du QR code : toujours afficher directement la saisie Nom & Prénom
+  if (isJoin) {
+    return <RegisterQuizPage />;
   }
 
   // 2. Super Admin connecté : accède à son écran de pilotage
@@ -43,19 +53,25 @@ function RootEntry() {
     return <Navigate to="/projection" replace />;
   }
 
-  // 3. Nouveau participant (via QR Code ou lien d'accueil) : démarre le questionnaire
+  // 3. Participant déjà inscrit : reste dans son parcours (Salle d'attente, ou Espace Équipe si groupes formés)
+  if (currentUser) {
+    return <Navigate to={participantHome(currentUser, sessionPhase)} replace />;
+  }
+
+  // 4. Par défaut : formulaire d'inscription
   return <RegisterQuizPage />;
 }
+
 function AdminOnly({ children }) {
-  const { isAdmin, currentUser } = useWorkshop();
+  const { isAdmin, currentUser, sessionPhase } = useWorkshop();
   if (isAdmin) return children;
-  return <Navigate to={participantHome(currentUser) || '/login'} replace />;
+  return <Navigate to={participantHome(currentUser, sessionPhase) || '/login'} replace />;
 }
 
 // Toute URL inconnue : un participant inscrit reste dans son parcours
 function FallbackRoute() {
-  const { isAdmin, currentUser } = useWorkshop();
-  if (!isAdmin && currentUser) return <Navigate to={participantHome(currentUser)} replace />;
+  const { isAdmin, currentUser, sessionPhase } = useWorkshop();
+  if (!isAdmin && currentUser) return <Navigate to={participantHome(currentUser, sessionPhase)} replace />;
   return <Navigate to="/login" replace />;
 }
 

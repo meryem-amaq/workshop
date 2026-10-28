@@ -62,10 +62,14 @@ export default function TeamWorkspacePage() {
 
   useEffect(() => {
     if (!currentUser && !isAdmin) {
-      showToast('Veuillez vous inscrire ou vous connecter en tant qu\'animateur.', 'warning');
       navigate('/register');
+      return;
     }
-  }, [currentUser, isAdmin, navigate, showToast]);
+    // Si participant sans équipe formée : redirection immédiate en salle d'attente
+    if (!isAdmin && (!currentUser?.team_id || teams.length === 0)) {
+      navigate('/waiting', { replace: true });
+    }
+  }, [currentUser, isAdmin, teams.length, navigate]);
 
   // Set active team on mount or change
   useEffect(() => {
