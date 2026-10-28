@@ -245,18 +245,6 @@ export default function House5Business({
         </div>
       </div>
 
-      {/* 2. Livrable Exigé (Lecture seule) */}
-      <div className="house-livrable-box">
-        <div className="house-livrable-title">
-          📄 Livrable exigé pour la Maison 5 : Business Model Canvas (9 blocs)
-        </div>
-        <div className="house-formula-code">
-          Les 9 blocs du BMC complétés pour valider la viabilité économique de la solution IoT.
-        </div>
-        <p className="house-example-sub">
-          Exemple inspirant : Matrice BMC complétée : Vente du boîtier 79€ + abonnement cloud 4,99€/mois, distribué via magasins bio et coopératives horticoles.
-        </p>
-      </div>
 
       {/* 3. Section Saisie Synthèse */}
       <div className="house-input-section">

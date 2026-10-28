@@ -59,18 +59,6 @@ export default function House3Technique({
         </div>
       </div>
 
-      {/* 2. Livrable Exigé (Lecture seule) */}
-      <div className="house-livrable-box">
-        <div className="house-livrable-title">
-          📄 Livrable exigé pour la Maison 3 : Architecture technique simple
-        </div>
-        <div className="house-formula-code">
-          Capteur [type de capteur] → Traitement [microcontrôleur] → Communication [protocole réseau] → Utilisateur [dashboard / alerte]
-        </div>
-        <p className="house-example-sub">
-          Exemple inspirant : Sonde capacitive d'humidité du sol → Microcontrôleur ESP32 → Réseau LoRaWAN longue portée (faible conso) → Tableau de bord Web & vanne solénoïde 12V.
-        </p>
-      </div>
 
       {/* 3. Section Saisie & Travail de l'équipe */}
       <div className="house-input-section">

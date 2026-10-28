@@ -14,6 +14,8 @@ export default function WorkspaceSidebar({
   return (
     <aside className="workspace-sidebar">
       <div className="sidebar-card">
+        {isAdmin && (
+          <>
         <h3 className="sidebar-title">Équipe en Cours</h3>
         <div className="team-selector-wrap">
           <label htmlFor="selectCurrentTeam">Choisir le groupe :</label>
@@ -31,6 +33,8 @@ export default function WorkspaceSidebar({
             ))}
           </select>
         </div>
+          </>
+        )}
 
         {/* Carte récapitulative de l'équipe active */}
         <div className="active-team-card" id="activeTeamCard">

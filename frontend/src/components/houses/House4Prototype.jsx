@@ -34,18 +34,6 @@ export default function House4Prototype({
         </div>
       </div>
 
-      {/* 2. Livrable Exigé (Lecture seule) */}
-      <div className="house-livrable-box">
-        <div className="house-livrable-title">
-          📄 Livrable exigé pour la Maison 4 : Prototype conceptuel & scénario d'usage
-        </div>
-        <div className="house-formula-code">
-          Maquette physique/visuelle + Schéma fonctionnel illustrant le comportement du produit dans son environnement réel.
-        </div>
-        <p className="house-example-sub">
-          Exemple inspirant : Maquette en carton échelle 1:1 du boîtier étanche IP65 avec pointeau de terre amovible, voyant LED d'état tricolore et bouton d'appairage.
-        </p>
-      </div>
 
       {/* 3. Section Saisie & Travail de l'équipe */}
       <div className="house-input-section">

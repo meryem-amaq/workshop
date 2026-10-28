@@ -76,18 +76,6 @@ export default function House6Pitch({
         </div>
       </div>
 
-      {/* 2. Livrable Exigé (Lecture seule) */}
-      <div className="house-livrable-box">
-        <div className="house-livrable-title">
-          📄 Livrable exigé pour la Maison 6 : Mini-plan de lancement + Pitch 3 minutes
-        </div>
-        <div className="house-formula-code">
-          Client cible ➔ Prix ➔ Concurrent ➔ Différenciation ➔ Premier canal de vente + Pitch oral en 3 min
-        </div>
-        <p className="house-example-sub">
-          Exemple inspirant : Maraîchers bio périurbains ➔ 89€ + 5€/mois ➔ Concurrent : sondes manuelles ou pro à 600€ ➔ Différenciation : plug-and-play solaire sans configuration ➔ Canal : salon Tech & Bio + campagne précommande Ulule.
-        </p>
-      </div>
 
       {/* 3. Section Saisie & Travail de l'équipe */}
       <div className="house-input-section">

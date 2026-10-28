@@ -34,18 +34,6 @@ export default function House1Besoin({
         </div>
       </div>
 
-      {/* 2. Livrable Exigé (Lecture seule) */}
-      <div className="house-livrable-box">
-        <div className="house-livrable-title">
-          📄 Livrable exigé pour la Maison 1 : Problématique clairement formulée
-        </div>
-        <div className="house-formula-code">
-          « Pour [utilisateur cible], le problème est [formulation du problème] parce que [cause racine / douleur subie]. »
-        </div>
-        <p className="house-example-sub">
-          Exemple inspirant : « Pour les agriculteurs urbains en permaculture, le problème est la déshydratation imprévue des serres lors des canicules parce qu'ils ne peuvent pas être présents en journée pour réguler l'arrosage. »
-        </p>
-      </div>
 
       {/* 3. Section Saisie & Travail de l'équipe */}
       <div className="house-input-section">

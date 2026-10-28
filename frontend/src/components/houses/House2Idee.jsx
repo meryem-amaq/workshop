@@ -34,18 +34,6 @@ export default function House2Idee({
         </div>
       </div>
 
-      {/* 2. Livrable Exigé (Lecture seule) */}
-      <div className="house-livrable-box">
-        <div className="house-livrable-title">
-          📄 Livrable exigé pour la Maison 2 : Concept du produit IoT
-        </div>
-        <div className="house-formula-code">
-          « Un dispositif connecté qui mesure [grandeur/paramètre physique] et permet à [utilisateur cible] de [action/bénéfice débloqué]. »
-        </div>
-        <p className="house-example-sub">
-          Exemple inspirant : « Un boîtier connecté solaire qui mesure l'humidité du sol et la température au pied des plants, et déclenche une micro-irrigation automatique tout en alertant le maraîcher par notification. »
-        </p>
-      </div>
 
       {/* 3. Section Saisie & Travail de l'équipe */}
       <div className="house-input-section">
