@@ -35,14 +35,21 @@ export default function AdminDashboardPage() {
   }
 
   // Formatage des équipes pour le composant CarteInteractiveVillage
-  const formattedTeams = teams.map((t) => ({
-    id: t.id,
-    name: t.name,
-    groupName: t.name,
-    personalityProfile: t.archetype || 'Professeur',
-    currentStage: t.current_house || 1,
-    current_house: t.current_house || 1
-  }));
+  const formattedTeams = teams.map((t) => {
+    const scribeMember =
+      (t.members || []).find((m) => m.id === t.scribe_participant_id || m.is_scribe) || t.scribe;
+    const scribeName = scribeMember ? `${scribeMember.first_name} (Scribe)` : 'Point de départ';
+    return {
+      id: t.id,
+      name: t.name,
+      groupName: t.name,
+      personalityProfile: t.archetype || 'Professeur',
+      archetype: t.archetype || 'Professeur',
+      currentStage: t.current_house || 1,
+      current_house: t.current_house || 1,
+      scribe_name: scribeName
+    };
+  });
 
   return (
     <div className="view-panel active">

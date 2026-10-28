@@ -175,7 +175,7 @@ export default function CarteInteractiveVillage({
       archetype: 'professeur',
       current_house: 1,
       currentStage: 1,
-      scribe_name: 'Amin (Scribe)'
+      scribe_name: 'Point de départ'
     },
     {
       id: 2,
@@ -185,7 +185,7 @@ export default function CarteInteractiveVillage({
       archetype: 'artiste',
       current_house: 1,
       currentStage: 1,
-      scribe_name: 'Sara (Scribe)'
+      scribe_name: 'Point de départ'
     },
     {
       id: 3,
@@ -193,9 +193,9 @@ export default function CarteInteractiveVillage({
       groupName: 'Sportif',
       personalityProfile: 'Sportif',
       archetype: 'sportif',
-      current_house: 2,
-      currentStage: 2,
-      scribe_name: 'Yassine (Scribe)'
+      current_house: 1,
+      currentStage: 1,
+      scribe_name: 'Point de départ'
     },
     {
       id: 4,
@@ -203,9 +203,9 @@ export default function CarteInteractiveVillage({
       groupName: 'Critique',
       personalityProfile: 'Critique',
       archetype: 'critique',
-      current_house: 3,
-      currentStage: 3,
-      scribe_name: 'Meryem (Scribe)'
+      current_house: 1,
+      currentStage: 1,
+      scribe_name: 'Point de départ'
     },
     {
       id: 5,
@@ -213,9 +213,9 @@ export default function CarteInteractiveVillage({
       groupName: 'Empathique',
       personalityProfile: 'Empathique',
       archetype: 'empathique',
-      current_house: 5,
-      currentStage: 5,
-      scribe_name: 'Inès (Scribe)'
+      current_house: 1,
+      currentStage: 1,
+      scribe_name: 'Point de départ'
     }
   ], []);
 
@@ -351,8 +351,18 @@ export default function CarteInteractiveVillage({
 
         prevStagesRef.current[teamId] = currentStage;
       });
+    } else if (externalTeams && externalTeams.length === 0) {
+      // Aucune équipe formée ou atelier réinitialisé : tous les pions reviennent au point de départ (Maison 1)
+      setTeamsState(initialTeams);
+      const startHouse = VILLAGE_HOUSES[0];
+      const resetPos = {};
+      initialTeams.forEach((t) => {
+        resetPos[t.id] = { x: startHouse.x, y: startHouse.y, isWalking: false };
+        prevStagesRef.current[t.id] = 1;
+      });
+      setAnimatedPositions(resetPos);
     }
-  }, [externalTeams]);
+  }, [externalTeams, initialTeams]);
 
   // Simulation manuelle / Déplacement guidé sur le circuit
   const simulateAdvanceTeam = (teamId) => {
@@ -376,7 +386,7 @@ export default function CarteInteractiveVillage({
     );
   };
 
-  // Calcul des coordonnées décalées avec anti-superposition
+  // Calcul des coordonnées décalées en quinconce (sans superposition entre avatars et bulles)
   const positionedTeams = useMemo(() => {
     const stageGroups = {};
     teamsState.forEach((t) => {
@@ -384,6 +394,33 @@ export default function CarteInteractiveVillage({
       if (!stageGroups[stage]) stageGroups[stage] = [];
       stageGroups[stage].push(t);
     });
+
+    // Positions en quinconce bien espacées pour éviter qu'une bulle cache un visage
+    const STAGGERED_SLOTS = {
+      1: [{ x: 0, y: 0 }],
+      2: [
+        { x: -56, y: 0 },
+        { x: 56, y: 0 }
+      ],
+      3: [
+        { x: -72, y: 18 },
+        { x: 0, y: -42 },
+        { x: 72, y: 18 }
+      ],
+      4: [
+        { x: -78, y: -34 },
+        { x: 78, y: -34 },
+        { x: -48, y: 42 },
+        { x: 48, y: 42 }
+      ],
+      5: [
+        { x: -92, y: -40 },
+        { x: 0, y: -58 },
+        { x: 92, y: -40 },
+        { x: -56, y: 38 },
+        { x: 56, y: 38 }
+      ]
+    };
 
     return teamsState.map((team) => {
       const stage = Math.min(Math.max(team.current_house || team.currentStage || 1, 1), 6);
@@ -396,10 +433,17 @@ export default function CarteInteractiveVillage({
       let offsetY = 0;
 
       if (count > 1) {
-        const radius = count <= 3 ? 36 : 46;
-        const angle = (peerIndex / count) * 2 * Math.PI - Math.PI / 2;
-        offsetX = Math.cos(angle) * radius;
-        offsetY = Math.sin(angle) * radius;
+        const preset = STAGGERED_SLOTS[count];
+        if (preset && preset[peerIndex]) {
+          offsetX = preset[peerIndex].x;
+          offsetY = preset[peerIndex].y;
+        } else {
+          const radiusX = 95;
+          const radiusY = 55;
+          const angle = (peerIndex / count) * 2 * Math.PI - Math.PI / 2;
+          offsetX = Math.cos(angle) * radiusX;
+          offsetY = Math.sin(angle) * radiusY;
+        }
       }
 
       const animPos = animatedPositions[team.id];
