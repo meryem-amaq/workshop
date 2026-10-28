@@ -7,8 +7,13 @@ export default function Header() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // 1. NE PAS afficher le header sur la page de login, ni sur l'inscription mobile
-  if (location.pathname === '/login' || location.pathname === '/register' || location.pathname === '/quiz') {
+  // 1. Parcours participant (après scan du QR) : jamais de barre de navigation
+  const participantPaths = ['/login', '/register', '/quiz', '/waiting', '/team', '/workspace'];
+  if (participantPaths.includes(location.pathname) && !isAdmin) {
+    return null;
+  }
+  // La barre admin n'apparaît que pour un Super Admin connecté
+  if (!isAdmin || location.pathname === '/login' || location.pathname === '/register' || location.pathname === '/quiz' || location.pathname === '/waiting') {
     return null;
   }
 

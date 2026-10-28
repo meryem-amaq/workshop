@@ -1,6 +1,6 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { WorkshopProvider } from './context/WorkshopContext';
+import { WorkshopProvider, useWorkshop } from './context/WorkshopContext';
 import Header from './components/Header';
 import ModalAdminAuth from './components/ModalAdminAuth';
 import ModalChangeScribe from './components/ModalChangeScribe';
@@ -27,6 +27,12 @@ function RootEntry() {
   return <Navigate to="/login" replace />;
 }
 
+// Pages réservées au Super Admin : redirection vers /login si non connecté
+function AdminOnly({ children }) {
+  const { isAdmin } = useWorkshop();
+  return isAdmin ? children : <Navigate to="/login" replace />;
+}
+
 export default function App() {
   return (
     <WorkshopProvider>
@@ -47,15 +53,15 @@ export default function App() {
               <Route path="/workspace" element={<TeamWorkspacePage />} />
 
               {/* Parcours Super Admin (accessible après connexion) */}
-              <Route path="/projection" element={<ProjectionPage />} />
-              <Route path="/qrcode" element={<ProjectionPage />} />
-              <Route path="/launch" element={<GroupsLaunchPage />} />
-              <Route path="/groups" element={<GroupsLaunchPage />} />
-              <Route path="/admin" element={<AdminDashboardPage />} />
-              <Route path="/dashboard" element={<AdminDashboardPage />} />
-              <Route path="/village" element={<AdminDashboardPage />} />
-              <Route path="/stages" element={<TeamStagesPage />} />
-              <Route path="/progress" element={<TeamStagesPage />} />
+              <Route path="/projection" element={<AdminOnly><ProjectionPage /></AdminOnly>} />
+              <Route path="/qrcode" element={<AdminOnly><ProjectionPage /></AdminOnly>} />
+              <Route path="/launch" element={<AdminOnly><GroupsLaunchPage /></AdminOnly>} />
+              <Route path="/groups" element={<AdminOnly><GroupsLaunchPage /></AdminOnly>} />
+              <Route path="/admin" element={<AdminOnly><AdminDashboardPage /></AdminOnly>} />
+              <Route path="/dashboard" element={<AdminOnly><AdminDashboardPage /></AdminOnly>} />
+              <Route path="/village" element={<AdminOnly><AdminDashboardPage /></AdminOnly>} />
+              <Route path="/stages" element={<AdminOnly><TeamStagesPage /></AdminOnly>} />
+              <Route path="/progress" element={<AdminOnly><TeamStagesPage /></AdminOnly>} />
               <Route path="/restitution" element={<RestitutionPage />} />
               <Route path="/home" element={<Navigate to="/login" replace />} />
 
