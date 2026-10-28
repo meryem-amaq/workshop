@@ -76,6 +76,55 @@ export default function House6Pitch({
         </div>
       </div>
 
+      {/* 🎮 Mini-Jeu Spécial : L'Apocalypse des Schtroumpfs */}
+      <div style={{
+        background: 'linear-gradient(135deg, rgba(236, 72, 153, 0.15), rgba(139, 92, 246, 0.15))',
+        border: '1px solid rgba(236, 72, 153, 0.35)',
+        borderRadius: '14px',
+        padding: '1rem 1.25rem',
+        marginBottom: '1.25rem',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        flexWrap: 'wrap',
+        gap: '1rem',
+        boxShadow: '0 4px 20px rgba(236, 72, 153, 0.15)'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+          <span style={{ fontSize: '2.2rem', lineHeight: 1 }}>🎮</span>
+          <div>
+            <div style={{ color: '#fff', fontWeight: '800', fontSize: '0.98rem' }}>
+              Défi Interactif : L'Apocalypse des Schtroumpfs
+            </div>
+            <div style={{ color: '#cbd5e1', fontSize: '0.82rem', marginTop: '2px' }}>
+              Testez votre réactivité dans le mini-jeu connecté avant le pitch final !
+            </div>
+          </div>
+        </div>
+        <a
+          href="https://smurfs-apocalypse-armagadan.ai.studio/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="btn btn-primary pulse-glow"
+          style={{
+            background: 'linear-gradient(135deg, #ec4899, #8b5cf6)',
+            borderColor: '#ec4899',
+            color: '#fff',
+            fontWeight: '700',
+            fontSize: '0.88rem',
+            padding: '0.55rem 1.1rem',
+            textDecoration: 'none',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            borderRadius: '10px'
+          }}
+        >
+          <span>🕹️ Lancer le Jeu</span>
+          <span>➔</span>
+        </a>
+      </div>
+
 
       {/* 3. Section Saisie & Travail de l'équipe */}
       <div className="house-input-section">
@@ -100,9 +149,28 @@ export default function House6Pitch({
 
         {/* Boutons d'action */}
         <div style={{ display: 'flex', justifyContent: 'space-between', gap: '0.75rem', flexWrap: 'wrap' }}>
-          <button type="button" className="btn btn-outline" onClick={onPrevHouse}>
-            ← Maison précédente
-          </button>
+          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+            <button type="button" className="btn btn-outline" onClick={onPrevHouse}>
+              ← Maison précédente
+            </button>
+            <a
+              href="https://smurfs-apocalypse-armagadan.ai.studio/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn btn-outline"
+              style={{
+                borderColor: '#ec4899',
+                color: '#f472b6',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.35rem',
+                textDecoration: 'none'
+              }}
+              title="Ouvrir le jeu dans un nouvel onglet"
+            >
+              🎮 L'Apocalypse des Schtroumpfs ↗
+            </a>
+          </div>
           <div style={{ display: 'flex', gap: '0.75rem' }}>
             <button
               type="button"
