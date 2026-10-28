@@ -37,7 +37,9 @@ if (cloudDbUrl && cloudDbUrl.startsWith('mysql')) {
     dbConfigObj.password = decodeURIComponent(parsed.password || '');
     dbConfigObj.database = (parsed.pathname || '').replace(/^\//, '');
     dbConfigObj.ssl = { rejectUnauthorized: false };
-    console.log(`[DB CONFIG] Base de données cloud détectée : ${dbConfigObj.host}/${dbConfigObj.database}`);
+    // Sur JawsDB gratuit (Kitefin), limiter à 3 connexions pour éviter l'erreur ER_USER_LIMIT_REACHED
+    dbConfigObj.connectionLimit = 3;
+    console.log(`[DB CONFIG] Base de données cloud détectée : ${dbConfigObj.host}/${dbConfigObj.database} (pool: 3 max)`);
   } catch (e) {
     console.warn('[DB CONFIG] Erreur parsing URL base de données cloud:', e.message);
   }
