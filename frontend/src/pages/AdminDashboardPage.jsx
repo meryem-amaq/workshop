@@ -58,7 +58,7 @@ export default function AdminDashboardPage() {
               setActiveTeamId(team.id);
               navigate('/team');
             }}
-            enableDemoSimulation={teams.length === 0}
+            enableDemoSimulation={false}
           />
         </div>
 

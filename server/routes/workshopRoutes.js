@@ -175,9 +175,13 @@ router.get('/restitution', async (req, res) => {
   }
 });
 
-// 7. Charger les données de démonstration
+// 7. Charger les données de démonstration (Sécurisé : refuse d'écraser si des participants réels sont inscrits)
 router.post('/demo/seed', async (req, res) => {
   try {
+    const current = await db.getParticipants();
+    if (current && current.length > 0) {
+      return res.status(400).json({ error: 'Action bloquée par sécurité : des participants réels sont déjà inscrits dans l\'atelier.' });
+    }
     const result = await db.seedDemoData();
     res.json({ success: true, message: 'Données de démonstration chargées avec succès !', result });
   } catch (err) {

@@ -224,23 +224,6 @@ export default function GroupsLaunchPage() {
 
             <button
               type="button"
-              className="btn btn-outline btn-xs"
-              onClick={handleSeedDemo}
-              disabled={seeding}
-              style={{
-                fontSize: '0.75rem',
-                padding: '0.35rem 0.7rem',
-                borderRadius: '8px',
-                color: '#38bdf8',
-                borderColor: 'rgba(56, 189, 248, 0.4)'
-              }}
-              title="Charge 15 participants et 5 équipes démo"
-            >
-              🧪 {seeding ? '...' : 'Charger Données Démo'}
-            </button>
-
-            <button
-              type="button"
               className="btn btn-ghost btn-xs"
               onClick={handleResetWorkshop}
               style={{
