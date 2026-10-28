@@ -9,9 +9,13 @@ export default function RestitutionPage() {
   const navigate = useNavigate();
   const [filterTeamId, setFilterTeamId] = useState('all');
 
-  // Détection de l'équipe du participant (si non-admin)
+  // Détection de l'équipe du participant (si non-admin) : uniquement SA propre équipe, jamais une autre par défaut
   const myTeamId = currentUser?.team_id || activeTeamId;
-  const myTeam = teams.find((t) => t.id === myTeamId) || (teams.length > 0 ? teams[0] : null);
+  const myTeam = isAdmin
+    ? (teams.find((t) => t.id === myTeamId) || (teams.length > 0 ? teams[0] : null))
+    : (teams.find((t) => t.id === currentUser?.team_id) ||
+       teams.find((t) => (t.members || []).some((m) => m.id === currentUser?.id)) ||
+       null);
 
   // Restriction stricte : le participant ne voit QUE son équipe, sans les autres équipes !
   const displayedTeams = isAdmin

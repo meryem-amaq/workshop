@@ -27,8 +27,15 @@ export default function TeamWorkspacePage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
-  // Selected team
-  const currentTeam = teams.find((t) => t.id === (activeTeamId || currentUser?.team_id)) || teams[0];
+  // Équipe du participant : uniquement SA propre équipe (jamais une autre par défaut). L'admin choisit librement.
+  const participantTeam = !isAdmin
+    ? (teams.find((t) => t.id === currentUser?.team_id) ||
+       teams.find((t) => (t.members || []).some((m) => m.id === currentUser?.id)) ||
+       null)
+    : null;
+  const currentTeam = isAdmin
+    ? (teams.find((t) => t.id === (activeTeamId || currentUser?.team_id)) || teams[0])
+    : participantTeam;
 
   // Active house stepper (1 to 6)
   const [activeHouse, setActiveHouse] = useState(() => {
@@ -65,14 +72,18 @@ export default function TeamWorkspacePage() {
       navigate('/register');
       return;
     }
-    // Si participant sans équipe formée : redirection immédiate en salle d'attente
-    if (!isAdmin && (!currentUser?.team_id || teams.length === 0)) {
+    // Si participant sans équipe attribuée : retour en salle d'attente (sauf si les données sont encore en chargement)
+    if (!isAdmin && !participantTeam && (teams.length > 0 || !currentUser?.team_id)) {
       navigate('/waiting', { replace: true });
     }
-  }, [currentUser, isAdmin, teams.length, navigate]);
+  }, [currentUser, isAdmin, participantTeam?.id, teams.length, navigate]);
 
   // Set active team on mount or change
   useEffect(() => {
+    if (!isAdmin) {
+      if (participantTeam && activeTeamId !== participantTeam.id) setActiveTeamId(participantTeam.id);
+      return;
+    }
     if (currentUser?.team_id && !activeTeamId) {
       setActiveTeamId(currentUser.team_id);
     } else if (!activeTeamId && teams.length > 0) {

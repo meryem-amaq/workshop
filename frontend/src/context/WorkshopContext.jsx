@@ -85,12 +85,8 @@ export function WorkshopProvider({ children }) {
         // Synchroniser l'utilisateur connecté
         setCurrentUserState((prevUser) => {
           if (!prevUser) return null;
-          let found = fetchedParts.find((p) => p.id === prevUser.id);
-          if (!found && prevUser.first_name) {
-            found = fetchedParts.find((p) => 
-              p.first_name && p.first_name.trim().toLowerCase() === prevUser.first_name.trim().toLowerCase()
-            );
-          }
+          // Recherche STRICTE par identifiant (jamais par prénom : deux participants peuvent avoir le même prénom)
+          const found = fetchedParts.find((p) => p.id === prevUser.id);
           if (found) {
             if (JSON.stringify(found) !== JSON.stringify(prevUser)) {
               localStorage.setItem('smurf_iot_user', JSON.stringify(found));
