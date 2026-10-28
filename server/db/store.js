@@ -163,8 +163,8 @@ async function initDatabase() {
         \`submitted_at\` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
         \`updated_at\` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         UNIQUE KEY \`uq_team_house\` (\`team_id\`, \`house_number\`)
-      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`
-        `CREATE TABLE IF NOT EXISTS \`admins\` (
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`,
+      `CREATE TABLE IF NOT EXISTS \`admins\` (
         \`id\` VARCHAR(64) NOT NULL PRIMARY KEY,
         \`email\` VARCHAR(150) NOT NULL UNIQUE,
         \`password\` VARCHAR(255) NOT NULL,

@@ -12,6 +12,7 @@ const sessionRepo = require('./sessionRepo');
 module.exports = {
   initDatabase: store.initDatabase,
   getStatus: store.getStatus,
+  getPool: store.getPool,
   verifyAdminLogin: store.verifyAdminLogin,
   ...participantRepo,
   ...teamRepo,
