@@ -17,10 +17,11 @@ router.post(['/', '/register'], async (req, res) => {
 
     // Vérifier si des équipes existent déjà (affectation retardataire)
     const existingTeams = await db.getTeams();
+    const personality = calculatePersonality15(Array.isArray(ratings) ? ratings : (Array.isArray(answers) ? answers : []));
     const tempDominant = (archetype && ARCHETYPES_META[archetype])
       ? archetype
-      : calculatePersonality15(Array.isArray(ratings) ? ratings : (Array.isArray(answers) ? answers : [])).dominantArchetype;
-    const assignedTeamId = findTeamForLatecomer(tempDominant, existingTeams);
+      : personality.dominantArchetype;
+    const assignedTeamId = findTeamForLatecomer(tempDominant, existingTeams, personality.scores75);
 
     const participant = formatParticipantRecord({
       first_name,

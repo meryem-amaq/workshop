@@ -6,9 +6,9 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../db');
-const { generateHomogeneousTeams } = require('../services/teamService');
+const { generateBalancedTeams } = require('../services/teamService');
 
-// Génération automatique des groupes homogènes
+// Génération automatique des groupes équilibrés (2 ou 3 personnes par équipe)
 router.post(['/generate', '/auto-assign'], async (req, res) => {
   try {
     const participants = await db.getParticipants();
@@ -16,7 +16,7 @@ router.post(['/generate', '/auto-assign'], async (req, res) => {
       return res.status(400).json({ error: 'Aucun participant inscrit. Veuillez inscrire des participants avant de former les groupes.' });
     }
 
-    const { teams, participantUpdates } = generateHomogeneousTeams(participants);
+    const { teams, participantUpdates } = generateBalancedTeams(participants);
 
     // Enregistrer les équipes et changer la phase du workshop
     const savedTeams = await db.saveTeams(teams, participantUpdates);

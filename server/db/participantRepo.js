@@ -89,17 +89,17 @@ async function autoAssignUnassignedParticipants() {
   const teams = await getTeams();
   if (!teams || teams.length === 0) return { assigned: 0 };
 
+  const { findTeamForLatecomer } = require('../services/teamService');
   const participants = await getParticipants();
   const unassigned = participants.filter(p => !p.team_id);
   let count = 0;
+  const extraCounts = {};
 
   for (const p of unassigned) {
-    let matchingTeam = teams.find(t => t.archetype === p.archetype);
-    if (!matchingTeam) {
-      matchingTeam = teams.slice().sort((a, b) => (a.members || []).length - (b.members || []).length)[0];
-    }
-    if (matchingTeam) {
-      await assignParticipantToTeam(p.id, matchingTeam.id);
+    const teamId = findTeamForLatecomer(p.archetype, teams, p.archetype_scores, extraCounts);
+    if (teamId) {
+      await assignParticipantToTeam(p.id, teamId);
+      extraCounts[teamId] = (extraCounts[teamId] || 0) + 1;
       count++;
     }
   }

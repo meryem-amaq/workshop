@@ -49,7 +49,7 @@ async function resetAll() {
       await pool.query('UPDATE participants SET team_id = NULL, is_scribe = FALSE');
       await pool.query('DELETE FROM teams');
       await pool.query('DELETE FROM participants');
-      await pool.query('UPDATE sessions SET phase = "registration" WHERE id = "default"');
+      await pool.query("UPDATE sessions SET phase = 'registration' WHERE id = 'default'");
     } catch (err) {
       console.error('[DB] Erreur reset MySQL:', err.message);
     }

@@ -24,7 +24,7 @@ export default function TeamAssignedCard({
               {assignedTeam.name}
             </h3>
             <div className="assigned-team-trait" id="assignedTeamTrait">
-              Archétype dominant : {getArchetypeDisplayName(assignedTeam.archetype)}
+              Votre caractère : {getArchetypeDisplayName(assignedTeam.archetype)}
             </div>
           </div>
         </div>

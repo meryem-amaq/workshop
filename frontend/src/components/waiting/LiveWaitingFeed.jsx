@@ -1,5 +1,4 @@
 import React from 'react';
-import { ARCHETYPES } from '../../constants/workshopData';
 
 export default function LiveWaitingFeed({
   participants,
@@ -44,21 +43,14 @@ export default function LiveWaitingFeed({
             </div>
           ) : (
             [...participants].reverse().map((p) => {
-              const pMeta = ARCHETYPES[p.archetype] || ARCHETYPES.Professeur;
               const timeStr = p.created_at
                 ? new Date(p.created_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
                 : 'À l\'instant';
               return (
                 <div key={p.id} className="waiting-feed-item">
                   <div className="feed-item-left">
-                    <span className="waiting-feed-dot" style={{ background: pMeta.color }}></span>
+                    <span className="waiting-feed-dot" style={{ background: '#38bdf8' }}></span>
                     <span className="feed-item-name">{p.first_name} {p.last_name}</span>
-                    <span
-                      className="feed-item-badge"
-                      style={{ background: `${pMeta.color}22`, color: pMeta.color, border: `1px solid ${pMeta.color}44` }}
-                    >
-                      {pMeta.badge || p.archetype}
-                    </span>
                   </div>
                   <span className="feed-item-time">{timeStr}</span>
                 </div>
