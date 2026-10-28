@@ -29,7 +29,7 @@ function participantHome(currentUser, sessionPhase) {
 }
 
 function RootEntry() {
-  const { setAdminMode, currentUser, setCurrentUser, isAdmin, sessionPhase } = useWorkshop();
+  const { setAdminMode, setCurrentUser, isAdmin } = useWorkshop();
   const isJoin = typeof window !== 'undefined' && window.location.search.includes('join=1');
 
   React.useEffect(() => {
@@ -43,23 +43,19 @@ function RootEntry() {
     }
   }, [isJoin, setAdminMode, setCurrentUser]);
 
-  // 1. Scan du QR code : toujours afficher directement la saisie Nom & Prénom
+  // 1. Scan du QR Code (?join=1) : C'est un ÉTUDIANT qui rejoint -> formulaire d'inscription (Nom & Prénom)
   if (isJoin) {
     return <RegisterQuizPage />;
   }
 
-  // 2. Super Admin connecté : accède à son écran de pilotage
+  // 2. Super Admin déjà connecté : C'est l'ANIMATEUR -> Écran de Projection du Grand QR Code
   if (isAdmin) {
     return <Navigate to="/projection" replace />;
   }
 
-  // 3. Participant déjà inscrit : reste dans son parcours (Salle d'attente, ou Espace Équipe si groupes formés)
-  if (currentUser) {
-    return <Navigate to={participantHome(currentUser, sessionPhase)} replace />;
-  }
-
-  // 4. Par défaut : formulaire d'inscription
-  return <RegisterQuizPage />;
+  // 3. Clic sur "Open App" ou ouverture du site racine sans QR code :
+  // C'est l'ANIMATEUR sur son ordinateur -> Page de Connexion Officielle pour ouvrir le QR Code
+  return <Navigate to="/login" replace />;
 }
 
 function AdminOnly({ children }) {
@@ -83,18 +79,18 @@ export default function App() {
           <Header />
           <main className="main-content">
             <Routes>
-              {/* Si ?join=1 (via QR Code) -> Questionnaire Incubé. Sinon -> /login */}
+              {/* Si ?join=1 (via QR Code) -> Questionnaire. Sinon -> /login pour l'Animateur */}
               <Route path="/" element={<RootEntry />} />
               <Route path="/login" element={<LoginPage />} />
 
-              {/* Parcours des Incubés (accessible via le QR Code) */}
+              {/* Parcours des Incubés / Participants (accessible via le QR Code) */}
               <Route path="/register" element={<RegisterQuizPage />} />
               <Route path="/quiz" element={<RegisterQuizPage />} />
               <Route path="/waiting" element={<WaitingRoomPage />} />
               <Route path="/team" element={<TeamWorkspacePage />} />
               <Route path="/workspace" element={<TeamWorkspacePage />} />
 
-              {/* Parcours Super Admin (accessible après connexion) */}
+              {/* Parcours Super Admin (accessible après connexion pour afficher le Grand QR Code) */}
               <Route path="/projection" element={<AdminOnly><ProjectionPage /></AdminOnly>} />
               <Route path="/qrcode" element={<AdminOnly><ProjectionPage /></AdminOnly>} />
               <Route path="/launch" element={<AdminOnly><GroupsLaunchPage /></AdminOnly>} />
