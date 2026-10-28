@@ -55,12 +55,10 @@ export function WorkshopProvider({ children }) {
     setIsAdminState(val);
     if (val) {
       localStorage.setItem('smurf_iot_admin', 'true');
-      showToast('👑 Espace Animateur déverrouillé !', 'success');
     } else {
       localStorage.removeItem('smurf_iot_admin');
-      showToast('Retour au mode participant standard.', 'info');
     }
-  }, [showToast]);
+  }, []);
 
   // Rafraîchissement optimisé des données de l'API (1 seule requête globale /api/state)
   const refreshWorkshopData = useCallback(async () => {

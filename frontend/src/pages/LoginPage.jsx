@@ -50,7 +50,7 @@ export default function LoginPage() {
         setAdminMode(true);
         setCurrentUser(null);
         setError('');
-        showToast('👑 Connexion Super Admin réussie !', 'success');
+        showToast('👑 Connexion réussie !', 'success');
         navigate('/projection');
       } else {
         setError(err.message || 'Adresse email ou mot de passe incorrect.');
@@ -59,11 +59,6 @@ export default function LoginPage() {
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleLogout = () => {
-    setAdminMode(false);
-    showToast('Déconnexion effectuée.', 'info');
   };
 
   return (
