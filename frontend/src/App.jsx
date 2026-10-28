@@ -19,7 +19,7 @@ import RestitutionPage from './pages/RestitutionPage';
 import ProjectionPage from './pages/ProjectionPage';
 import LoginPage from './pages/LoginPage';
 
-// Destination d'un participant d�j� inscrit (jamais la page de login)
+// Destination d'un participant déjà inscrit (jamais la page de login)
 function participantHome(currentUser) {
   return currentUser ? (currentUser.team_id ? '/team' : '/waiting') : null;
 }
@@ -40,7 +40,7 @@ function RootEntry() {
   return <Navigate to="/login" replace />;
 }
 
-// Pages réservées au Super Admin : redirection vers /login si non connecté
+// Pages réservées au Super Admin : redirection si non connecté
 function AdminOnly({ children }) {
   const { isAdmin, currentUser } = useWorkshop();
   if (isAdmin) return children;
