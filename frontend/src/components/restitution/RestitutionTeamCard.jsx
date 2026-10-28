@@ -23,12 +23,24 @@ export default function RestitutionTeamCard({ team }) {
         background: 'rgba(15, 23, 42, 0.75)',
         border: `1px solid ${team.color}44`,
         borderRadius: '18px',
-        padding: '1.75rem',
-        boxShadow: '0 4px 25px rgba(0,0,0,0.3)'
+        padding: '1.5rem',
+        boxShadow: '0 4px 25px rgba(0,0,0,0.3)',
+        overflow: 'hidden'
       }}
     >
       {/* Head */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem', borderBottom: '1px solid rgba(255,255,255,0.08)', paddingBottom: '1rem' }}>
+      <div
+        className="restitution-card-head"
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '1rem',
+          flexWrap: 'wrap',
+          marginBottom: '1.5rem',
+          borderBottom: '1px solid rgba(255,255,255,0.08)',
+          paddingBottom: '1rem'
+        }}
+      >
         <img
           src={`/assets/images/${team.avatar}`}
           alt={team.name}
@@ -38,12 +50,13 @@ export default function RestitutionTeamCard({ team }) {
             borderRadius: '50%',
             objectFit: 'cover',
             border: `3px solid ${team.color}`,
-            boxShadow: `0 0 20px ${team.color}55`
+            boxShadow: `0 0 20px ${team.color}55`,
+            flexShrink: 0
           }}
         />
-        <div>
+        <div style={{ flex: 1, minWidth: '200px' }}>
           <h3 style={{ fontSize: '1.3rem', color: '#fff', margin: 0 }}>{team.name}</h3>
-          <div style={{ fontSize: '0.85rem', color: '#94a3b8', marginTop: '0.25rem' }}>
+          <div style={{ fontSize: '0.85rem', color: '#94a3b8', marginTop: '0.25rem', lineHeight: 1.4 }}>
             Archétype : <strong style={{ color: team.color }}>{getArchetypeDisplayName(team.archetype)}</strong> •{' '}
             Rédacteur Unique : <strong style={{ color: '#fbbf24' }}>{scribeName}</strong> •{' '}
             Progression : <strong>{team.progress_percent}% (Maison {team.current_house}/6)</strong>
@@ -55,9 +68,16 @@ export default function RestitutionTeamCard({ team }) {
       </div>
 
       {/* 6 Houses Grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem' }}>
+      <div
+        className="restitution-houses-grid-responsive"
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 260px), 1fr))',
+          gap: '1rem'
+        }}
+      >
         {/* Maison 1 */}
-        <div className="restitution-house-block" style={{ background: 'rgba(255,255,255,0.02)', padding: '1rem', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.05)' }}>
+        <div className="restitution-house-block" style={{ background: 'rgba(255,255,255,0.02)', padding: '1rem', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.05)', wordBreak: 'break-word' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', color: '#38bdf8', fontWeight: 'bold', fontSize: '0.85rem', marginBottom: '0.5rem' }}>
             <span>🛖 Maison 1 : Besoin</span>
             <span style={{ color: '#10b981' }}>16%</span>
@@ -71,7 +91,7 @@ export default function RestitutionTeamCard({ team }) {
         </div>
 
         {/* Maison 2 */}
-        <div className="restitution-house-block" style={{ background: 'rgba(255,255,255,0.02)', padding: '1rem', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.05)' }}>
+        <div className="restitution-house-block" style={{ background: 'rgba(255,255,255,0.02)', padding: '1rem', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.05)', wordBreak: 'break-word' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', color: '#38bdf8', fontWeight: 'bold', fontSize: '0.85rem', marginBottom: '0.5rem' }}>
             <span>💡 Maison 2 : Idée</span>
             <span style={{ color: '#10b981' }}>33%</span>
@@ -85,7 +105,7 @@ export default function RestitutionTeamCard({ team }) {
         </div>
 
         {/* Maison 3 */}
-        <div className="restitution-house-block" style={{ background: 'rgba(255,255,255,0.02)', padding: '1rem', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.05)' }}>
+        <div className="restitution-house-block" style={{ background: 'rgba(255,255,255,0.02)', padding: '1rem', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.05)', wordBreak: 'break-word' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', color: '#38bdf8', fontWeight: 'bold', fontSize: '0.85rem', marginBottom: '0.5rem' }}>
             <span>⚙️ Maison 3 : Technique</span>
             <span style={{ color: '#10b981' }}>50%</span>
@@ -99,7 +119,7 @@ export default function RestitutionTeamCard({ team }) {
         </div>
 
         {/* Maison 4 */}
-        <div className="restitution-house-block" style={{ background: 'rgba(255,255,255,0.02)', padding: '1rem', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.05)' }}>
+        <div className="restitution-house-block" style={{ background: 'rgba(255,255,255,0.02)', padding: '1rem', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.05)', wordBreak: 'break-word' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', color: '#38bdf8', fontWeight: 'bold', fontSize: '0.85rem', marginBottom: '0.5rem' }}>
             <span>🔌 Maison 4 : Prototype</span>
             <span style={{ color: '#10b981' }}>66%</span>
@@ -113,12 +133,20 @@ export default function RestitutionTeamCard({ team }) {
         </div>
 
         {/* Maison 5 - BMC 9 blocs */}
-        <div className="restitution-house-block" style={{ gridColumn: '1 / -1', background: 'rgba(255,255,255,0.02)', padding: '1rem', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.05)' }}>
+        <div className="restitution-house-block" style={{ gridColumn: '1 / -1', background: 'rgba(255,255,255,0.02)', padding: '1rem', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.05)', wordBreak: 'break-word' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', color: '#38bdf8', fontWeight: 'bold', fontSize: '0.85rem', marginBottom: '0.75rem' }}>
             <span>📊 Maison 5 : Business</span>
             <span style={{ color: '#10b981' }}>83%</span>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '0.5rem', fontSize: '0.78rem' }}>
+          <div
+            className="restitution-bmc-grid"
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 170px), 1fr))',
+              gap: '0.5rem',
+              fontSize: '0.78rem'
+            }}
+          >
             <div style={{ background: 'rgba(0,0,0,0.25)', padding: '0.5rem', borderRadius: '6px' }}><strong>Partenaires :</strong><br />{d5.bmcPartners || '—'}</div>
             <div style={{ background: 'rgba(0,0,0,0.25)', padding: '0.5rem', borderRadius: '6px' }}><strong style={{ color: '#38bdf8' }}>Proposition Valeur :</strong><br />{d5.bmcValue || '—'}</div>
             <div style={{ background: 'rgba(0,0,0,0.25)', padding: '0.5rem', borderRadius: '6px' }}><strong>Segments Clients :</strong><br />{d5.bmcSegments || '—'}</div>
@@ -129,7 +157,7 @@ export default function RestitutionTeamCard({ team }) {
         </div>
 
         {/* Maison 6 - Marché & Pitch */}
-        <div className="restitution-house-block" style={{ gridColumn: '1 / -1', background: 'rgba(255,255,255,0.02)', padding: '1rem', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.05)' }}>
+        <div className="restitution-house-block" style={{ gridColumn: '1 / -1', background: 'rgba(255,255,255,0.02)', padding: '1rem', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.05)', wordBreak: 'break-word' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', color: '#10b981', fontWeight: 'bold', fontSize: '0.85rem', marginBottom: '0.5rem' }}>
             <span>🏆 Maison 6 : Pitch</span>
             <span style={{ color: '#10b981' }}>100%</span>

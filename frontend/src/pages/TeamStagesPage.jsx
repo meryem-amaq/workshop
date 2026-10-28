@@ -131,7 +131,7 @@ export default function TeamStagesPage() {
                   </div>
 
                   {/* Décomposition des 6 Maisons */}
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1rem' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 260px), 1fr))', gap: '1rem', wordBreak: 'break-word' }}>
                     {houseDefs.map((house) => {
                       const del = deliverables.find((d) => Number(d.house_number) === house.num);
                       const isCompleted = team.current_house > house.num || (del && del.status === 'validated');

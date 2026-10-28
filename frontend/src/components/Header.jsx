@@ -19,88 +19,30 @@ export default function Header() {
   }
 
   return (
-    <header className="app-header" style={{
-      background: 'rgba(7, 13, 25, 0.95)',
-      backdropFilter: 'blur(20px)',
-      borderBottom: '1px solid rgba(56, 189, 248, 0.2)',
-      position: 'sticky',
-      top: 0,
-      zIndex: 100,
-      width: '100%',
-      padding: '0.4rem 1rem'
-    }}>
-      <div style={{
-        maxWidth: '1800px',
-        margin: '0 auto',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        gap: '1rem'
-      }}>
+    <header className="app-header">
+      <div className="admin-header-bar">
 
         {/* Zone 1 : Logo & Titre */}
         <div
+          className="admin-header-brand"
           onClick={() => navigate('/projection')}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.65rem',
-            cursor: 'pointer',
-            flexShrink: 0
-          }}
           title="Supervision Workshop"
         >
           <img
             src="/assets/images/logo.jpg"
             alt="Logo Schtroumpf IoT"
-            style={{
-              width: '42px',
-              height: '42px',
-              borderRadius: '10px',
-              border: '1.5px solid rgba(56, 189, 248, 0.5)',
-              boxShadow: '0 0 12px rgba(56, 189, 248, 0.35)',
-              objectFit: 'cover'
-            }}
+            className="admin-header-logo"
           />
-          <span style={{
-            color: '#fff',
-            fontWeight: '800',
-            fontSize: '0.98rem',
-            letterSpacing: '-0.01em'
-          }} className="header-brand-title">
+          <span className="header-brand-title">
             Village IoT
           </span>
         </div>
 
         {/* Zone 2 : Navigation Principale Super Admin (6 Étapes) */}
-        <nav style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '0.35rem',
-          flexWrap: 'wrap',
-          justifyContent: 'center',
-          background: 'rgba(15, 23, 42, 0.75)',
-          padding: '4px 8px',
-          borderRadius: '14px',
-          border: '1px solid rgba(255, 255, 255, 0.08)'
-        }}>
+        <nav className="admin-header-nav">
           <NavLink
             to="/projection"
             className={({ isActive }) => `header-nav-btn ${isActive ? 'active' : ''}`}
-            style={({ isActive }) => ({
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '0.4rem',
-              padding: '0.4rem 0.75rem',
-              borderRadius: '10px',
-              fontSize: '0.85rem',
-              fontWeight: isActive ? '700' : '500',
-              color: isActive ? '#fff' : '#94a3b8',
-              background: isActive ? 'linear-gradient(135deg, #0284c7, #38bdf8)' : 'transparent',
-              textDecoration: 'none',
-              transition: 'all 0.2s ease',
-              whiteSpace: 'nowrap'
-            })}
           >
             <span>📱</span>
             <span>1. Projection QR</span>
@@ -109,20 +51,6 @@ export default function Header() {
           <NavLink
             to="/launch"
             className={({ isActive }) => `header-nav-btn ${isActive ? 'active' : ''}`}
-            style={({ isActive }) => ({
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '0.4rem',
-              padding: '0.4rem 0.75rem',
-              borderRadius: '10px',
-              fontSize: '0.85rem',
-              fontWeight: isActive ? '700' : '500',
-              color: isActive ? '#fff' : '#94a3b8',
-              background: isActive ? 'linear-gradient(135deg, #0284c7, #38bdf8)' : 'transparent',
-              textDecoration: 'none',
-              transition: 'all 0.2s ease',
-              whiteSpace: 'nowrap'
-            })}
           >
             <span>👥</span>
             <span>2. Lancement Groupes</span>
@@ -131,20 +59,6 @@ export default function Header() {
           <NavLink
             to="/team"
             className={({ isActive }) => `header-nav-btn ${isActive ? 'active' : ''}`}
-            style={({ isActive }) => ({
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '0.4rem',
-              padding: '0.4rem 0.75rem',
-              borderRadius: '10px',
-              fontSize: '0.85rem',
-              fontWeight: isActive ? '700' : '500',
-              color: isActive ? '#fff' : '#94a3b8',
-              background: isActive ? 'linear-gradient(135deg, #0284c7, #38bdf8)' : 'transparent',
-              textDecoration: 'none',
-              transition: 'all 0.2s ease',
-              whiteSpace: 'nowrap'
-            })}
           >
             <span>🛖</span>
             <span>3. Espace Équipe</span>
@@ -153,20 +67,6 @@ export default function Header() {
           <NavLink
             to="/village"
             className={({ isActive }) => `header-nav-btn ${isActive ? 'active' : ''}`}
-            style={({ isActive }) => ({
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '0.4rem',
-              padding: '0.4rem 0.75rem',
-              borderRadius: '10px',
-              fontSize: '0.85rem',
-              fontWeight: isActive ? '700' : '500',
-              color: isActive ? '#fff' : '#94a3b8',
-              background: isActive ? 'linear-gradient(135deg, #0284c7, #38bdf8)' : 'transparent',
-              textDecoration: 'none',
-              transition: 'all 0.2s ease',
-              whiteSpace: 'nowrap'
-            })}
           >
             <span>🍄</span>
             <span>4. Carte 3D Village</span>
@@ -175,20 +75,6 @@ export default function Header() {
           <NavLink
             to="/stages"
             className={({ isActive }) => `header-nav-btn ${isActive ? 'active' : ''}`}
-            style={({ isActive }) => ({
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '0.4rem',
-              padding: '0.4rem 0.75rem',
-              borderRadius: '10px',
-              fontSize: '0.85rem',
-              fontWeight: isActive ? '700' : '500',
-              color: isActive ? '#fff' : '#94a3b8',
-              background: isActive ? 'linear-gradient(135deg, #0284c7, #38bdf8)' : 'transparent',
-              textDecoration: 'none',
-              transition: 'all 0.2s ease',
-              whiteSpace: 'nowrap'
-            })}
           >
             <span>📋</span>
             <span>5. Suivi 6 Maisons</span>
@@ -197,20 +83,6 @@ export default function Header() {
           <NavLink
             to="/restitution"
             className={({ isActive }) => `header-nav-btn ${isActive ? 'active' : ''}`}
-            style={({ isActive }) => ({
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '0.4rem',
-              padding: '0.4rem 0.75rem',
-              borderRadius: '10px',
-              fontSize: '0.85rem',
-              fontWeight: isActive ? '700' : '500',
-              color: isActive ? '#fff' : '#94a3b8',
-              background: isActive ? 'linear-gradient(135deg, #0284c7, #38bdf8)' : 'transparent',
-              textDecoration: 'none',
-              transition: 'all 0.2s ease',
-              whiteSpace: 'nowrap'
-            })}
           >
             <span>📊</span>
             <span>6. Restitution & Pitch</span>
@@ -218,41 +90,20 @@ export default function Header() {
         </nav>
 
         {/* Zone 3 : Statut Super Admin & Déconnexion */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexShrink: 0 }}>
-          <span style={{
-            background: 'linear-gradient(135deg, rgba(2, 132, 199, 0.25), rgba(56, 189, 248, 0.25))',
-            border: '1px solid rgba(56, 189, 248, 0.5)',
-            padding: '0.35rem 0.75rem',
-            borderRadius: '10px',
-            fontSize: '0.8rem',
-            fontWeight: '700',
-            color: '#38bdf8',
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '0.35rem',
-            whiteSpace: 'nowrap'
-          }}>
-            👑 Super Admin
+        <div className="admin-header-actions">
+          <span className="admin-badge-pill">
+            👑 <span className="admin-badge-text">Super Admin</span>
           </span>
           <button
             type="button"
-            className="btn btn-ghost btn-xs"
-            style={{
-              color: '#ef4444',
-              fontSize: '0.8rem',
-              border: '1px solid rgba(239, 68, 68, 0.35)',
-              borderRadius: '8px',
-              padding: '0.35rem 0.65rem',
-              cursor: 'pointer',
-              background: 'rgba(239, 68, 68, 0.08)'
-            }}
+            className="btn btn-ghost btn-xs admin-quit-btn"
             onClick={() => {
               setAdminMode(false);
               navigate('/login');
             }}
             title="Quitter le mode Administrateur"
           >
-            🚪 Quitter
+            🚪 <span>Quitter</span>
           </button>
         </div>
 
