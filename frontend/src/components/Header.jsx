@@ -7,11 +7,14 @@ export default function Header() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Menu Super Admin : uniquement pour un admin connecté, sur les pages admin.
-  // Jamais sur le parcours participant (inscription, attente, espace équipe, résultats).
-  const adminPaths = ['/projection', '/qrcode', '/launch', '/groups', '/admin', '/dashboard', '/village', '/stages', '/progress', '/team', '/workspace', '/restitution'];
-  const isAdminPage = adminPaths.includes(location.pathname);
-  if (!isAdmin || !isAdminPage || currentUser) {
+  // 1. Cette barre est STRICTEMENT RÉSERVÉE au Super Admin connecté
+  if (!isAdmin) {
+    return null;
+  }
+
+  // 2. Sur les pages de login, inscription et attente, ne pas afficher la barre
+  const hiddenOn = ['/login', '/register', '/quiz', '/waiting'];
+  if (hiddenOn.includes(location.pathname)) {
     return null;
   }
 

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useWorkshop } from '../context/WorkshopContext';
 
 export default function LoginPage() {
-  const { isAdmin, setAdminMode, showToast } = useWorkshop();
+  const { isAdmin, setAdminMode, setCurrentUser, showToast } = useWorkshop();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -30,6 +30,7 @@ export default function LoginPage() {
 
     if (isPasswordValid) {
       setAdminMode(true);
+      setCurrentUser(null); // Nettoie tout profil participant pour que la session Admin soit 100% propre
       setError('');
       showToast('👑 Connexion Super Admin réussie !', 'success');
       navigate('/projection');
