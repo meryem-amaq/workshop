@@ -38,19 +38,15 @@ export default function WaitingRoomPage() {
   const scribeMember = assignedTeam?.members?.find((m) => m.id === assignedTeam.scribe_participant_id || m.is_scribe);
   const scribeName = scribeMember ? `${scribeMember.first_name} ${scribeMember.last_name}` : 'Désigné par animateur';
 
-  // Redirection automatique dès que le groupe est constitué par l'animateur
+  // Notification bienveillante lorsque le groupe est prêt (l'utilisateur clique sur le bouton pour entrer)
   useEffect(() => {
     if (assignedTeam) {
       showToast(
-        `🎉 Votre groupe « ${assignedTeam.name} » est prêt ! Redirection vers votre Espace Équipe...`,
+        `🎉 Votre groupe « ${assignedTeam.name} » est prêt ! Cliquez ci-dessous pour entrer dans votre Espace Équipe.`,
         'success'
       );
-      const timeout = setTimeout(() => {
-        navigate('/team');
-      }, 1500);
-      return () => clearTimeout(timeout);
     }
-  }, [assignedTeam, navigate, showToast]);
+  }, [assignedTeam, showToast]);
 
   if (!currentUser) return null;
 
