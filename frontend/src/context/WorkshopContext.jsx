@@ -62,71 +62,53 @@ export function WorkshopProvider({ children }) {
     }
   }, [showToast]);
 
-  // Rafraîchissement des données de l'API
+  // Rafraîchissement optimisé des données de l'API (1 seule requête globale /api/state)
   const refreshWorkshopData = useCallback(async () => {
     try {
-      const [resSession, resTeams, resParticipants, resDeliverables] = await Promise.all([
-        fetch('/api/session'),
-        fetch('/api/teams'),
-        fetch('/api/participants'),
-        fetch('/api/deliverables')
-      ]);
-
-      let currentPhase = 'registration';
-      if (resSession.ok) {
-        const sessData = await resSession.json();
-        currentPhase = sessData.phase || 'registration';
+      const resState = await fetch('/api/state');
+      if (resState.ok) {
+        const data = await resState.json();
+        const currentPhase = data.phase || (data.session && data.session.phase) || 'registration';
         setSessionPhase(currentPhase);
-      }
 
-      let fetchedTeams = [];
-      if (resTeams.ok) {
-        fetchedTeams = await resTeams.json();
-      }
-
-      let fetchedParts = [];
-      if (resParticipants.ok) {
-        fetchedParts = await resParticipants.json();
+        const fetchedParts = data.participants || [];
         setParticipants(fetchedParts);
-      }
 
-      let fetchedDels = [];
-      if (resDeliverables.ok) {
-        fetchedDels = await resDeliverables.json();
+        const fetchedDels = data.deliverables || [];
         setDeliverables(fetchedDels);
+
+        const fetchedTeams = data.teams || [];
+        const hydratedTeams = fetchedTeams.map((t) => ({
+          ...t,
+          deliverables: fetchedDels.filter((d) => d.team_id === t.id)
+        }));
+        setTeams(hydratedTeams);
+
+        // Synchroniser l'utilisateur connecté
+        setCurrentUserState((prevUser) => {
+          if (!prevUser) return null;
+          let found = fetchedParts.find((p) => p.id === prevUser.id);
+          if (!found && prevUser.first_name) {
+            found = fetchedParts.find((p) => 
+              p.first_name && p.first_name.trim().toLowerCase() === prevUser.first_name.trim().toLowerCase()
+            );
+          }
+          if (found) {
+            if (JSON.stringify(found) !== JSON.stringify(prevUser)) {
+              localStorage.setItem('smurf_iot_user', JSON.stringify(found));
+              return found;
+            }
+          } else if (hydratedTeams.length > 0 && !prevUser.team_id) {
+            const myTeam = hydratedTeams.find((t) => (t.members || []).some((m) => m.id === prevUser.id));
+            if (myTeam) {
+              const updated = { ...prevUser, team_id: myTeam.id };
+              localStorage.setItem('smurf_iot_user', JSON.stringify(updated));
+              return updated;
+            }
+          }
+          return prevUser;
+        });
       }
-
-      // Lier les livrables à leurs équipes
-      const hydratedTeams = fetchedTeams.map((t) => ({
-        ...t,
-        deliverables: fetchedDels.filter((d) => d.team_id === t.id)
-      }));
-      setTeams(hydratedTeams);
-
-      // Si l'utilisateur connecté existe, vérifier sa mise à jour (notamment son affectation d'équipe)
-      setCurrentUserState((prevUser) => {
-        if (!prevUser) return null;
-        let found = fetchedParts.find((p) => p.id === prevUser.id);
-        if (!found && prevUser.first_name) {
-          found = fetchedParts.find((p) => 
-            p.first_name && p.first_name.trim().toLowerCase() === prevUser.first_name.trim().toLowerCase()
-          );
-        }
-        if (found) {
-          if (JSON.stringify(found) !== JSON.stringify(prevUser)) {
-            localStorage.setItem('smurf_iot_user', JSON.stringify(found));
-            return found;
-          }
-        } else if (hydratedTeams.length > 0 && !prevUser.team_id) {
-          const myTeam = hydratedTeams.find((t) => (t.members || []).some((m) => m.id === prevUser.id));
-          if (myTeam) {
-            const updated = { ...prevUser, team_id: myTeam.id };
-            localStorage.setItem('smurf_iot_user', JSON.stringify(updated));
-            return updated;
-          }
-        }
-        return prevUser;
-      });
     } catch {
       // Erreur silencieuse de polling
     }
@@ -148,8 +130,8 @@ export function WorkshopProvider({ children }) {
   useEffect(() => {
     checkHealth();
     refreshWorkshopData();
-    // Polling toutes les 2.5 secondes
-    const interval = setInterval(refreshWorkshopData, 2500);
+    // Polling toutes les 4 secondes (économie de 80% des requêtes réseau)
+    const interval = setInterval(refreshWorkshopData, 4000);
     return () => clearInterval(interval);
   }, [checkHealth, refreshWorkshopData]);
 

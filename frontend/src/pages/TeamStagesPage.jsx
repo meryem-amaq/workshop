@@ -170,40 +170,37 @@ export default function TeamStagesPage() {
                         if (house.num === 1) {
                           detailsPreview = (
                             <div style={{ fontSize: '0.78rem', color: '#cbd5e1', marginTop: '0.4rem' }}>
-                              <strong>Cible :</strong> {c.targetUser || '—'}<br />
-                              <strong>Problème :</strong> {c.problem || '—'}
+                              <strong style={{ color: '#38bdf8' }}>Problème :</strong> {c.formulation || c.problem || c.targetUser || '—'}
                             </div>
                           );
                         } else if (house.num === 2) {
                           detailsPreview = (
                             <div style={{ fontSize: '0.78rem', color: '#cbd5e1', marginTop: '0.4rem' }}>
-                              <strong>Concept :</strong> {c.conceptName || '—'}<br />
-                              <strong>Capteurs :</strong> {c.measures || '—'}
+                              <strong style={{ color: '#38bdf8' }}>Concept IoT :</strong> {c.actions || c.conceptName || c.measures || '—'}
                             </div>
                           );
                         } else if (house.num === 3) {
                           detailsPreview = (
                             <div style={{ fontSize: '0.78rem', color: '#cbd5e1', marginTop: '0.4rem' }}>
-                              <strong>Capteurs :</strong> {c.sensors || '—'}<br />
-                              <strong>Réseau :</strong> {c.protocol || '—'}
+                              <strong style={{ color: '#38bdf8' }}>Chaîne IoT :</strong> {c.cloudUser || c.processing || c.sensors || '—'}
                             </div>
                           );
                         } else if (house.num === 4) {
                           detailsPreview = (
                             <div style={{ fontSize: '0.78rem', color: '#cbd5e1', marginTop: '0.4rem' }}>
-                              <strong>Maquette :</strong> {c.prototypeType || '—'}
+                              <strong style={{ color: '#38bdf8' }}>Prototype :</strong> {c.testProtocol || c.usageScenario || c.prototypeType || '—'}
                             </div>
                           );
                         } else if (house.num === 5) {
                           detailsPreview = (
                             <div style={{ fontSize: '0.78rem', color: '#cbd5e1', marginTop: '0.4rem' }}>
-                              <strong>Valeur :</strong> {c.value || '—'}
+                              <strong style={{ color: '#38bdf8' }}>Valeur BMC :</strong> {c.bmcValue || c.value || '—'}
                             </div>
                           );
                         } else if (house.num === 6) {
                           detailsPreview = (
                             <div style={{ fontSize: '0.78rem', color: '#cbd5e1', marginTop: '0.4rem' }}>
-                              <strong>Go-to-market :</strong> {c.launchPlan || '—'}
+                              <strong style={{ color: '#38bdf8' }}>Go-to-market :</strong> {c.launchPlan || '—'}
                             </div>
                           );
                         }

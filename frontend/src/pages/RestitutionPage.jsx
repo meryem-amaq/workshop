@@ -232,25 +232,19 @@ export default function RestitutionPage() {
     <div class="houses-grid">
       <div class="house-row">
         <div class="house-tag">🛖 Maison 1 — Besoin & Problématique</div>
-        <div class="house-content-p"><strong>Utilisateur Cible :</strong> ${d1.targetUser || 'Non spécifié'}</div>
-        <div class="house-content-p"><strong>Problème :</strong> ${d1.problem || 'Non spécifié'}</div>
-        <div class="house-content-p"><strong>Formulation Canonique :</strong> ${d1.formulation || 'Non formulé'}</div>
+        <div class="house-content-p"><strong>Formulation du Problème :</strong> ${d1.formulation || d1.problem || d1.targetUser || 'Non spécifié'}</div>
       </div>
       <div class="house-row">
-        <div class="house-tag">🛖 Maison 2 — Idée & Dispositif IoT</div>
-        <div class="house-content-p"><strong>Nom du Produit :</strong> ${d2.conceptName || 'Non spécifié'}</div>
-        <div class="house-content-p"><strong>Mesures (Capteurs) :</strong> ${d2.measures || 'Non spécifié'}</div>
-        <div class="house-content-p"><strong>Connectivité :</strong> ${d2.connectivity || 'Non spécifié'}</div>
+        <div class="house-tag">🛖 Maison 2 — Idée & Concept IoT</div>
+        <div class="house-content-p"><strong>Concept & Valeur Usager :</strong> ${d2.actions || d2.conceptName || d2.measures || 'Non spécifié'}</div>
       </div>
       <div class="house-row">
-        <div class="house-tag">🛖 Maison 3 — Faisabilité & Architecture</div>
-        <div class="house-content-p"><strong>Capteurs :</strong> ${d3.sensors || 'Non spécifié'} | <strong>Microcontrôleur :</strong> ${d3.processing || 'Non spécifié'}</div>
-        <div class="house-content-p"><strong>Protocole :</strong> ${d3.protocol || 'Non spécifié'} | <strong>Cloud & Dashboard :</strong> ${d3.cloudUser || 'Non spécifié'}</div>
+        <div class="house-tag">🛖 Maison 3 — Architecture & Faisabilité</div>
+        <div class="house-content-p"><strong>Chaîne Complète IoT :</strong> ${d3.cloudUser || d3.processing || d3.sensors || 'Non spécifié'}</div>
       </div>
       <div class="house-row">
-        <div class="house-tag">🛖 Maison 4 — Prototype & Algorithme</div>
-        <div class="house-content-p"><strong>Type de Prototype :</strong> ${d4.prototypeType || 'Non spécifié'}</div>
-        <div class="house-content-p"><strong>Scénario :</strong> ${d4.usageScenario || 'Non spécifié'}</div>
+        <div class="house-tag">🛖 Maison 4 — Prototype & Scénario</div>
+        <div class="house-content-p"><strong>Descriptif Maquette & Test :</strong> ${d4.testProtocol || d4.usageScenario || d4.prototypeType || 'Non spécifié'}</div>
       </div>
       <div class="house-row">
         <div class="house-tag">🛖 Maison 5 — Business Model Canvas</div>

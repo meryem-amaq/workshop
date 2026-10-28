@@ -6,8 +6,6 @@ export default function WorkspaceRoleBanner({
   currentTeam,
   scribeName
 }) {
-  // Bandeau réservé à l'animateur : masqué sur les pages participants
-  if (!isAdmin) return null;
   return (
     <div
       className={`workspace-role-banner ${

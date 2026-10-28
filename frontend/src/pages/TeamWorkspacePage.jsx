@@ -363,27 +363,6 @@ export default function TeamWorkspacePage() {
               })}
             </div>
 
-            {/* Bannière Dynamique de Rôle dans l'Espace de Travail */}
-            <div
-              className="workspace-role-banner"
-              id="workspaceRoleBanner"
-              style={{
-                display: 'flex',
-                background: canEdit ? 'rgba(56, 189, 248, 0.1)' : 'rgba(245, 158, 11, 0.1)',
-                border: canEdit ? '1px solid rgba(56, 189, 248, 0.3)' : '1px solid rgba(245, 158, 11, 0.3)'
-              }}
-            >
-              <div className="banner-icon">{canEdit ? '✍️' : '🔒'}</div>
-              <div className="banner-content">
-                <strong>{canEdit ? 'Mode Rédacteur Unique (Porteur de stylo)' : 'Mode Consultation (Conseiller)'}</strong>
-                <p>
-                  {canEdit
-                    ? 'Vous avez les droits exclusifs pour saisir et valider les livrables de votre équipe ci-dessous.'
-                    : `Le rédacteur désigné pour votre groupe est ${scribeName}. Participez aux réflexions et aux débats ; seul le rédacteur enregistre les livrables.`}
-                </p>
-              </div>
-            </div>
-
             {/* Conteneur dynamique des Formulaires par Maison */}
             <div className={`house-workspace-card ${!canEdit ? 'workspace-readonly-active' : ''}`}>
               {/* House Title Header */}

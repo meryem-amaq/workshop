@@ -32,16 +32,18 @@ router.get('/health', (req, res) => {
   });
 });
 
-// 2. État global synchronisé du Workshop
+// 2. État global synchronisé du Workshop (Endpoint unifié haute performance)
 router.get('/state', async (req, res) => {
   try {
-    const [teams, participants, deliverables] = await Promise.all([
+    const [session, teams, participants, deliverables] = await Promise.all([
+      db.getSession(),
       db.getTeams(),
       db.getParticipants(),
       db.getDeliverables()
     ]);
     res.json({
-      phase: teams.length > 0 ? 'teams_formed' : 'registration',
+      session,
+      phase: session?.phase || (teams.length > 0 ? 'teams_formed' : 'registration'),
       teams,
       participants,
       deliverables
@@ -95,7 +97,11 @@ router.get('/qrcode', async (req, res) => {
     let targetUrl = req.query.url;
 
     if (!targetUrl) {
-      targetUrl = 'https://vast-shore-88233.herokuapp.com/?join=1';
+      if (isCloud && host) {
+        targetUrl = `${proto}://${host}/?join=1`;
+      } else {
+        targetUrl = `http://${localIp}:${PORT}/?join=1`;
+      }
     }
 
     if (QRCode) {

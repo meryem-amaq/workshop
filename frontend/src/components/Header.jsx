@@ -7,13 +7,8 @@ export default function Header() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // 1. Cette barre est STRICTEMENT RÉSERVÉE au Super Admin connecté
-  if (!isAdmin) {
-    return null;
-  }
-
-  // 2. Sur les pages de login, inscription et attente, ne pas afficher la barre
-  const hiddenOn = ['/login', '/register', '/quiz', '/waiting'];
+  // Sur les pages de login et questionnaire initial, ne pas afficher la barre
+  const hiddenOn = ['/login', '/register', '/quiz'];
   if (hiddenOn.includes(location.pathname)) {
     return null;
   }
@@ -361,6 +356,24 @@ export default function Header() {
               >
                 🚪 Quitter
               </button>
+            </div>
+          ) : currentUser ? (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <span style={{
+                background: 'rgba(56, 189, 248, 0.12)',
+                border: '1px solid rgba(56, 189, 248, 0.35)',
+                padding: '0.35rem 0.75rem',
+                borderRadius: '10px',
+                fontSize: '0.8rem',
+                fontWeight: '600',
+                color: '#38bdf8',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.35rem',
+                whiteSpace: 'nowrap'
+              }}>
+                👤 {currentUser.first_name} {currentUser.last_name}
+              </span>
             </div>
           ) : (
             <NavLink

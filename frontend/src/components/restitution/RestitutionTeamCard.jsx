@@ -63,50 +63,52 @@ export default function RestitutionTeamCard({ team }) {
             <span style={{ color: '#10b981' }}>16%</span>
           </div>
           <div style={{ fontSize: '0.82rem', color: '#cbd5e1', lineHeight: '1.5' }}>
-            <div><strong>Utilisateur :</strong> {d1.targetUser || '—'}</div>
-            <div><strong>Douleur :</strong> {d1.problem || '—'}</div>
-            <div style={{ marginTop: '0.4rem', color: '#38bdf8' }}><strong>Formule :</strong> {d1.formulation || '—'}</div>
+            <div style={{ color: '#38bdf8', fontWeight: '600', marginBottom: '0.25rem' }}>Formulation du Problème :</div>
+            <div style={{ fontStyle: d1.formulation || d1.problem ? 'normal' : 'italic' }}>
+              {d1.formulation || d1.problem || d1.targetUser || '— Non formulé'}
+            </div>
           </div>
         </div>
 
         {/* Maison 2 */}
         <div className="restitution-house-block" style={{ background: 'rgba(255,255,255,0.02)', padding: '1rem', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.05)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', color: '#38bdf8', fontWeight: 'bold', fontSize: '0.85rem', marginBottom: '0.5rem' }}>
-            <span>💡 Maison 2 : Concept IoT</span>
+            <span>💡 Maison 2 : Idée & Solution IoT</span>
             <span style={{ color: '#10b981' }}>33%</span>
           </div>
           <div style={{ fontSize: '0.82rem', color: '#cbd5e1', lineHeight: '1.5' }}>
-            <div><strong>Produit :</strong> {d2.conceptName || '—'}</div>
-            <div><strong>Capteurs :</strong> {d2.measures || '—'}</div>
-            <div><strong>Réseau :</strong> {d2.connectivity || '—'}</div>
-            <div><strong>Action :</strong> {d2.actions || '—'}</div>
+            <div style={{ color: '#38bdf8', fontWeight: '600', marginBottom: '0.25rem' }}>Concept & Valeur Usager :</div>
+            <div style={{ fontStyle: d2.actions || d2.conceptName ? 'normal' : 'italic' }}>
+              {d2.actions || d2.conceptName || d2.measures || '— Non formulé'}
+            </div>
           </div>
         </div>
 
         {/* Maison 3 */}
         <div className="restitution-house-block" style={{ background: 'rgba(255,255,255,0.02)', padding: '1rem', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.05)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', color: '#38bdf8', fontWeight: 'bold', fontSize: '0.85rem', marginBottom: '0.5rem' }}>
-            <span>⚙️ Maison 3 : Faisabilité</span>
+            <span>⚙️ Maison 3 : Architecture Technique</span>
             <span style={{ color: '#10b981' }}>50%</span>
           </div>
           <div style={{ fontSize: '0.82rem', color: '#cbd5e1', lineHeight: '1.5' }}>
-            <div><strong>Capteurs :</strong> {d3.sensors || '—'}</div>
-            <div><strong>Traitement :</strong> {d3.processing || '—'}</div>
-            <div><strong>Protocole :</strong> {d3.protocol || '—'}</div>
-            <div><strong>Cloud :</strong> {d3.cloudUser || '—'}</div>
+            <div style={{ color: '#38bdf8', fontWeight: '600', marginBottom: '0.25rem' }}>Chaîne Complète IoT :</div>
+            <div style={{ fontStyle: d3.cloudUser || d3.processing ? 'normal' : 'italic' }}>
+              {d3.cloudUser || d3.processing || d3.sensors || '— Non formulé'}
+            </div>
           </div>
         </div>
 
         {/* Maison 4 */}
         <div className="restitution-house-block" style={{ background: 'rgba(255,255,255,0.02)', padding: '1rem', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.05)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', color: '#38bdf8', fontWeight: 'bold', fontSize: '0.85rem', marginBottom: '0.5rem' }}>
-            <span>🔌 Maison 4 : Prototype</span>
+            <span>🔌 Maison 4 : Prototype & Test</span>
             <span style={{ color: '#10b981' }}>66%</span>
           </div>
           <div style={{ fontSize: '0.82rem', color: '#cbd5e1', lineHeight: '1.5' }}>
-            <div><strong>Maquette :</strong> {d4.prototypeType || '—'}</div>
-            <div><strong>Scénario :</strong> {d4.usageScenario || '—'}</div>
-            <div><strong>Test :</strong> {d4.testProtocol || '—'}</div>
+            <div style={{ color: '#38bdf8', fontWeight: '600', marginBottom: '0.25rem' }}>Descriptif Maquette & Protocole :</div>
+            <div style={{ fontStyle: d4.testProtocol || d4.usageScenario ? 'normal' : 'italic' }}>
+              {d4.testProtocol || d4.usageScenario || d4.prototypeType || '— Non formulé'}
+            </div>
           </div>
         </div>
 

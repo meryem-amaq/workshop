@@ -26,8 +26,8 @@ let dbConfigObj = {
   multipleStatements: true
 };
 
-// Détection automatique de l'URL de base de données Cloud (Heroku JawsDB, ClearDB, etc.)
-const cloudDbUrl = process.env.JAWSDB_URL || process.env.CLEARDB_DATABASE_URL || process.env.DATABASE_URL;
+// Détection automatique de l'URL de base de données Cloud (Aiven, Heroku JawsDB, ClearDB, etc.)
+const cloudDbUrl = process.env.AIVEN_URL || process.env.AIVEN_DATABASE_URL || process.env.JAWSDB_URL || process.env.CLEARDB_DATABASE_URL || process.env.DATABASE_URL;
 if (cloudDbUrl && cloudDbUrl.startsWith('mysql')) {
   try {
     const parsed = new URL(cloudDbUrl);
@@ -35,11 +35,12 @@ if (cloudDbUrl && cloudDbUrl.startsWith('mysql')) {
     dbConfigObj.port = parseInt(parsed.port || '3306', 10);
     dbConfigObj.user = decodeURIComponent(parsed.username || '');
     dbConfigObj.password = decodeURIComponent(parsed.password || '');
-    dbConfigObj.database = (parsed.pathname || '').replace(/^\//, '');
+    dbConfigObj.database = (parsed.pathname || '').replace(/^\//, '') || 'defaultdb';
     dbConfigObj.ssl = { rejectUnauthorized: false };
-    // Sur JawsDB gratuit (Kitefin), limiter à 3 connexions pour éviter l'erreur ER_USER_LIMIT_REACHED
-    dbConfigObj.connectionLimit = 3;
-    console.log(`[DB CONFIG] Base de données cloud détectée : ${dbConfigObj.host}/${dbConfigObj.database} (pool: 3 max)`);
+    const isAiven = parsed.hostname.includes('aivencloud.com');
+    // Aiven supporte 50-100 connexions, JawsDB Kitefin n'en supporte que 10
+    dbConfigObj.connectionLimit = isAiven ? 15 : 3;
+    console.log(`[DB CONFIG] Base de données cloud détectée (${isAiven ? 'Aiven' : 'JawsDB/Cloud'}) : ${dbConfigObj.host}/${dbConfigObj.database} (pool: ${dbConfigObj.connectionLimit} max)`);
   } catch (e) {
     console.warn('[DB CONFIG] Erreur parsing URL base de données cloud:', e.message);
   }

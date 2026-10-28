@@ -38,15 +38,17 @@ export default function WaitingRoomPage() {
   const scribeMember = assignedTeam?.members?.find((m) => m.id === assignedTeam.scribe_participant_id || m.is_scribe);
   const scribeName = scribeMember ? `${scribeMember.first_name} ${scribeMember.last_name}` : 'Désigné par animateur';
 
-  // Notification bienveillante lorsque le groupe est prêt (l'utilisateur clique sur le bouton pour entrer)
+  // Notification bienveillante lorsque le groupe est prêt (affichée 1 seule fois)
+  const notifiedTeamIdRef = React.useRef(null);
   useEffect(() => {
-    if (assignedTeam) {
+    if (assignedTeam && notifiedTeamIdRef.current !== assignedTeam.id) {
+      notifiedTeamIdRef.current = assignedTeam.id;
       showToast(
         `🎉 Votre groupe « ${assignedTeam.name} » est prêt ! Cliquez ci-dessous pour entrer dans votre Espace Équipe.`,
         'success'
       );
     }
-  }, [assignedTeam, showToast]);
+  }, [assignedTeam?.id, assignedTeam?.name, showToast]);
 
   if (!currentUser) return null;
 
