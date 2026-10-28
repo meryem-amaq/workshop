@@ -512,13 +512,6 @@ export default function CarteInteractiveVillage({
               }}
               title={`Cliquer pour voir la mission : ${house.fullName}`}
             >
-              {/* Pastille discrète du nombre d'équipes si présentes */}
-              {teamsAtHouse.length > 0 && (
-                <div className="house-teams-badge-pill">
-                  {teamsAtHouse.length} {teamsAtHouse.length > 1 ? 'équipes' : 'équipe'}
-                </div>
-              )}
-
               {/* Carte animée au survol (Micro-interaction Maison) */}
               <div className="house-interactive-hover-card">
                 <div className="house-hover-card-header">
