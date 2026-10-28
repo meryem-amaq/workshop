@@ -44,9 +44,8 @@ export default function House1Besoin({
         <div className="form-group" style={{ marginBottom: '1.5rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.35rem' }}>
             <label style={{ fontSize: '0.85rem', color: '#38bdf8', fontWeight: 'bold' }}>
-              Votre réponse pour cette Maison :
+              Formulation Canonique du Problème :
             </label>
-            
           </div>
           <textarea
             rows={3}

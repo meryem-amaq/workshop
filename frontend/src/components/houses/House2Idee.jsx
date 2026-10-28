@@ -42,8 +42,8 @@ export default function House2Idee({
         </h4>
 
         <div className="form-group" style={{ marginBottom: '1.5rem' }}>
-          <label style={{ display: 'block', fontSize: '0.85rem', color: '#94a3b8', marginBottom: '0.35rem' }}>
-            Votre réponse pour cette Maison :
+          <label style={{ display: 'block', fontSize: '0.85rem', color: '#38bdf8', fontWeight: 'bold', marginBottom: '0.35rem' }}>
+            Concept de la Solution IoT & Valeur pour l'Usager :
           </label>
           <textarea
             rows={3}
