@@ -17,6 +17,15 @@ import GroupsLaunchPage from './pages/GroupsLaunchPage';
 import TeamStagesPage from './pages/TeamStagesPage';
 import RestitutionPage from './pages/RestitutionPage';
 import ProjectionPage from './pages/ProjectionPage';
+import LoginPage from './pages/LoginPage';
+
+function RootEntry() {
+  const search = typeof window !== 'undefined' ? window.location.search : '';
+  if (search.includes('join=1')) {
+    return <RegisterQuizPage />;
+  }
+  return <Navigate to="/login" replace />;
+}
 
 export default function App() {
   return (
@@ -26,14 +35,18 @@ export default function App() {
           <Header />
           <main className="main-content">
             <Routes>
-              {/* Le participant arrive DIRECTEMENT sur la saisie Prénom & Nom / Questionnaire */}
-              <Route path="/" element={<RegisterQuizPage />} />
+              {/* Si ?join=1 (via QR Code) -> Questionnaire Incubé. Sinon -> /login */}
+              <Route path="/" element={<RootEntry />} />
+              <Route path="/login" element={<LoginPage />} />
+
+              {/* Parcours des Incubés (accessible via le QR Code) */}
               <Route path="/register" element={<RegisterQuizPage />} />
               <Route path="/quiz" element={<RegisterQuizPage />} />
               <Route path="/waiting" element={<WaitingRoomPage />} />
               <Route path="/team" element={<TeamWorkspacePage />} />
               <Route path="/workspace" element={<TeamWorkspacePage />} />
-              <Route path="/home" element={<HomePage />} />
+
+              {/* Parcours Super Admin (accessible après connexion) */}
               <Route path="/projection" element={<ProjectionPage />} />
               <Route path="/qrcode" element={<ProjectionPage />} />
               <Route path="/launch" element={<GroupsLaunchPage />} />
@@ -44,7 +57,10 @@ export default function App() {
               <Route path="/stages" element={<TeamStagesPage />} />
               <Route path="/progress" element={<TeamStagesPage />} />
               <Route path="/restitution" element={<RestitutionPage />} />
-              <Route path="*" element={<Navigate to="/" replace />} />
+              <Route path="/home" element={<Navigate to="/login" replace />} />
+
+              {/* Redirection universelle vers le Login */}
+              <Route path="*" element={<Navigate to="/login" replace />} />
             </Routes>
           </main>
 

@@ -13,8 +13,8 @@ require('dotenv').config({ path: path.join(__dirname, '../.env') });
 // Port d'écoute HTTP
 const PORT = parseInt(process.env.PORT || '3000', 10);
 
-// Configuration de connexion MySQL
-const DB_CONFIG = {
+// Configuration de connexion MySQL (Support Localhost & Cloud Heroku / JawsDB / ClearDB)
+let dbConfigObj = {
   host: process.env.DB_HOST || '127.0.0.1',
   port: parseInt(process.env.DB_PORT || '3306', 10),
   user: process.env.DB_USER || 'root',
@@ -25,6 +25,25 @@ const DB_CONFIG = {
   queueLimit: 0,
   multipleStatements: true
 };
+
+// Détection automatique de l'URL de base de données Cloud (Heroku JawsDB, ClearDB, etc.)
+const cloudDbUrl = process.env.JAWSDB_URL || process.env.CLEARDB_DATABASE_URL || process.env.DATABASE_URL;
+if (cloudDbUrl && cloudDbUrl.startsWith('mysql')) {
+  try {
+    const parsed = new URL(cloudDbUrl);
+    dbConfigObj.host = parsed.hostname;
+    dbConfigObj.port = parseInt(parsed.port || '3306', 10);
+    dbConfigObj.user = decodeURIComponent(parsed.username || '');
+    dbConfigObj.password = decodeURIComponent(parsed.password || '');
+    dbConfigObj.database = (parsed.pathname || '').replace(/^\//, '');
+    dbConfigObj.ssl = { rejectUnauthorized: false };
+    console.log(`[DB CONFIG] Base de données cloud détectée : ${dbConfigObj.host}/${dbConfigObj.database}`);
+  } catch (e) {
+    console.warn('[DB CONFIG] Erreur parsing URL base de données cloud:', e.message);
+  }
+}
+
+const DB_CONFIG = dbConfigObj;
 
 // Chemins d'accès du projet
 const PATHS = {

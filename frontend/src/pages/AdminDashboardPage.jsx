@@ -37,9 +37,11 @@ export default function AdminDashboardPage() {
   // Formatage des équipes pour le composant CarteInteractiveVillage
   const formattedTeams = teams.map((t) => ({
     id: t.id,
+    name: t.name,
     groupName: t.name,
     personalityProfile: t.archetype || 'Professeur',
-    currentStage: t.current_house || 1
+    currentStage: t.current_house || 1,
+    current_house: t.current_house || 1
   }));
 
   return (

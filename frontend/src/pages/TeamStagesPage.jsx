@@ -22,24 +22,6 @@ export default function TeamStagesPage() {
   return (
     <div className="view-panel active">
       <div className="dashboard-container">
-        
-        {/* En-tête de la vue Suivi 6 Maisons */}
-        <div className="animator-control-bar">
-          <div className="control-bar-left">
-            <div className="animator-badge">📋 Suivi Détaillé des 6 Maisons par Équipe</div>
-            <p className="control-bar-desc" style={{ margin: '0.25rem 0 0', fontSize: '0.85rem', color: '#94a3b8' }}>
-              Consultez l'avancement jalon par jalon (Besoin, Idée, Faisabilité, Prototype, Business, Marché) et les livrables saisis en direct.
-            </p>
-          </div>
-          <div className="control-bar-actions">
-            <button type="button" className="btn btn-outline btn-sm" onClick={refreshWorkshopData}>
-              🔄 Rafraîchir en Direct
-            </button>
-            <button type="button" className="btn btn-primary btn-sm" onClick={() => navigate('/village')}>
-              🍄 Voir la Carte 3D
-            </button>
-          </div>
-        </div>
 
         {/* Filtres par équipe */}
         <div className="restitution-filter-row" style={{ marginBottom: '1.5rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>

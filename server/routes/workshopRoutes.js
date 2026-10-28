@@ -95,11 +95,7 @@ router.get('/qrcode', async (req, res) => {
     let targetUrl = req.query.url;
 
     if (!targetUrl) {
-      if (isCloud && host) {
-        targetUrl = `${proto}://${host}/?join=1`;
-      } else {
-        targetUrl = `http://${localIp}:${PORT}/?join=1`;
-      }
+      targetUrl = 'https://vast-shore-88233.herokuapp.com/?join=1';
     }
 
     if (QRCode) {

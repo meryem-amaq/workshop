@@ -11,7 +11,7 @@ export default function ModalQrCode() {
   useEffect(() => {
     if (!isQrModalOpen) return;
     const fetchQr = async () => {
-      let target = `${window.location.origin}/?join=1`;
+      let target = 'https://vast-shore-88233.herokuapp.com/?join=1';
       try {
         const res = await fetch('/api/qrcode');
         if (res.ok) {

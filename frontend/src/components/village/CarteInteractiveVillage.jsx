@@ -229,7 +229,33 @@ export default function CarteInteractiveVillage({
 
   const [animatedPositions, setAnimatedPositions] = useState({});
   const [activeHouseModal, setActiveHouseModal] = useState(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const containerRef = useRef(null);
   const activeAnimationsRef = useRef({});
+  const prevStagesRef = useRef({});
+
+  // Gestion du mode Plein Écran (Vidéoprojecteur)
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      if (containerRef.current?.requestFullscreen) {
+        containerRef.current.requestFullscreen().catch((err) => {
+          console.warn('Erreur activation plein écran:', err);
+        });
+      }
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      }
+    }
+  };
+
+  useEffect(() => {
+    const handleFsChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+    document.addEventListener('fullscreenchange', handleFsChange);
+    return () => document.removeEventListener('fullscreenchange', handleFsChange);
+  }, []);
 
   // Initialiser les positions de base
   useEffect(() => {
@@ -238,30 +264,34 @@ export default function CarteInteractiveVillage({
       const stage = Math.min(Math.max(t.current_house || t.currentStage || 1, 1), 6);
       const house = VILLAGE_HOUSES.find((h) => h.num === stage) || VILLAGE_HOUSES[0];
       initialPos[t.id] = { x: house.x, y: house.y, isWalking: false };
+      prevStagesRef.current[t.id] = stage;
     });
     setAnimatedPositions(initialPos);
   }, []);
 
-  // Synchroniser avec les équipes externes
-  useEffect(() => {
-    if (externalTeams && externalTeams.length > 0) {
-      setTeamsState(externalTeams);
-      if (!selectedTeamId) setSelectedTeamId(externalTeams[0].id);
-    }
-  }, [externalTeams]);
-
   // Fonction pour animer le personnage point par point le long du sentier
   const animateAlongCircuit = (teamId, fromStage, toStage) => {
-    const key = `${fromStage}-${toStage}`;
-    let waypoints = CIRCUIT_WAYPOINTS[key];
+    if (fromStage === toStage) return;
 
-    if (!waypoints) {
+    let combinedWaypoints = [];
+    if (toStage > fromStage) {
+      for (let s = fromStage; s < toStage; s++) {
+        const key = `${s}-${s + 1}`;
+        const segment = CIRCUIT_WAYPOINTS[key] || [];
+        combinedWaypoints = combinedWaypoints.concat(segment);
+      }
+    } else {
       const targetHouse = VILLAGE_HOUSES.find((h) => h.num === toStage) || VILLAGE_HOUSES[0];
-      waypoints = [{ x: targetHouse.x, y: targetHouse.y }];
+      combinedWaypoints = [{ x: targetHouse.x, y: targetHouse.y }];
+    }
+
+    if (combinedWaypoints.length === 0) {
+      const targetHouse = VILLAGE_HOUSES.find((h) => h.num === toStage) || VILLAGE_HOUSES[0];
+      combinedWaypoints = [{ x: targetHouse.x, y: targetHouse.y }];
     }
 
     let stepIndex = 0;
-    const stepDuration = 260; // ms par point de passage
+    const stepDuration = 220; // ms par point de passage
 
     if (activeAnimationsRef.current[teamId]) {
       clearInterval(activeAnimationsRef.current[teamId]);
@@ -270,14 +300,14 @@ export default function CarteInteractiveVillage({
     setAnimatedPositions((prev) => ({
       ...prev,
       [teamId]: {
-        ...(prev[teamId] || { x: waypoints[0].x, y: waypoints[0].y }),
+        ...(prev[teamId] || { x: combinedWaypoints[0].x, y: combinedWaypoints[0].y }),
         isWalking: true
       }
     }));
 
     const interval = setInterval(() => {
-      if (stepIndex < waypoints.length) {
-        const pt = waypoints[stepIndex];
+      if (stepIndex < combinedWaypoints.length) {
+        const pt = combinedWaypoints[stepIndex];
         setAnimatedPositions((prev) => ({
           ...prev,
           [teamId]: { x: pt.x, y: pt.y, isWalking: true }
@@ -296,6 +326,33 @@ export default function CarteInteractiveVillage({
 
     activeAnimationsRef.current[teamId] = interval;
   };
+
+  // Synchroniser avec les équipes externes et DÉCLENCHER AUTOMATIQUEMENT L'ANIMATION sans intervention admin
+  useEffect(() => {
+    if (externalTeams && externalTeams.length > 0) {
+      setTeamsState(externalTeams);
+      if (!selectedTeamId) setSelectedTeamId(externalTeams[0].id);
+
+      externalTeams.forEach((t) => {
+        const teamId = t.id;
+        const currentStage = Math.min(Math.max(t.current_house || t.currentStage || 1, 1), 6);
+        const prevStage = prevStagesRef.current[teamId];
+
+        if (prevStage !== undefined && prevStage !== currentStage) {
+          // L'équipe a avancé : déplacement AUTOMATIQUE immédiat sur le sentier !
+          animateAlongCircuit(teamId, prevStage, currentStage);
+        } else if (prevStage === undefined) {
+          const house = VILLAGE_HOUSES.find((h) => h.num === currentStage) || VILLAGE_HOUSES[0];
+          setAnimatedPositions((prev) => ({
+            ...prev,
+            [teamId]: { x: house.x, y: house.y, isWalking: false }
+          }));
+        }
+
+        prevStagesRef.current[teamId] = currentStage;
+      });
+    }
+  }, [externalTeams]);
 
   // Simulation manuelle / Déplacement guidé sur le circuit
   const simulateAdvanceTeam = (teamId) => {
@@ -366,7 +423,10 @@ export default function CarteInteractiveVillage({
   const selectedTeam = teamsState.find((t) => t.id === selectedTeamId) || teamsState[0];
 
   return (
-    <div className="village-game-container">
+    <div
+      ref={containerRef}
+      className={`village-game-container ${isFullscreen ? 'is-fullscreen' : ''}`}
+    >
       {/* 1. Barre Supérieure Style Jeu Vidéo (Quest HUD) */}
       <div className="village-game-hud">
         <div className="village-hud-left">
@@ -380,6 +440,17 @@ export default function CarteInteractiveVillage({
         </div>
 
         <div className="village-hud-right">
+          {/* Bouton Plein Écran pour la projection dans la salle */}
+          <button
+            type="button"
+            className="village-btn-fullscreen"
+            onClick={toggleFullscreen}
+            title={isFullscreen ? "Quitter le plein écran" : "Passer la carte en plein écran (idéal pour vidéoprojecteur)"}
+          >
+            <span>{isFullscreen ? '🗗' : '📺'}</span>
+            <span>{isFullscreen ? 'Quitter Plein Écran' : 'Plein Écran Vidéoprojecteur'}</span>
+          </button>
+
           {/* Sélecteur d'équipes rapide avec noms courts */}
           <div className="hud-team-pills">
             {teamsState.map((t) => {
@@ -402,9 +473,9 @@ export default function CarteInteractiveVillage({
             type="button"
             className="village-btn-advance"
             onClick={() => simulateAdvanceTeam(selectedTeamId)}
-            title="Faire marcher le Scribe le long du sentier en pavés"
+            title="Tester le déplacement d'une étape"
           >
-            <span>🚶‍♂️</span> Faire Marcher {formatShortTeamName(selectedTeam)} (+1 Étape)
+            <span>🚶‍♂️</span> +1 Étape ({formatShortTeamName(selectedTeam)})
           </button>
         </div>
       </div>
@@ -447,6 +518,20 @@ export default function CarteInteractiveVillage({
                   {teamsAtHouse.length} {teamsAtHouse.length > 1 ? 'équipes' : 'équipe'}
                 </div>
               )}
+
+              {/* Carte animée au survol (Micro-interaction Maison) */}
+              <div className="house-interactive-hover-card">
+                <div className="house-hover-card-header">
+                  <span className="house-hover-icon">{house.icon}</span>
+                  <span className="house-hover-title">{house.name}</span>
+                  <span className="house-hover-badge" style={{ background: house.color }}>{house.badge}</span>
+                </div>
+                <p className="house-hover-desc">{house.desc}</p>
+                <div className="house-hover-cta">
+                  <span>{teamsAtHouse.length > 0 ? `🏕️ ${teamsAtHouse.length} groupe(s) ici` : '👣 En attente'}</span>
+                  <span className="house-hover-arrow">Explorer ➔</span>
+                </div>
+              </div>
             </div>
           );
         })}
@@ -681,6 +766,47 @@ export default function CarteInteractiveVillage({
           box-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
         }
 
+        .village-btn-fullscreen {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          padding: 8px 16px;
+          font-size: 0.82rem;
+          font-weight: 700;
+          color: #38bdf8;
+          background: rgba(2, 132, 199, 0.15);
+          border: 1.5px solid rgba(56, 189, 248, 0.6);
+          border-radius: 12px;
+          cursor: pointer;
+          box-shadow: 0 0 14px rgba(56, 189, 248, 0.25);
+          transition: all 0.25s ease;
+          white-space: nowrap;
+        }
+
+        .village-btn-fullscreen:hover {
+          background: linear-gradient(135deg, #0284c7 0%, #38bdf8 100%);
+          color: #ffffff;
+          box-shadow: 0 0 22px rgba(56, 189, 248, 0.7);
+          transform: translateY(-2px);
+        }
+
+        .village-game-container.is-fullscreen {
+          border-radius: 0 !important;
+          border: none !important;
+          width: 100vw !important;
+          height: 100vh !important;
+          max-width: 100vw !important;
+          position: fixed !important;
+          top: 0 !important;
+          left: 0 !important;
+          z-index: 999999 !important;
+        }
+
+        .village-game-container.is-fullscreen .village-game-canvas-wrap {
+          height: calc(100vh - 65px) !important;
+          min-height: unset !important;
+        }
+
         .village-btn-advance {
           display: inline-flex;
           align-items: center;
@@ -741,8 +867,89 @@ export default function CarteInteractiveVillage({
         }
 
         .village-house-interactive-zone:hover {
-          background: rgba(56, 189, 248, 0.08);
-          box-shadow: inset 0 0 25px rgba(56, 189, 248, 0.35);
+          background: radial-gradient(circle, rgba(56, 189, 248, 0.22) 0%, transparent 75%);
+          box-shadow: inset 0 0 30px rgba(56, 189, 248, 0.45), 0 0 35px rgba(56, 189, 248, 0.3);
+          transform: translate(-50%, -50%) scale(1.03);
+        }
+
+        .house-interactive-hover-card {
+          position: absolute;
+          bottom: calc(100% + 8px);
+          left: 50%;
+          transform: translateX(-50%) translateY(8px);
+          width: 220px;
+          background: rgba(15, 23, 42, 0.95);
+          backdrop-filter: blur(16px);
+          border: 1px solid rgba(56, 189, 248, 0.55);
+          border-radius: 14px;
+          padding: 10px 12px;
+          box-shadow: 0 12px 30px rgba(0, 0, 0, 0.8), 0 0 25px rgba(56, 189, 248, 0.35);
+          pointer-events: none;
+          opacity: 0;
+          transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+          z-index: 100;
+          text-align: left;
+        }
+
+        .village-house-interactive-zone:hover .house-interactive-hover-card {
+          opacity: 1;
+          transform: translateX(-50%) translateY(0);
+          pointer-events: auto;
+        }
+
+        .house-hover-card-header {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          margin-bottom: 4px;
+        }
+
+        .house-hover-icon {
+          font-size: 1.15rem;
+        }
+
+        .house-hover-title {
+          font-size: 0.82rem;
+          font-weight: 800;
+          color: #fff;
+          flex: 1;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
+        .house-hover-badge {
+          font-size: 0.68rem;
+          font-weight: 800;
+          color: #fff;
+          padding: 2px 6px;
+          border-radius: 8px;
+        }
+
+        .house-hover-desc {
+          font-size: 0.72rem;
+          color: #94a3b8;
+          margin: 0 0 6px 0;
+          line-height: 1.25;
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+        }
+
+        .house-hover-cta {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          font-size: 0.72rem;
+          font-weight: 700;
+          color: #38bdf8;
+          border-top: 1px solid rgba(255, 255, 255, 0.08);
+          padding-top: 5px;
+        }
+
+        .house-hover-arrow {
+          color: #fbbf24;
         }
 
         .house-teams-badge-pill {
@@ -825,6 +1032,28 @@ export default function CarteInteractiveVillage({
           align-items: center;
           cursor: pointer;
           user-select: none;
+          transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .village-team-character:hover {
+          z-index: 60 !important;
+        }
+
+        .village-team-character:hover .team-avatar-frame {
+          transform: scale(1.22) translateY(-6px);
+          box-shadow: 0 0 32px #38bdf8, 0 14px 28px rgba(0, 0, 0, 0.75) !important;
+          border-color: #38bdf8 !important;
+        }
+
+        .village-team-character:hover .team-character-speech-bubble {
+          transform: translateY(-5px) scale(1.08);
+          box-shadow: 0 8px 24px rgba(2, 132, 199, 0.9);
+          border-color: #7dd3fc;
+        }
+
+        .village-team-character:hover .pawn-3d-base {
+          transform: scale(1.3);
+          filter: brightness(1.5);
         }
 
         .character-jumping .pawn-3d-wrapper {

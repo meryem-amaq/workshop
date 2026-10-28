@@ -24,9 +24,7 @@ app.use(cors());
 app.use(express.json());
 
 // Servir les fichiers statiques de React (dist) en priorité
-if (fs.existsSync(PATHS.frontendDist)) {
-  app.use(express.static(PATHS.frontendDist));
-}
+app.use(express.static(PATHS.frontendDist));
 app.use(express.static(PATHS.public));
 
 // ================= API ENDPOINTS =================
@@ -35,10 +33,19 @@ app.use('/api/teams', teamRoutes);
 app.use('/api/deliverables', deliverableRoutes);
 app.use('/api', workshopRoutes);
 
+// Si une ressource /assets/ ou /api/ est demandée mais introuvable, renvoyer 404 et NON PAS index.html
+app.use((req, res, next) => {
+  if (req.path.startsWith('/assets/') || req.path.startsWith('/api/')) {
+    return res.status(404).type('text/plain').send('Resource not found');
+  }
+  next();
+});
+
 // Fallback SPA complet (Application React unifiée : /, /admin, /team, /stages, /launch, etc.)
 app.get('*', (req, res) => {
   const reactIndex = path.join(PATHS.frontendDist, 'index.html');
   if (fs.existsSync(reactIndex)) {
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
     return res.sendFile(reactIndex);
   }
   if (req.path.startsWith('/admin')) {
