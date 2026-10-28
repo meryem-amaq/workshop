@@ -20,8 +20,13 @@ import ProjectionPage from './pages/ProjectionPage';
 import LoginPage from './pages/LoginPage';
 
 function RootEntry() {
-  const search = typeof window !== 'undefined' ? window.location.search : '';
-  if (search.includes('join=1')) {
+  const { setAdminMode } = useWorkshop();
+  const isJoin = typeof window !== 'undefined' && window.location.search.includes('join=1');
+  React.useEffect(() => {
+    // Un scan du QR code = parcours participant : on quitte toute session admin
+    if (isJoin) setAdminMode(false);
+  }, [isJoin]);
+  if (isJoin) {
     return <RegisterQuizPage />;
   }
   return <Navigate to="/login" replace />;

@@ -7,13 +7,11 @@ export default function Header() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // 1. Parcours participant (après scan du QR) : jamais de barre de navigation
-  const participantPaths = ['/login', '/register', '/quiz', '/waiting', '/team', '/workspace'];
-  if (participantPaths.includes(location.pathname) && !isAdmin) {
-    return null;
-  }
-  // La barre admin n'apparaît que pour un Super Admin connecté
-  if (!isAdmin || location.pathname === '/login' || location.pathname === '/register' || location.pathname === '/quiz' || location.pathname === '/waiting') {
+  // Menu Super Admin : uniquement pour un admin connecté, sur les pages admin.
+  // Jamais sur le parcours participant (inscription, attente, espace équipe, résultats).
+  const adminPaths = ['/projection', '/qrcode', '/launch', '/groups', '/admin', '/dashboard', '/village', '/stages', '/progress', '/team', '/workspace', '/restitution'];
+  const isAdminPage = adminPaths.includes(location.pathname);
+  if (!isAdmin || !isAdminPage || currentUser) {
     return null;
   }
 
