@@ -200,7 +200,7 @@ export default function TeamStagesPage() {
                         } else if (house.num === 6) {
                           detailsPreview = (
                             <div style={{ fontSize: '0.78rem', color: '#cbd5e1', marginTop: '0.4rem' }}>
-                              <strong style={{ color: '#38bdf8' }}>Go-to-market :</strong> {c.launchPlan || '—'}
+                              <strong style={{ color: '#38bdf8' }}>Pitch (3 min) :</strong> {c.pitchScript || c.launchPlan || '—'}
                             </div>
                           );
                         }

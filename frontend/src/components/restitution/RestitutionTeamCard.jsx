@@ -131,18 +131,16 @@ export default function RestitutionTeamCard({ team }) {
         {/* Maison 6 - Marché & Pitch */}
         <div className="restitution-house-block" style={{ gridColumn: '1 / -1', background: 'rgba(255,255,255,0.02)', padding: '1rem', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.05)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', color: '#10b981', fontWeight: 'bold', fontSize: '0.85rem', marginBottom: '0.5rem' }}>
-            <span>🏆 Maison 6 : Marché & Pitch 3 Minutes</span>
+            <span>🏆 Maison 6 : Marché & Pitch Final (180s)</span>
             <span style={{ color: '#10b981' }}>100%</span>
           </div>
           <div style={{ fontSize: '0.82rem', color: '#cbd5e1', lineHeight: '1.5' }}>
-            <div><strong>Lancement :</strong> {d6.launchPlan || '—'}</div>
-            <div><strong>Métriques 12 Mois :</strong> {d6.targetMetrics || '—'}</div>
-            {d6.pitchScript && (
-              <div style={{ marginTop: '0.5rem', padding: '0.75rem', background: 'rgba(56, 189, 248, 0.05)', borderLeft: '3px solid #38bdf8', borderRadius: '4px' }}>
-                <strong style={{ color: '#38bdf8' }}>🎤 Script du Pitch 3 Minutes :</strong>
-                <div style={{ fontStyle: 'italic', marginTop: '0.25rem' }}>« {d6.pitchScript} »</div>
+            <div style={{ padding: '0.75rem', background: 'rgba(56, 189, 248, 0.05)', borderLeft: '3px solid #38bdf8', borderRadius: '4px' }}>
+              <strong style={{ color: '#38bdf8' }}>🎤 Script du Pitch (3 Minutes Chrono) :</strong>
+              <div style={{ fontStyle: 'italic', marginTop: '0.25rem' }}>
+                {d6.pitchScript || d6.launchPlan ? `« ${d6.pitchScript || d6.launchPlan} »` : '— Non formulé'}
               </div>
-            )}
+            </div>
           </div>
         </div>
       </div>

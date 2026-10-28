@@ -80,42 +80,12 @@ export default function House6Pitch({
       {/* 3. Section Saisie & Travail de l'équipe */}
       <div className="house-input-section">
         <h4 className="house-input-section-title">
-          ✍️ Votre travail et réponses pour la Maison 6 (Marché) :
+          ✍️ Votre travail et réponses pour la Maison 6 (Marché & Pitch) :
         </h4>
 
-        <div className="form-group" style={{ marginBottom: '1rem' }}>
-          <label style={{ display: 'block', fontSize: '0.85rem', color: '#94a3b8', marginBottom: '0.35rem' }}>
-            1. Plan de Lancement Commercial (Go-to-Market) :
-          </label>
-          <input
-            type="text"
-            disabled={!canEdit}
-            value={data.launchPlan || ''}
-            onChange={(e) => onChange('launchPlan', e.target.value)}
-            placeholder="Ex : Pilote de 20 capteurs auprès de coopératives agricoles, campagne Ulule..."
-            className="input-field"
-            style={{ width: '100%' }}
-          />
-        </div>
-
-        <div className="form-group" style={{ marginBottom: '1rem' }}>
-          <label style={{ display: 'block', fontSize: '0.85rem', color: '#94a3b8', marginBottom: '0.35rem' }}>
-            2. Métriques Clés & Objectifs à 12 Mois :
-          </label>
-          <input
-            type="text"
-            disabled={!canEdit}
-            value={data.targetMetrics || ''}
-            onChange={(e) => onChange('targetMetrics', e.target.value)}
-            placeholder="Ex : 250 nœuds déployés, 35% d'eau économisée, satisfaction 4.8/5..."
-            className="input-field"
-            style={{ width: '100%' }}
-          />
-        </div>
-
         <div className="form-group" style={{ marginBottom: '1.5rem' }}>
-          <label style={{ display: 'block', fontSize: '0.85rem', color: '#94a3b8', marginBottom: '0.35rem' }}>
-            3. Script & Punchlines du Pitch (3 Minutes Chrono) :
+          <label style={{ display: 'block', fontSize: '0.85rem', color: '#38bdf8', fontWeight: 'bold', marginBottom: '0.35rem' }}>
+            Script & Punchlines du Pitch (3 Minutes Chrono) :
           </label>
           <textarea
             rows={4}

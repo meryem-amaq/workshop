@@ -253,8 +253,7 @@ export default function RestitutionPage() {
       </div>
       <div class="house-row">
         <div class="house-tag">🛖 Maison 6 — Marché & Pitch Final</div>
-        <div class="house-content-p"><strong>Plan de Lancement :</strong> ${d6.launchPlan || 'Non spécifié'}</div>
-        ${d6.pitchScript ? `<div class="pitch-box"><strong>Script du Pitch :</strong> "${d6.pitchScript}"</div>` : ''}
+        <div class="pitch-box"><strong>Script du Pitch (3 Minutes Chrono) :</strong> "${d6.pitchScript || d6.launchPlan || 'Non formulé'}"</div>
       </div>
     </div>
   </div>`;
