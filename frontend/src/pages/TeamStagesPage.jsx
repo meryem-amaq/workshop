@@ -9,12 +9,12 @@ export default function TeamStagesPage() {
   const [selectedTeamFilter, setSelectedTeamFilter] = useState('all');
 
   const houseDefs = [
-    { num: 1, title: 'Maison 1 : Définition du Problème', pct: '16%', icon: '🛖', desc: 'Utilisateur cible, problème identifié, cause racine et formulation canonique.' },
-    { num: 2, title: "Maison 2 : Idée d'Objet Connecté (IoT)", pct: '33%', icon: '💡', desc: 'Concept, grandeurs mesurées, connectivité et actionneurs physiques.' },
-    { num: 3, title: 'Maison 3 : Faisabilité & Architecture', pct: '50%', icon: '⚙️', desc: 'Capteurs, microcontrôleur, protocole réseau et restitution Cloud.' },
-    { num: 4, title: 'Maison 4 : Prototype & Scénario', pct: '66%', icon: '🔌', desc: 'Maquette physique, protocole de test et scénario d\'usage utilisateur.' },
-    { num: 5, title: 'Maison 5 : Business Model Canvas (BMC)', pct: '83%', icon: '📊', desc: 'Matrice économique en 9 blocs démontrant la viabilité du projet.' },
-    { num: 6, title: 'Maison 6 : Marché & Pitch Final 180s', pct: '100%', icon: '🏆', desc: 'Go-to-market, métriques à 12 mois et pitch oral de 3 minutes chrono.' }
+    { num: 1, title: 'Maison 1 : Besoin', pct: '16%', icon: '🛖', desc: 'Utilisateur cible, problème identifié, cause racine et formulation canonique.' },
+    { num: 2, title: "Maison 2 : Idée", pct: '33%', icon: '💡', desc: 'Concept, grandeurs mesurées, connectivité et actionneurs physiques.' },
+    { num: 3, title: 'Maison 3 : Technique', pct: '50%', icon: '⚙️', desc: 'Capteurs, microcontrôleur, protocole réseau et restitution Cloud.' },
+    { num: 4, title: 'Maison 4 : Prototype', pct: '66%', icon: '🔌', desc: 'Maquette physique, protocole de test et scénario d\'usage utilisateur.' },
+    { num: 5, title: 'Maison 5 : Business', pct: '83%', icon: '📊', desc: 'Matrice économique en 9 blocs démontrant la viabilité du projet.' },
+    { num: 6, title: 'Maison 6 : Pitch', pct: '100%', icon: '🏆', desc: 'Go-to-market, métriques à 12 mois et pitch oral de 3 minutes chrono.' }
   ];
 
   const teamsToShow = selectedTeamFilter === 'all' ? teams : teams.filter((t) => t.id === selectedTeamFilter);

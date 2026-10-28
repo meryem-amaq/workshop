@@ -127,13 +127,13 @@ export const HOUSES_META = {
     color: '#38bdf8'
   },
   2: {
-    title: 'Maison 2 : Idée IoT',
+    title: 'Maison 2 : Idée',
     subtitle: 'Concept Produit IoT & Cas d’usage connecté',
     badge: '33%',
     color: '#38bdf8'
   },
   3: {
-    title: 'Maison 3 : Faisabilité',
+    title: 'Maison 3 : Technique',
     subtitle: 'Chaîne technique : Capteurs, Traitement, Réseau, Cloud',
     badge: '50%',
     color: '#38bdf8'
@@ -151,7 +151,7 @@ export const HOUSES_META = {
     color: '#38bdf8'
   },
   6: {
-    title: 'Maison 6 : Marché & Pitch',
+    title: 'Maison 6 : Pitch',
     subtitle: 'Go-to-market, métriques de succès & Pitch 3 minutes',
     badge: '100%',
     color: '#10b981'

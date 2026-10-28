@@ -244,28 +244,28 @@ export default function RestitutionPage() {
     </div>
     <div class="houses-grid">
       <div class="house-row">
-        <div class="house-tag">🛖 Maison 1 — Besoin & Problématique</div>
+        <div class="house-tag">🛖 Maison 1 — Besoin</div>
         <div class="house-content-p"><strong>Formulation du Problème :</strong> ${d1.formulation || d1.problem || d1.targetUser || 'Non spécifié'}</div>
       </div>
       <div class="house-row">
-        <div class="house-tag">🛖 Maison 2 — Idée & Concept IoT</div>
-        <div class="house-content-p"><strong>Concept & Valeur Usager :</strong> ${d2.actions || d2.conceptName || d2.measures || 'Non spécifié'}</div>
+        <div class="house-tag">💡 Maison 2 — Idée</div>
+        <div class="house-content-p"><strong>Concept & Solution IoT :</strong> ${d2.actions || d2.conceptName || d2.measures || 'Non spécifié'}</div>
       </div>
       <div class="house-row">
-        <div class="house-tag">🛖 Maison 3 — Architecture & Faisabilité</div>
-        <div class="house-content-p"><strong>Chaîne Complète IoT :</strong> ${d3.cloudUser || d3.processing || d3.sensors || 'Non spécifié'}</div>
+        <div class="house-tag">⚙️ Maison 3 — Technique</div>
+        <div class="house-content-p"><strong>Chaîne Technique IoT :</strong> ${d3.cloudUser || d3.processing || d3.sensors || 'Non spécifié'}</div>
       </div>
       <div class="house-row">
-        <div class="house-tag">🛖 Maison 4 — Prototype & Scénario</div>
+        <div class="house-tag">🔌 Maison 4 — Prototype</div>
         <div class="house-content-p"><strong>Descriptif Maquette & Test :</strong> ${d4.testProtocol || d4.usageScenario || d4.prototypeType || 'Non spécifié'}</div>
       </div>
       <div class="house-row">
-        <div class="house-tag">🛖 Maison 5 — Business Model Canvas</div>
+        <div class="house-tag">📊 Maison 5 — Business</div>
         <div class="house-content-p"><strong>Proposition de Valeur :</strong> ${d5.bmcValue || 'Non spécifié'}</div>
         <div class="house-content-p"><strong>Clients :</strong> ${d5.bmcSegments || 'Non spécifié'} | <strong>Revenus :</strong> ${d5.bmcRevenues || 'Non spécifié'}</div>
       </div>
       <div class="house-row">
-        <div class="house-tag">🛖 Maison 6 — Marché & Pitch Final</div>
+        <div class="house-tag">🏆 Maison 6 — Pitch</div>
         <div class="pitch-box"><strong>Script du Pitch (3 Minutes Chrono) :</strong> "${d6.pitchScript || d6.launchPlan || 'Non formulé'}"</div>
       </div>
     </div>

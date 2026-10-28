@@ -7,7 +7,7 @@ export const VILLAGE_HOUSES = [
   {
     num: 1,
     name: 'Maison 1 : Besoin',
-    fullName: 'Maison 1 : Définition du Besoin',
+    fullName: 'Maison 1 : Besoin',
     desc: 'Identification précise de l’utilisateur cible et formulation canonique du problème réel.',
     icon: '🪵',
     color: '#fbbf24',
@@ -18,8 +18,8 @@ export const VILLAGE_HOUSES = [
   },
   {
     num: 2,
-    name: 'Maison 2 : Idée IoT',
-    fullName: 'Maison 2 : Concept & Idée IoT',
+    name: 'Maison 2 : Idée',
+    fullName: 'Maison 2 : Idée',
     desc: 'Définition du produit connecté : capteurs physiques mesurés et action automatisée.',
     icon: '💡',
     color: '#38bdf8',
@@ -30,8 +30,8 @@ export const VILLAGE_HOUSES = [
   },
   {
     num: 3,
-    name: 'Maison 3 : Faisabilité',
-    fullName: 'Maison 3 : Faisabilité & Architecture',
+    name: 'Maison 3 : Technique',
+    fullName: 'Maison 3 : Technique',
     desc: 'Chaîne de valeur technique : Capteurs ➔ Microcontrôleur ➔ Réseau ➔ Cloud.',
     icon: '⚙️',
     color: '#f97316',
@@ -43,7 +43,7 @@ export const VILLAGE_HOUSES = [
   {
     num: 4,
     name: 'Maison 4 : Prototype',
-    fullName: 'Maison 4 : Prototype & Algorithme',
+    fullName: 'Maison 4 : Prototype',
     desc: 'Maquette physique, protocole de test de validation et scénario logique d’usage.',
     icon: '🔌',
     color: '#00e5ff',
@@ -55,7 +55,7 @@ export const VILLAGE_HOUSES = [
   {
     num: 5,
     name: 'Maison 5 : Business',
-    fullName: 'Maison 5 : Business Model Canvas',
+    fullName: 'Maison 5 : Business',
     desc: 'Modèle économique en 9 blocs démontrant la viabilité financière et la proposition de valeur.',
     icon: '💎',
     color: '#10b981',
@@ -66,9 +66,9 @@ export const VILLAGE_HOUSES = [
   },
   {
     num: 6,
-    name: 'Maison 6 : Pitch Final',
-    fullName: 'Maison 6 : Marché & Pitch Final',
-    desc: 'Go-to-market, indicateurs cibles à 12 mois et soutenance orale de 3 minutes chrono.',
+    name: 'Maison 6 : Pitch',
+    fullName: 'Maison 6 : Pitch',
+    desc: 'Go-to-market, métriques de succès et soutenance orale du pitch de 3 minutes chrono.',
     icon: '🏆',
     color: '#f59e0b',
     badge: '100%',

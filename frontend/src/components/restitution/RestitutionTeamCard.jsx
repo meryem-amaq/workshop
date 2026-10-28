@@ -59,7 +59,7 @@ export default function RestitutionTeamCard({ team }) {
         {/* Maison 1 */}
         <div className="restitution-house-block" style={{ background: 'rgba(255,255,255,0.02)', padding: '1rem', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.05)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', color: '#38bdf8', fontWeight: 'bold', fontSize: '0.85rem', marginBottom: '0.5rem' }}>
-            <span>🛖 Maison 1 : Le Besoin</span>
+            <span>🛖 Maison 1 : Besoin</span>
             <span style={{ color: '#10b981' }}>16%</span>
           </div>
           <div style={{ fontSize: '0.82rem', color: '#cbd5e1', lineHeight: '1.5' }}>
@@ -73,11 +73,11 @@ export default function RestitutionTeamCard({ team }) {
         {/* Maison 2 */}
         <div className="restitution-house-block" style={{ background: 'rgba(255,255,255,0.02)', padding: '1rem', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.05)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', color: '#38bdf8', fontWeight: 'bold', fontSize: '0.85rem', marginBottom: '0.5rem' }}>
-            <span>💡 Maison 2 : Idée & Solution IoT</span>
+            <span>💡 Maison 2 : Idée</span>
             <span style={{ color: '#10b981' }}>33%</span>
           </div>
           <div style={{ fontSize: '0.82rem', color: '#cbd5e1', lineHeight: '1.5' }}>
-            <div style={{ color: '#38bdf8', fontWeight: '600', marginBottom: '0.25rem' }}>Concept & Valeur Usager :</div>
+            <div style={{ color: '#38bdf8', fontWeight: '600', marginBottom: '0.25rem' }}>Concept & Solution IoT :</div>
             <div style={{ fontStyle: d2.actions || d2.conceptName ? 'normal' : 'italic' }}>
               {d2.actions || d2.conceptName || d2.measures || '— Non formulé'}
             </div>
@@ -87,11 +87,11 @@ export default function RestitutionTeamCard({ team }) {
         {/* Maison 3 */}
         <div className="restitution-house-block" style={{ background: 'rgba(255,255,255,0.02)', padding: '1rem', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.05)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', color: '#38bdf8', fontWeight: 'bold', fontSize: '0.85rem', marginBottom: '0.5rem' }}>
-            <span>⚙️ Maison 3 : Architecture Technique</span>
+            <span>⚙️ Maison 3 : Technique</span>
             <span style={{ color: '#10b981' }}>50%</span>
           </div>
           <div style={{ fontSize: '0.82rem', color: '#cbd5e1', lineHeight: '1.5' }}>
-            <div style={{ color: '#38bdf8', fontWeight: '600', marginBottom: '0.25rem' }}>Chaîne Complète IoT :</div>
+            <div style={{ color: '#38bdf8', fontWeight: '600', marginBottom: '0.25rem' }}>Chaîne Technique IoT :</div>
             <div style={{ fontStyle: d3.cloudUser || d3.processing ? 'normal' : 'italic' }}>
               {d3.cloudUser || d3.processing || d3.sensors || '— Non formulé'}
             </div>
@@ -101,7 +101,7 @@ export default function RestitutionTeamCard({ team }) {
         {/* Maison 4 */}
         <div className="restitution-house-block" style={{ background: 'rgba(255,255,255,0.02)', padding: '1rem', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.05)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', color: '#38bdf8', fontWeight: 'bold', fontSize: '0.85rem', marginBottom: '0.5rem' }}>
-            <span>🔌 Maison 4 : Prototype & Test</span>
+            <span>🔌 Maison 4 : Prototype</span>
             <span style={{ color: '#10b981' }}>66%</span>
           </div>
           <div style={{ fontSize: '0.82rem', color: '#cbd5e1', lineHeight: '1.5' }}>
@@ -115,7 +115,7 @@ export default function RestitutionTeamCard({ team }) {
         {/* Maison 5 - BMC 9 blocs */}
         <div className="restitution-house-block" style={{ gridColumn: '1 / -1', background: 'rgba(255,255,255,0.02)', padding: '1rem', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.05)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', color: '#38bdf8', fontWeight: 'bold', fontSize: '0.85rem', marginBottom: '0.75rem' }}>
-            <span>📊 Maison 5 : Synthèse Business Model Canvas (9 Blocs)</span>
+            <span>📊 Maison 5 : Business</span>
             <span style={{ color: '#10b981' }}>83%</span>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '0.5rem', fontSize: '0.78rem' }}>
@@ -131,7 +131,7 @@ export default function RestitutionTeamCard({ team }) {
         {/* Maison 6 - Marché & Pitch */}
         <div className="restitution-house-block" style={{ gridColumn: '1 / -1', background: 'rgba(255,255,255,0.02)', padding: '1rem', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.05)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', color: '#10b981', fontWeight: 'bold', fontSize: '0.85rem', marginBottom: '0.5rem' }}>
-            <span>🏆 Maison 6 : Marché & Pitch Final (180s)</span>
+            <span>🏆 Maison 6 : Pitch</span>
             <span style={{ color: '#10b981' }}>100%</span>
           </div>
           <div style={{ fontSize: '0.82rem', color: '#cbd5e1', lineHeight: '1.5' }}>
