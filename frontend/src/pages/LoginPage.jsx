@@ -34,28 +34,18 @@ export default function LoginPage() {
       });
 
       const data = await res.json();
-      if (!res.ok) {
+      if (!res.ok || !data.token) {
         throw new Error(data.error || 'Adresse email ou mot de passe incorrect.');
       }
 
-      setAdminMode(true);
+      setAdminMode(true, data.token);
       setCurrentUser(null); // Nettoie tout profil participant pour que la session Admin soit 100% propre
       setError('');
       showToast(`👑 Bienvenue ${data.admin?.name || 'Super Admin'} !`, 'success');
       navigate('/projection');
     } catch (err) {
-      // Fallback gracieux si serveur hors-ligne ou mot de passe maître
-      const validPasswords = ['admin', '1234', 'admin123', 'animateur', 'superadmin'];
-      if (validPasswords.includes(cleanPwd.toLowerCase())) {
-        setAdminMode(true);
-        setCurrentUser(null);
-        setError('');
-        showToast('👑 Connexion réussie !', 'success');
-        navigate('/projection');
-      } else {
-        setError(err.message || 'Adresse email ou mot de passe incorrect.');
-        showToast('Identifiants incorrects', 'error');
-      }
+      setError(err.message || 'Adresse email ou mot de passe incorrect.');
+      showToast('Identifiants incorrects', 'error');
     } finally {
       setLoading(false);
     }
@@ -253,7 +243,7 @@ export default function LoginPage() {
             type="button"
             className="btn btn-ghost btn-xs"
             style={{ color: '#94a3b8', fontSize: '0.82rem', background: 'transparent', border: 'none', cursor: 'pointer' }}
-            onClick={() => navigate('/')}
+            onClick={() => navigate('/register')}
           >
             ⬅ Revenir au mode Incubé / Participant
           </button>

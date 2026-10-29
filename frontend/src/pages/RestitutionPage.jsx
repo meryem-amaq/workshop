@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useWorkshop } from '../context/WorkshopContext';
 import { getArchetypeDisplayName } from '../constants/workshopData';
@@ -8,6 +8,12 @@ export default function RestitutionPage() {
   const { teams, currentUser, isAdmin, activeTeamId, showToast } = useWorkshop();
   const navigate = useNavigate();
   const [filterTeamId, setFilterTeamId] = useState('all');
+
+  useEffect(() => {
+    if (!isAdmin && !currentUser) {
+      navigate('/login', { replace: true });
+    }
+  }, [isAdmin, currentUser, navigate]);
 
   // Détection de l'équipe du participant (si non-admin) : uniquement SA propre équipe, jamais une autre par défaut
   const myTeamId = currentUser?.team_id || activeTeamId;

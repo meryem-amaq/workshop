@@ -69,7 +69,7 @@ export default function TeamWorkspacePage() {
 
   useEffect(() => {
     if (!currentUser && !isAdmin) {
-      navigate('/register');
+      navigate('/login', { replace: true });
       return;
     }
     // Si participant sans équipe attribuée : retour en salle d'attente (sauf si les données sont encore en chargement)
@@ -285,6 +285,36 @@ export default function TeamWorkspacePage() {
   const pitchFormatted = `${String(pMin).padStart(2, '0')}:${String(pSec).padStart(2, '0')}`;
 
   if (!currentTeam) {
+    if (isAdmin) {
+      return (
+        <div className="view-panel active">
+          <div className="dashboard-container">
+            <div
+              style={{
+                textAlign: 'center',
+                padding: '3rem 1.5rem',
+                color: '#94a3b8',
+                background: 'rgba(255,255,255,0.02)',
+                borderRadius: '14px',
+                border: '1px dashed var(--border-glass)'
+              }}
+            >
+              <span style={{ fontSize: '2.5rem', display: 'block', marginBottom: '0.5rem' }}>🍄</span>
+              <h4 style={{ color: '#fff', marginBottom: '0.4rem', fontSize: '1.15rem' }}>
+                Aucune équipe formée pour le moment
+              </h4>
+              <p style={{ fontSize: '0.88rem', maxWidth: '480px', margin: '0 auto 1.25rem' }}>
+                Pour superviser l'Espace Équipe et les livrables des 6 Maisons, constituez d'abord les groupes dans l'onglet Lancement des Groupes.
+              </p>
+              <button type="button" className="btn btn-primary btn-sm" onClick={() => navigate('/launch')}>
+                👥 Aller au Lancement des Groupes
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div className="view-panel active">
         <div className="participant-screen-container" style={{ textAlign: 'center', padding: '3rem 1rem' }}>

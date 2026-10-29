@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { WorkshopProvider, useWorkshop } from './context/WorkshopContext';
 import Header from './components/Header';
 import ModalAdminAuth from './components/ModalAdminAuth';
@@ -29,27 +29,28 @@ function participantHome(currentUser, sessionPhase) {
 }
 
 function RootEntry() {
-  const { currentUser, isAdmin, sessionPhase } = useWorkshop();
+  const { isAdmin } = useWorkshop();
+  const location = useLocation();
+  const params = new URLSearchParams(location.search);
 
-  // 1. Participant déjà inscrit : va directement dans son parcours (Salle d'attente ou Espace Équipe)
-  if (currentUser && !isAdmin) {
-    return <Navigate to={participantHome(currentUser, sessionPhase)} replace />;
+  // 1. Si un participant scanne un ancien QR code contenant ?join=1, l'envoyer sur l'inscription
+  if (params.get('join') === '1') {
+    return <Navigate to="/register" replace />;
   }
 
-  // 2. Super Admin déjà connecté : va sur l'écran de projection du Grand QR Code
+  // 2. Super Admin disposant d'un jeton JWT valide : va sur l'écran de projection du Grand QR Code
   if (isAdmin) {
     return <Navigate to="/projection" replace />;
   }
 
-  // 3. Personne n'est connecté :
-  // Sur un ordinateur/tablette ouvrant le site racine, c'est l'animateur qui prépare l'atelier -> Page de Login
+  // 3. Sans JWT valide : l'URL racine de l'application exige toujours la connexion sur /login
   return <Navigate to="/login" replace />;
 }
 
 function AdminOnly({ children }) {
-  const { isAdmin, currentUser, sessionPhase } = useWorkshop();
+  const { isAdmin } = useWorkshop();
   if (isAdmin) return children;
-  return <Navigate to={currentUser ? participantHome(currentUser, sessionPhase) : '/login'} replace />;
+  return <Navigate to="/login" replace />;
 }
 
 // Toute URL inconnue
@@ -57,7 +58,7 @@ function FallbackRoute() {
   const { isAdmin, currentUser, sessionPhase } = useWorkshop();
   if (isAdmin) return <Navigate to="/projection" replace />;
   if (currentUser) return <Navigate to={participantHome(currentUser, sessionPhase)} replace />;
-  return <Navigate to="/register" replace />;
+  return <Navigate to="/login" replace />;
 }
 
 export default function App() {

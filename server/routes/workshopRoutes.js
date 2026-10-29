@@ -4,9 +4,53 @@
  */
 
 const express = require('express');
+const crypto = require('crypto');
 const router = express.Router();
 const db = require('../db');
 const { PORT, ARCHETYPES_META, getLocalIp } = require('../config');
+
+const JWT_SECRET = process.env.JWT_SECRET || 'smurf-iot-village-jwt-secret-key-2026';
+const JWT_EXP_SECONDS = 8 * 60 * 60; // 8 heures
+
+function signAdminJwt(admin) {
+  const header = Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).toString('base64url');
+  const now = Math.floor(Date.now() / 1000);
+  const payload = Buffer.from(
+    JSON.stringify({
+      sub: admin.id,
+      email: admin.email,
+      name: admin.name,
+      role: admin.role || 'superadmin',
+      iat: now,
+      exp: now + JWT_EXP_SECONDS
+    })
+  ).toString('base64url');
+  const signature = crypto
+    .createHmac('sha256', JWT_SECRET)
+    .update(`${header}.${payload}`)
+    .digest('base64url');
+  return `${header}.${payload}.${signature}`;
+}
+
+function verifyAdminJwt(token) {
+  if (!token || typeof token !== 'string') return null;
+  const parts = token.split('.');
+  if (parts.length !== 3) return null;
+  const [header, payload, signature] = parts;
+  const expectedSig = crypto
+    .createHmac('sha256', JWT_SECRET)
+    .update(`${header}.${payload}`)
+    .digest('base64url');
+  if (signature !== expectedSig) return null;
+  try {
+    const decoded = JSON.parse(Buffer.from(payload, 'base64url').toString('utf8'));
+    const now = Math.floor(Date.now() / 1000);
+    if (!decoded.exp || decoded.exp <= now) return null;
+    return decoded;
+  } catch {
+    return null;
+  }
+}
 
 let QRCode = null;
 try {
@@ -205,7 +249,7 @@ router.post('/workshop/reset', async (req, res) => {
   }
 });
 
-// 9. Authentification Sécurisée Super Admin (2 comptes créés en base)
+// 9. Authentification Sécurisée Super Admin avec émission d'un JWT signé (HS256)
 router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -220,8 +264,11 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ error: 'Adresse email ou mot de passe incorrect.' });
     }
 
+    const token = signAdminJwt(admin);
+
     res.json({
       success: true,
+      token,
       admin: {
         id: admin.id,
         email: admin.email,
@@ -232,6 +279,17 @@ router.post('/login', async (req, res) => {
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
+});
+
+// 10. Vérification stricte du JWT Super Admin
+router.get('/auth/verify', (req, res) => {
+  const authHeader = req.headers.authorization || '';
+  const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7).trim() : null;
+  const decoded = verifyAdminJwt(token);
+  if (!decoded) {
+    return res.status(401).json({ valid: false, error: 'Session expirée ou jeton JWT invalide.' });
+  }
+  return res.json({ valid: true, admin: decoded });
 });
 
 module.exports = router;

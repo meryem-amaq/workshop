@@ -2,6 +2,20 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 
 const WorkshopContext = createContext(null);
 
+function isJwtValidLocally(token) {
+  if (!token || typeof token !== 'string') return false;
+  const parts = token.split('.');
+  if (parts.length !== 3) return false;
+  try {
+    const base64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+    const payload = JSON.parse(window.atob(base64));
+    const now = Math.floor(Date.now() / 1000);
+    return Boolean(payload && payload.exp && payload.exp > now);
+  } catch {
+    return false;
+  }
+}
+
 export function WorkshopProvider({ children }) {
   // Participant connecté localement
   const [currentUser, setCurrentUserState] = useState(() => {
@@ -13,9 +27,16 @@ export function WorkshopProvider({ children }) {
     }
   });
 
-  // Mode Animateur (déverrouillé par PIN)
+  // Mode Super Admin (strictement protégé par un jeton JWT signé et non expiré)
   const [isAdmin, setIsAdminState] = useState(() => {
-    return localStorage.getItem('smurf_iot_admin') === 'true';
+    // Nettoyer l'ancien booléen non sécurisé s'il existait dans localStorage
+    localStorage.removeItem('smurf_iot_admin');
+    const token = sessionStorage.getItem('smurf_admin_jwt');
+    if (isJwtValidLocally(token)) {
+      return true;
+    }
+    sessionStorage.removeItem('smurf_admin_jwt');
+    return false;
   });
 
   const [sessionPhase, setSessionPhase] = useState('registration');
@@ -51,12 +72,43 @@ export function WorkshopProvider({ children }) {
     }
   }, []);
 
-  const setAdminMode = useCallback((val) => {
-    setIsAdminState(val);
-    if (val) {
-      localStorage.setItem('smurf_iot_admin', 'true');
+  const setAdminMode = useCallback((val, token = null) => {
+    localStorage.removeItem('smurf_iot_admin');
+    if (val && token && isJwtValidLocally(token)) {
+      sessionStorage.setItem('smurf_admin_jwt', token);
+      setIsAdminState(true);
+    } else if (val) {
+      const existing = sessionStorage.getItem('smurf_admin_jwt');
+      if (isJwtValidLocally(existing)) {
+        setIsAdminState(true);
+      } else {
+        sessionStorage.removeItem('smurf_admin_jwt');
+        setIsAdminState(false);
+      }
     } else {
-      localStorage.removeItem('smurf_iot_admin');
+      sessionStorage.removeItem('smurf_admin_jwt');
+      setIsAdminState(false);
+    }
+  }, []);
+
+  // Vérification serveur de la signature du JWT Super Admin
+  const verifyAdminSession = useCallback(async () => {
+    const token = sessionStorage.getItem('smurf_admin_jwt');
+    if (!token || !isJwtValidLocally(token)) {
+      sessionStorage.removeItem('smurf_admin_jwt');
+      setIsAdminState(false);
+      return;
+    }
+    try {
+      const res = await fetch('/api/auth/verify', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (!res.ok) {
+        sessionStorage.removeItem('smurf_admin_jwt');
+        setIsAdminState(false);
+      }
+    } catch {
+      // Silencieux en cas de coupure réseau temporaire
     }
   }, []);
 
@@ -92,13 +144,14 @@ export function WorkshopProvider({ children }) {
               localStorage.setItem('smurf_iot_user', JSON.stringify(found));
               return found;
             }
-          } else if (hydratedTeams.length > 0 && !prevUser.team_id) {
-            const myTeam = hydratedTeams.find((t) => (t.members || []).some((m) => m.id === prevUser.id));
-            if (myTeam) {
-              const updated = { ...prevUser, team_id: myTeam.id };
-              localStorage.setItem('smurf_iot_user', JSON.stringify(updated));
-              return updated;
-            }
+            return prevUser;
+          }
+          // Si le participant n'existe plus en base (atelier réinitialisé ou participant supprimé)
+          const createdMs = prevUser.created_at ? new Date(prevUser.created_at).getTime() : 0;
+          const isJustCreated = createdMs > 0 && Date.now() - createdMs < 10000;
+          if (!isJustCreated) {
+            localStorage.removeItem('smurf_iot_user');
+            return null;
           }
           return prevUser;
         });
@@ -122,12 +175,13 @@ export function WorkshopProvider({ children }) {
   }, []);
 
   useEffect(() => {
+    verifyAdminSession();
     checkHealth();
     refreshWorkshopData();
     // Polling toutes les 4 secondes (économie de 80% des requêtes réseau)
     const interval = setInterval(refreshWorkshopData, 4000);
     return () => clearInterval(interval);
-  }, [checkHealth, refreshWorkshopData]);
+  }, [verifyAdminSession, checkHealth, refreshWorkshopData]);
 
   return (
     <WorkshopContext.Provider
