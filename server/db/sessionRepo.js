@@ -45,6 +45,7 @@ async function resetAll() {
 
   if (isMySQLConnected() && pool) {
     try {
+      await pool.query('DELETE FROM votes');
       await pool.query('DELETE FROM deliverables');
       await pool.query('UPDATE participants SET team_id = NULL, is_scribe = FALSE');
       await pool.query('DELETE FROM teams');
@@ -59,6 +60,7 @@ async function resetAll() {
   memoryStore.participants = [];
   memoryStore.teams = [];
   memoryStore.deliverables = [];
+  memoryStore.votes = [];
   persistFallbackStore();
   return { success: true };
 }

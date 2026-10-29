@@ -45,6 +45,7 @@ async function saveTeams(teams, participantUpdates = []) {
 
   if (isMySQLConnected() && pool) {
     try {
+      await pool.query('DELETE FROM votes');
       await pool.query('DELETE FROM deliverables');
       await pool.query('UPDATE participants SET team_id = NULL, is_scribe = FALSE');
       await pool.query('DELETE FROM teams');
@@ -69,6 +70,7 @@ async function saveTeams(teams, participantUpdates = []) {
   }
 
   memoryStore.teams = teams;
+  memoryStore.votes = [];
   for (const u of participantUpdates) {
     const p = memoryStore.participants.find(part => part.id === u.id);
     if (p) {

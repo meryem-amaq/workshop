@@ -79,18 +79,20 @@ router.get('/health', (req, res) => {
 // 2. État global synchronisé du Workshop (Endpoint unifié haute performance)
 router.get('/state', async (req, res) => {
   try {
-    const [session, teams, participants, deliverables] = await Promise.all([
+    const [session, teams, participants, deliverables, votes] = await Promise.all([
       db.getSession(),
       db.getTeams(),
       db.getParticipants(),
-      db.getDeliverables()
+      db.getDeliverables(),
+      db.getVotes()
     ]);
     res.json({
       session,
       phase: session?.phase || (teams.length > 0 ? 'teams_formed' : 'registration'),
       teams,
       participants,
-      deliverables
+      deliverables,
+      votes
     });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -290,6 +292,57 @@ router.get('/auth/verify', (req, res) => {
     return res.status(401).json({ valid: false, error: 'Session expirée ou jeton JWT invalide.' });
   }
   return res.json({ valid: true, admin: decoded });
+});
+
+// 11. Votes Inter-Équipes sur 20 (/api/votes)
+router.get('/votes', async (req, res) => {
+  try {
+    const votes = await db.getVotes();
+    res.json({ success: true, votes });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.post('/votes', async (req, res) => {
+  try {
+    const { voter_team_id, target_team_id, score, criteria, comment, votes } = req.body;
+    if (!voter_team_id) {
+      return res.status(400).json({ error: 'Identifiant de l\'équipe votante requis.' });
+    }
+
+    // Mode lot (une équipe enregistre ses notes /20 pour toutes les autres équipes)
+    if (Array.isArray(votes)) {
+      const allVotes = await db.saveTeamVotesBatch(voter_team_id, votes);
+      return res.json({ success: true, votes: allVotes });
+    }
+
+    // Mode unitaire (une équipe note une autre équipe sur 20)
+    if (!target_team_id) {
+      return res.status(400).json({ error: 'Identifiant de l\'équipe évaluée requis.' });
+    }
+    if (voter_team_id === target_team_id) {
+      return res.status(400).json({ error: 'Une équipe ne peut pas voter pour elle-même.' });
+    }
+    if (score === undefined || score === null || score === '' || isNaN(Number(score))) {
+      return res.status(400).json({ error: 'Veuillez saisir une note valide entre 0 et 20.' });
+    }
+
+    const saved = await db.saveVote({ voter_team_id, target_team_id, score, criteria, comment });
+    const allVotes = await db.getVotes();
+    res.json({ success: true, vote: saved, votes: allVotes });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+router.post('/votes/reset', async (req, res) => {
+  try {
+    await db.resetVotes();
+    res.json({ success: true, votes: [] });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 module.exports = router;

@@ -43,6 +43,7 @@ export function WorkshopProvider({ children }) {
   const [participants, setParticipants] = useState([]);
   const [teams, setTeams] = useState([]);
   const [deliverables, setDeliverables] = useState([]);
+  const [votes, setVotes] = useState([]);
   const [dbHealth, setDbHealth] = useState(null);
   const [activeTeamId, setActiveTeamId] = useState(null);
 
@@ -127,6 +128,9 @@ export function WorkshopProvider({ children }) {
         const fetchedDels = data.deliverables || [];
         setDeliverables(fetchedDels);
 
+        const fetchedVotes = data.votes || [];
+        setVotes(fetchedVotes);
+
         const fetchedTeams = data.teams || [];
         const hydratedTeams = fetchedTeams.map((t) => ({
           ...t,
@@ -194,6 +198,7 @@ export function WorkshopProvider({ children }) {
         participants,
         teams,
         deliverables,
+        votes,
         dbHealth,
         activeTeamId,
         setActiveTeamId,

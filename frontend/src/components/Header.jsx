@@ -87,6 +87,14 @@ export default function Header() {
             <span>📊</span>
             <span>6. Restitution & Pitch</span>
           </NavLink>
+
+          <NavLink
+            to="/votes"
+            className={({ isActive }) => `header-nav-btn ${isActive ? 'active' : ''}`}
+          >
+            <span>🏆</span>
+            <span>7. Vote /20</span>
+          </NavLink>
         </nav>
 
         {/* Zone 3 : Statut Super Admin & Déconnexion */}

@@ -16,6 +16,7 @@ import AdminDashboardPage from './pages/AdminDashboardPage';
 import GroupsLaunchPage from './pages/GroupsLaunchPage';
 import TeamStagesPage from './pages/TeamStagesPage';
 import RestitutionPage from './pages/RestitutionPage';
+import VotingPage from './pages/VotingPage';
 import ProjectionPage from './pages/ProjectionPage';
 import LoginPage from './pages/LoginPage';
 
@@ -91,6 +92,8 @@ export default function App() {
               <Route path="/stages" element={<AdminOnly><TeamStagesPage /></AdminOnly>} />
               <Route path="/progress" element={<AdminOnly><TeamStagesPage /></AdminOnly>} />
               <Route path="/restitution" element={<RestitutionPage />} />
+              <Route path="/votes" element={<VotingPage />} />
+              <Route path="/vote" element={<VotingPage />} />
               <Route path="/home" element={<Navigate to="/login" replace />} />
 
               {/* Redirection universelle de secours */}

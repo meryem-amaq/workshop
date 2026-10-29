@@ -338,6 +338,14 @@ export default function RestitutionPage() {
                 <span>Revenir à l'Espace Équipe</span>
               </button>
             )}
+            <button
+              type="button"
+              className="btn btn-outline btn-sm"
+              onClick={() => navigate('/votes')}
+              style={{ borderColor: 'rgba(251, 191, 36, 0.5)', color: '#fde047' }}
+            >
+              🏆 Vote Final (/20)
+            </button>
             <button type="button" className="btn btn-outline btn-sm" onClick={handleToggleFullscreen}>
               🖥️ Plein Écran
             </button>

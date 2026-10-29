@@ -8,6 +8,7 @@ const participantRepo = require('./participantRepo');
 const teamRepo = require('./teamRepo');
 const deliverableRepo = require('./deliverableRepo');
 const sessionRepo = require('./sessionRepo');
+const voteRepo = require('./voteRepo');
 
 module.exports = {
   initDatabase: store.initDatabase,
@@ -17,5 +18,6 @@ module.exports = {
   ...participantRepo,
   ...teamRepo,
   ...deliverableRepo,
-  ...sessionRepo
+  ...sessionRepo,
+  ...voteRepo
 };

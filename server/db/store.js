@@ -42,6 +42,7 @@ let memoryStore = {
   participants: [],
   teams: [],
   deliverables: [],
+  votes: [],
   logs: []
 };
 
@@ -171,6 +172,17 @@ async function initDatabase() {
         \`name\` VARCHAR(100) NOT NULL,
         \`role\` VARCHAR(50) NOT NULL DEFAULT 'superadmin',
         \`created_at\` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`,
+
+      `CREATE TABLE IF NOT EXISTS \`votes\` (
+        \`id\` VARCHAR(64) NOT NULL PRIMARY KEY,
+        \`voter_team_id\` VARCHAR(64) NOT NULL,
+        \`target_team_id\` VARCHAR(64) NOT NULL,
+        \`score\` DECIMAL(4,1) NOT NULL DEFAULT 0,
+        \`criteria\` JSON NULL,
+        \`comment\` VARCHAR(500) NULL,
+        \`updated_at\` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        UNIQUE KEY \`uq_voter_target\` (\`voter_team_id\`, \`target_team_id\`)
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`
     ];
 
