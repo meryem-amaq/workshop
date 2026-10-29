@@ -159,7 +159,7 @@ export default function ProjectionPage() {
     Sportif: participants.filter((p) => p.archetype === 'Sportif').length
   };
 
-  const directJoinUrl = qrUrl || `${window.location.origin}/?join=1`;
+  const directJoinUrl = qrUrl || `${window.location.origin}/register`;
 
   return (
     <div className="view-panel active">

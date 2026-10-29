@@ -71,7 +71,7 @@ router.get('/health', (req, res) => {
     network: {
       localIp: localIp,
       port: PORT,
-      joinUrl: `http://${localIp}:${PORT}/?join=1`
+      joinUrl: `http://${localIp}:${PORT}/register`
     }
   });
 });

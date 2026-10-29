@@ -111,14 +111,19 @@ async function autoAssignUnassignedParticipants() {
 async function removeParticipant(participantId) {
   const pool = getPool();
   const memoryStore = getMemoryStore();
-  const { setTeamScribe } = require('./teamRepo');
+  const { getTeams, setTeamScribe } = require('./teamRepo');
 
-  const p = memoryStore.participants.find(x => x.id === participantId);
+  const allParticipants = await getParticipants();
+  const allTeams = await getTeams();
+  const p = allParticipants.find(x => x.id === participantId);
   const teamId = p ? p.team_id : null;
-  const wasScribe = p ? (p.is_scribe || p.id === (memoryStore.teams.find(t => t.id === teamId)?.scribe_participant_id)) : false;
+  const teamObj = teamId ? allTeams.find(t => t.id === teamId) : null;
+  const wasScribe = p ? Boolean(p.is_scribe || (teamObj && teamObj.scribe_participant_id === p.id)) : false;
 
   if (isMySQLConnected() && pool) {
     try {
+      await pool.query('UPDATE deliverables SET submitted_by = NULL WHERE submitted_by = ?', [participantId]);
+      await pool.query('UPDATE teams SET scribe_participant_id = NULL WHERE scribe_participant_id = ?', [participantId]);
       await pool.query('DELETE FROM participants WHERE id = ?', [participantId]);
     } catch (err) {
       console.error('[DB] Erreur delete participant MySQL:', err.message);
@@ -128,21 +133,18 @@ async function removeParticipant(participantId) {
   memoryStore.participants = memoryStore.participants.filter(x => x.id !== participantId);
 
   // Si le participant était rédacteur du groupe, élire automatiquement le prochain membre
+  const remainingMembers = allParticipants.filter(x => x.team_id === teamId && x.id !== participantId);
   if (teamId && wasScribe) {
-    const remainingMembers = memoryStore.participants.filter(x => x.team_id === teamId);
     if (remainingMembers.length > 0) {
       await setTeamScribe(teamId, remainingMembers[0].id);
     } else {
       const t = memoryStore.teams.find(x => x.id === teamId);
       if (t) t.scribe_participant_id = null;
-      if (isMySQLConnected() && pool) {
-        await pool.query('UPDATE teams SET scribe_participant_id = NULL WHERE id = ?', [teamId]);
-      }
     }
   }
 
   persistFallbackStore();
-  return { success: true, remainingCount: memoryStore.participants.length };
+  return { success: true, remainingCount: allParticipants.length - (p ? 1 : 0) };
 }
 
 module.exports = {
