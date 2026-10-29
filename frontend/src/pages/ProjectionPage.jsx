@@ -251,7 +251,7 @@ export default function ProjectionPage() {
               </div>
             </div>
 
-            {/* Jauge Circulaire + Indicateurs globaux */}
+            {/* Jauge Circulaire + Indicateurs globaux (sans révéler les caractères avant le lancement) */}
             <div className="dashboard-gauge-character-box" style={{ marginBottom: '1rem' }}>
               <div className="circular-kpi-wrap">
                 <svg className="circular-gauge-svg" viewBox="0 0 100 100">
@@ -273,28 +273,14 @@ export default function ProjectionPage() {
                 </div>
               </div>
 
-              {/* Répartition dynamique par archétype en temps réel */}
-              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-                <span style={{ fontSize: '0.78rem', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                  Répartition des Profils :
+              {/* Information neutre sans mentionner les caractères */}
+              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                <span style={{ fontSize: '0.82rem', color: '#38bdf8', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  Participants Inscrits
                 </span>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
-                  <span style={{ background: 'rgba(236, 72, 153, 0.15)', color: '#ec4899', border: '1px solid rgba(236, 72, 153, 0.3)', padding: '0.2rem 0.5rem', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 'bold' }}>
-                    🎨 Artiste : {archetypeCounts.Artiste}
-                  </span>
-                  <span style={{ background: 'rgba(56, 189, 248, 0.15)', color: '#38bdf8', border: '1px solid rgba(56, 189, 248, 0.3)', padding: '0.2rem 0.5rem', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 'bold' }}>
-                    🔬 Professeur : {archetypeCounts.Professeur}
-                  </span>
-                  <span style={{ background: 'rgba(139, 92, 246, 0.15)', color: '#8b5cf6', border: '1px solid rgba(139, 92, 246, 0.3)', padding: '0.2rem 0.5rem', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 'bold' }}>
-                    🛡️ Critique : {archetypeCounts.Critique}
-                  </span>
-                  <span style={{ background: 'rgba(16, 185, 129, 0.15)', color: '#10b981', border: '1px solid rgba(16, 185, 129, 0.3)', padding: '0.2rem 0.5rem', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 'bold' }}>
-                    🤝 Empathique : {archetypeCounts.Empathique}
-                  </span>
-                  <span style={{ background: 'rgba(245, 158, 11, 0.15)', color: '#f59e0b', border: '1px solid rgba(245, 158, 11, 0.3)', padding: '0.2rem 0.5rem', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 'bold' }}>
-                    ⚡ Sportif : {archetypeCounts.Sportif}
-                  </span>
-                </div>
+                <p style={{ fontSize: '0.84rem', color: '#94a3b8', margin: 0, lineHeight: 1.45 }}>
+                  Les incubés ayant terminé le questionnaire s'affichent ci-dessous. Leurs groupes et caractères seront révélés au lancement de l'atelier.
+                </p>
               </div>
             </div>
 
@@ -313,16 +299,15 @@ export default function ProjectionPage() {
               )}
             </div>
 
-            {/* Liste détaillée en temps réel de chaque participant ayant terminé */}
+            {/* Liste détaillée en temps réel de chaque participant (Nom & Prénom uniquement) */}
             <div className="dashboard-live-participants-list" style={{ maxHeight: '280px', overflowY: 'auto' }}>
               {count === 0 ? (
                 <div className="dashboard-empty-message">
-                  <p>Dès qu'un incubé termine son questionnaire sur son téléphone, son profil Schtroumpf calculé apparaît ici instantanément.</p>
+                  <p>Dès qu'un incubé termine son questionnaire sur son téléphone, son nom et prénom apparaissent ici instantanément.</p>
                 </div>
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                   {participants.slice().reverse().map((p) => {
-                    const arch = ARCHETYPES[p.archetype] || ARCHETYPES.Professeur;
                     const dateFormatted = p.created_at
                       ? new Date(p.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
                       : 'À l\'instant';
@@ -332,7 +317,7 @@ export default function ProjectionPage() {
                         key={p.id}
                         className="live-participant-chip"
                         style={{
-                          borderLeft: `4px solid ${arch.color}`,
+                          borderLeft: '4px solid #38bdf8',
                           background: 'rgba(15, 23, 42, 0.7)',
                           padding: '0.65rem 0.85rem',
                           borderRadius: '10px',
@@ -343,18 +328,27 @@ export default function ProjectionPage() {
                         }}
                       >
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                          <img
-                            src={arch.avatar}
-                            alt={arch.displayName}
-                            className="chip-avatar-img"
-                            style={{ width: '38px', height: '38px', borderRadius: '50%', border: `2px solid ${arch.color}` }}
-                          />
+                          <div
+                            style={{
+                              width: '36px',
+                              height: '36px',
+                              borderRadius: '50%',
+                              background: 'rgba(56, 189, 248, 0.15)',
+                              border: '1.5px solid rgba(56, 189, 248, 0.4)',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              fontSize: '0.95rem',
+                              color: '#38bdf8',
+                              fontWeight: '700',
+                              flexShrink: 0
+                            }}
+                          >
+                            👤
+                          </div>
                           <div>
-                            <div style={{ fontWeight: '700', color: '#fff', fontSize: '0.92rem' }}>
+                            <div style={{ fontWeight: '700', color: '#fff', fontSize: '0.95rem' }}>
                               {p.first_name} {p.last_name}
-                            </div>
-                            <div style={{ fontSize: '0.78rem', color: arch.color, fontWeight: '600' }}>
-                              {arch.displayName}
                             </div>
                           </div>
                         </div>
